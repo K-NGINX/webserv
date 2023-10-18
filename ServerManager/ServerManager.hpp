@@ -1,5 +1,5 @@
-#ifndef SERVERMANAGER_HPP
-#define SERVERMANAGER_HPP
+#pragma once
+
 #include <fcntl.h>
 #include <iostream>
 #include <netinet/in.h>
@@ -19,5 +19,3 @@ private:
 	std::vector<int> v_server_socket_fd_;
 	// std::vector<int> v_new_socket_fd_; // accept해서 내놓을 소켓
 };
-
-#endif
