@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ABlock.hpp"
 #include "ServerBlock.hpp"
 
 /**
@@ -9,7 +8,9 @@
  */
 class ConfigBlock : public ABlock {
 public:
-    virtual void addSubBlock(const std::string& line);
+    virtual ABlock* getLastSubBlock();
+
+    virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
 
 private:
