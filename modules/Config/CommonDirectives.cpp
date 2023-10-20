@@ -22,44 +22,110 @@ CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
     return *this;
 }
 
-void CommonDirectives::refineCommonDirectives(std::map<std::string, std::string>& m_directives) {
+void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) {
     std::map<std::string, std::string>::iterator directive_it;
 
     if ((directive_it = m_directives.find("autoindex")) != m_directives.end())
         setAutoindex(directive_it->second);
     if ((directive_it = m_directives.find("client_max_body_size")) != m_directives.end())
         setClientMaxBodySize(directive_it->second);
-    // if ((directive_it = m_directives.find("error_page")) != m_directives.end())
-    // if ((directive_it = m_directives.find("index")) != m_directives.end())
-    // if ((directive_it = m_directives.find("return")) != m_directives.end())
-    // if ((directive_it = m_directives.find("root")) != m_directives.end())
+    if ((directive_it = m_directives.find("error_page")) != m_directives.end())
+        setErrorPage(directive_it->second);
+    if ((directive_it = m_directives.find("index")) != m_directives.end())
+        setIndex(directive_it->second);
+    if ((directive_it = m_directives.find("return")) != m_directives.end())
+        setReturn(directive_it->second);
+    if ((directive_it = m_directives.find("root")) != m_directives.end())
+        setRoot(directive_it->second);
+
+    print();
 }
 
-void CommonDirectives::setAutoindex(const std::string& value) {
+void CommonDirectives::setAutoindex(std::string& value) {
+    Utils::refineStr(value);
     if (value == "on")
         is_autoindex_ = true;
     else if (value != "off")
         throw std::runtime_error("autoindex directives must be \"on\" or \"off\"");
 }
 
-void CommonDirectives::setClientMaxBodySize(const std::string& value) {
+void CommonDirectives::setClientMaxBodySize(std::string& value) {
+    Utils::refineStr(value);
     std::istringstream iss(value);
     if (!(iss >> client_max_body_size_) || iss.eof() == false || client_max_body_size_ < 0)
         throw std::runtime_error("client_max_body_size must be an integer");
 }
 
-// void CommonDirectives::setErrorPage(const std::string& value) {
+void CommonDirectives::setErrorPage(std::string& value) {
+    Utils::refineStr(value);
+    size_t pos_start = value.find_first_not_of(Utils::whitespace), pos_end;
+    std::string error_str;
 
-// }
+    while (pos_start != std::string::npos) {
+        pos_end = value.find_first_of(Utils::whitespace, pos_start);
 
-// void CommonDirectives::setIndex(const std::string& value) {
+        error_str = value.substr(pos_start, pos_end - pos_start);
+        if (error_str != "400" && error_str != "404" && error_str != "405" && error_str != "413" && error_str != "500")
+            break;
+        v_error_code_.push_back(error_str);
 
-// }
+        pos_start = value.find_first_not_of(Utils::whitespace, pos_end);
+    }
+    if (error_str == "" || v_error_code_.empty())
+        throw std::runtime_error("error_page must be in following format: \"error_code error_page\"");
+    // 마지막 항목은 에러페이지
+    error_page_ = error_str;
 
-// void CommonDirectives::setReturn(const std::string& value) {
+}
 
-// }
+void CommonDirectives::setIndex(std::string& value) {
+    Utils::refineStr(value);
+    size_t pos_start = value.find_first_not_of(Utils::whitespace), pos_end;
+    std::string page;
 
-// void CommonDirectives::setRoot(const std::string& value) {
+    while (pos_start != std::string::npos) {
+        pos_end = value.find_first_of(Utils::whitespace, pos_start);
 
-// }
+        page = value.substr(pos_start, pos_end - pos_start);
+        v_index_.push_back(page);
+
+        pos_start = value.find_first_not_of(Utils::whitespace, pos_end);
+    }
+}
+
+void CommonDirectives::setReturn(std::string& value) {
+    Utils::refineStr(value);
+    size_t pos_sepatator = value.find_last_of(Utils::whitespace);
+    return_path_ = value.substr(pos_sepatator + 1);
+
+    return_code_ = value.substr(0, pos_sepatator);
+    if (return_code_ != "301")
+        throw std::runtime_error("return must be in following format: \"return_code return_path\"");
+    Utils::refineStr(return_code_);
+}
+
+void CommonDirectives::setRoot(std::string& value) {
+    Utils::refineStr(value);
+    root_ = value;
+}
+
+void CommonDirectives::print() {
+    std::cout << "*- autoindex : " << (is_autoindex_ == true ? "on" : "off") << std::endl;
+    std::cout << "*- client_max_body_size : " << client_max_body_size_ << std::endl;
+    if (v_error_code_.empty() == false) {
+        std::cout << "*- error_page : ";
+        for (size_t i = 0; i < v_error_code_.size(); i++)
+            std::cout << v_error_code_[i] << " ";
+        std::cout << error_page_ << std::endl;
+    }
+    if (v_index_.empty() == false) {
+        std::cout << "*- index : ";
+        for (size_t i = 0; i < v_index_.size(); i++)
+            std::cout << v_index_[i] << " ";
+        std::cout << std::endl;
+    }
+    if (return_code_ != "")
+        std::cout << "*- return : " << return_code_ << " " << return_path_ << std::endl;
+    if (root_ != "")
+        std::cout << "*- root : " << root_ << std::endl;
+}

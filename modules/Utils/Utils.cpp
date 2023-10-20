@@ -1,5 +1,7 @@
 #include "Utils.hpp"
 
+std::string Utils::whitespace = " \r\n\t\v\f";
+
 Utils::Utils() {}
 
 Utils::~Utils() {}

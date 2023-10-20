@@ -5,20 +5,23 @@
 #include <sstream>
 #include <vector>
 
+#include "../Utils/Utils.hpp"
+
 class CommonDirectives {
 public:
     CommonDirectives();
     CommonDirectives& operator=(const CommonDirectives& other);
 
     /* setter */
-    void setAutoindex(const std::string& value);
-    void setClientMaxBodySize(const std::string& value);
-    void setErrorPage(const std::string& value);
-    void setIndex(const std::string& value);
-    void setReturn(const std::string& value);
-    void setRoot(const std::string& value);
+    void setAutoindex(std::string& value);
+    void setClientMaxBodySize(std::string& value);
+    void setErrorPage(std::string& value);
+    void setIndex(std::string& value);
+    void setReturn(std::string& value);
+    void setRoot(std::string& value);
 
-    void refineCommonDirectives(std::map<std::string, std::string>& m_directives);
+    void refine(std::map<std::string, std::string>& m_directives);
+    void print();
 
 private:
     bool is_autoindex_;
