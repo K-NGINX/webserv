@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sstream>
-
 #include "LocationBlock.hpp"
 
 /**
@@ -12,7 +10,12 @@ class ServerBlock : public ABlock {
 public:
     ServerBlock();
 
+    /* getter */
     virtual ABlock* getLastSubBlock();
+    const std::vector<LocationBlock>& getLocationBlockVec() const;
+    const std::string& getHost() const;
+    const std::string& getPort() const;
+    const std::string& getServerName() const;
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
@@ -20,13 +23,12 @@ public:
     void print();
 
 private:
-    void setPort(const std::string& value);
     void setHostPort(const std::string& value);
 
     std::vector<LocationBlock> v_location_block_;
 
     /* server 블록에서만 사용되는 지시어 */
     std::string host_;
-    int port_;
+    std::string port_;
     std::string server_name_;
 };

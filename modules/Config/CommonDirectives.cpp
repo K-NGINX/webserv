@@ -22,34 +22,44 @@ CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
     return *this;
 }
 
-void CommonDirectives::setAutoindex(bool is_autoindex) {
-    is_autoindex_ = is_autoindex;
+void CommonDirectives::refineCommonDirectives(std::map<std::string, std::string>& m_directives) {
+    std::map<std::string, std::string>::iterator directive_it;
+
+    if ((directive_it = m_directives.find("autoindex")) != m_directives.end())
+        setAutoindex(directive_it->second);
+    if ((directive_it = m_directives.find("client_max_body_size")) != m_directives.end())
+        setClientMaxBodySize(directive_it->second);
+    if ((directive_it = m_directives.find("error_page")) != m_directives.end())
+    if ((directive_it = m_directives.find("index")) != m_directives.end())
+    if ((directive_it = m_directives.find("return")) != m_directives.end())
+    if ((directive_it = m_directives.find("root")) != m_directives.end())
 }
 
-void CommonDirectives::setClientMaxBodySize(int client_max_body_size) {
-    client_max_body_size_ = client_max_body_size;
+void CommonDirectives::setAutoindex(const std::string& value) {
+    if (value == "on")
+        is_autoindex_ = true;
+    else if (value != "off")
+        throw std::runtime_error("autoindex directives must be \"on\" or \"off\"");
 }
 
-void CommonDirectives::setErrorCodeVec(const std::vector<std::string>& v_error_code) {
-    v_error_code_ = v_error_code;
+void CommonDirectives::setClientMaxBodySize(const std::string& value) {
+    std::istringstream iss(value);
+    if (!(iss >> client_max_body_size_) || iss.eof() == false || client_max_body_size_ < 0)
+        throw std::runtime_error("client_max_body_size must be an integer");
 }
 
-void CommonDirectives::setErrorPage(const std::string& error_page) {
-    error_page_ = error_page;
-}
+// void CommonDirectives::setErrorPage(const std::string& value) {
 
-void CommonDirectives::setIndexVec(const std::vector<std::string>& v_index) {
-    v_index_ = v_index;
-}
+// }
 
-void CommonDirectives::setReturnCode(const std::string& return_code) {
-    return_code_ = return_code;
-}
+// void CommonDirectives::setIndex(const std::string& value) {
 
-void CommonDirectives::setReturnPath(const std::string& return_path) {
-    return_path_ = return_path;
-}
+// }
 
-void CommonDirectives::setRoot(const std::string& root) {
-    root_ = root;
-}
+// void CommonDirectives::setReturn(const std::string& value) {
+
+// }
+
+// void CommonDirectives::setRoot(const std::string& value) {
+
+// }
