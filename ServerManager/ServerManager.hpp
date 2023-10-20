@@ -1,8 +1,11 @@
 #pragma once
 
+#include <cstdlib>
 #include <fcntl.h>
 #include <iostream>
+#include <netdb.h>
 #include <netinet/in.h>
+#include <stdio.h>
 #include <string>
 #include <sys/socket.h> // server.cpp
 #include <unistd.h>
