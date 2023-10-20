@@ -3,13 +3,13 @@
 #include <fstream>
 #include <iostream>
 
+#include "../Utils/Utils.hpp"
 #include "Block/ConfigBlock.hpp"
 
 class ConfigManager {
 public:
     static ConfigManager& getInstance();
     void parse(int argc, char** argv);
-    void refineStr(std::string& str);
 
 private:
     ConfigManager();

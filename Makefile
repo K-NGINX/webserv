@@ -11,7 +11,8 @@ SRCS		= modules/main.cpp							\
 			  modules/Config/Block/LocationBlock.cpp	\
 			  modules/Config/Block/ServerBlock.cpp		\
 			  modules/Config/CommonDirectives.cpp		\
-			  modules/Config/ConfigManager.cpp
+			  modules/Config/ConfigManager.cpp			\
+			  modules/Utils/Utils.cpp
 OBJS		= $(SRCS:.cpp=.o)
 
 # colors

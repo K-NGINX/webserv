@@ -1,10 +1,19 @@
 #include "ServerBlock.hpp"
-#include "../ConfigManager.hpp"
 
 ServerBlock::ServerBlock() :
 host_("0.0.0.0"),
-port_(80),
+port_("80"),
 server_name_("") {}
+
+ABlock* ServerBlock::getLastSubBlock() { return &(v_location_block_.back()); }
+
+const std::vector<LocationBlock>& ServerBlock::getLocationBlockVec() const { return v_location_block_; }
+
+const std::string& ServerBlock::getHost() const { return host_; }
+
+const std::string& ServerBlock::getPort() const { return port_; }
+
+const std::string& ServerBlock::getServerName() const { return server_name_; }
 
 /**
  * @brief LocationBlock 객체를 벡터에 추가하는 함수
@@ -13,31 +22,18 @@ server_name_("") {}
  */
 void ServerBlock::addSubBlock(std::string& line) {
     // match_directive 추출
-    ConfigManager::getInstance().refineStr(line);
+    Utils::refineStr(line);
     size_t pos_sepatator = line.find_last_of(' ');
     std::string match_directive = line.substr(pos_sepatator + 1);
 
     // 블록 이름(location) 추출
     line = line.substr(0, pos_sepatator);
-    ConfigManager::getInstance().refineStr(line);
+    Utils::refineStr(line);
 
     if (match_directive == "" || line != "location")
         throw std::runtime_error("location blocks must start with the following format: \"location match_directive {\"");
 
     v_location_block_.push_back(LocationBlock(match_directive));
-}
-
-ABlock* ServerBlock::getLastSubBlock() {
-    return &(v_location_block_.back());
-}
-
-void ServerBlock::setPort(const std::string& value) {
-    int port;
-    std::istringstream port_ss(value);
-    if (!(port_ss >> port) || !port_ss.eof())
-        throw std::runtime_error("port should be a value between 0 and 65535");
-    
-    port_ = port;
 }
 
 void ServerBlock::setHostPort(const std::string& value) {
@@ -46,27 +42,21 @@ void ServerBlock::setHostPort(const std::string& value) {
         if (value.find('.') != std::string::npos)
             host_ = value;
         else
-            setPort(value);
+            port_ = value;
     } else {
         host_ = value.substr(0, pos_separator);
-        setPort(value.substr(pos_separator + 1));
+        port_ = value.substr(pos_separator + 1);
     }
 }
 
 void ServerBlock::refineDirectives() {
-    std::map<std::string, std::string>::iterator m_it = m_directives_.begin();
-    while (m_it != m_directives_.end()) {
-        std::string direcvite = m_it->first;
-        std::string value = m_it->second;
-        ConfigManager::getInstance().refineStr(value);
+    /* server 블록에서만 사용되는 지시어 정제 */
+    std::map<std::string, std::string>::iterator directive_it;
+    if ((directive_it = m_directives_.find("listen")) != m_directives_.end())
+        setHostPort(directive_it->second);
+    if ((directive_it = m_directives_.find("server_name")) != m_directives_.end())
+        server_name_ = directive_it->second;
 
-        if (direcvite == "listen")
-            setHostPort(value);
-        else if (direcvite == "server_name")
-            server_name_ = value;
-
-        m_it++;
-    }
     print(); /////////////////
 
     std::vector<LocationBlock>::iterator v_it = v_location_block_.begin();

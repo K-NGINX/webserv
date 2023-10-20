@@ -8,7 +8,9 @@
  */
 class ConfigBlock : public ABlock {
 public:
+    /* getter */
     virtual ABlock* getLastSubBlock();
+    const std::vector<ServerBlock>& getServerBlockVec() const;
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();

@@ -1,11 +1,15 @@
 #include "LocationBlock.hpp"
-#include "../ConfigManager.hpp"
 
 LocationBlock::LocationBlock(const std::string& match_directive) :
 match_directive_(match_directive),
 cgi_path_(""),
 upload_path_("") {}
 
+const std::vector<HttpMethod>& LocationBlock::getAllowMethodVec() const { return v_allow_method_;}
+
+const std::string& LocationBlock::getCgiPath() const { return cgi_path_;}
+
+const std::string& LocationBlock::getUploadPath() const { return upload_path_;}
 /**
  * @note location 블록은 하위 블록을 가질 수 없으므로, 예외를 던짐
  * 
@@ -15,19 +19,15 @@ void LocationBlock::addSubBlock(std::string& line) {
     throw std::runtime_error("location blocks can't have sub-blocks");
 }
 
-// " GET      POST"
 void LocationBlock::setAllowMethodVec(std::string& value) {
     const std::string whitespace = " \r\n\t\v\f";
-    size_t pos_start, pos_end;
+    size_t pos_start = value.find_first_not_of(whitespace), pos_end;
     std::string method;
 
-    while (true) {
-        pos_start = value.find_first_not_of(whitespace);
-        pos_end = value.substr(pos_start).find_first_of(whitespace);
+    while (pos_start != std::string::npos) {
+        pos_end = value.find_first_of(whitespace, pos_start);
 
-        method = value.substr(pos_start, pos_end - pos_start + 1);
-        value = value.substr(pos_end + 1);
-
+        method = value.substr(pos_start, pos_end - pos_start);
         if (method == "GET")
             v_allow_method_.push_back(GET);
         else if (method == "POST")
@@ -37,26 +37,19 @@ void LocationBlock::setAllowMethodVec(std::string& value) {
         else
             throw ("invalid HTTP method");
 
-        if (pos_end == std::string::npos)
-            break;
+        pos_start = value.find_first_not_of(whitespace, pos_end);
     }
 }
 
 void LocationBlock::refineDirectives() {
-    std::map<std::string, std::string>::iterator m_it = m_directives_.begin();
-    while (m_it != m_directives_.end()) {
-        std::string direcvite = m_it->first;
-        std::string value = m_it->second;
-
-        if (direcvite == "allow_method")
-            setAllowMethodVec(value);
-        else if (direcvite == "cgi_path")
-            cgi_path_ = value;
-        else if (direcvite == "upload_path")
-            upload_path_ = value;
-
-        m_it++;
-    }
+    /* location 블록에서만 사용되는 지시어 정제 */
+    std::map<std::string, std::string>::iterator directive_it;
+    if ((directive_it = m_directives_.find("allow_method")) != m_directives_.end())
+        setAllowMethodVec(directive_it->second);
+    if ((directive_it = m_directives_.find("cgi_path")) != m_directives_.end())
+        cgi_path_ = directive_it->second;
+    if ((directive_it = m_directives_.find("upload_path")) != m_directives_.end())
+        upload_path_ = directive_it->second;
 
     print(); ///////////////////////////
 }

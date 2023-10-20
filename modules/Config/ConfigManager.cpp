@@ -42,13 +42,6 @@ void ConfigManager::checkLineType(std::string& line, char& line_type) {
         line_type = '\0';
 }
 
-void ConfigManager::refineStr(std::string& str) {
-    const std::string whitespace = " \r\n\t\v\f";
-
-    str.erase(0, str.find_first_not_of(whitespace));
-    str.erase(str.find_last_not_of(whitespace) + 1);
-}
-
 /**
  * @brief 재귀적으로 블록을 파싱하는 함수
  * 
@@ -60,7 +53,7 @@ void ConfigManager::parseBlock(std::ifstream& ifs, ABlock* block) {
     char line_type;
 
     while (std::getline(ifs, line)) {
-        refineStr(line);
+        Utils::refineStr(line);
         if (line == "")
             continue;
         checkLineType(line, line_type);
