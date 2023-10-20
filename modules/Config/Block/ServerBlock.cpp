@@ -23,7 +23,7 @@ const std::string& ServerBlock::getServerName() const { return server_name_; }
 void ServerBlock::addSubBlock(std::string& line) {
     // match_directive 추출
     Utils::refineStr(line);
-    size_t pos_sepatator = line.find_last_of(' ');
+    size_t pos_sepatator = line.find_last_of(Utils::whitespace);
     std::string match_directive = line.substr(pos_sepatator + 1);
 
     // 블록 이름(location) 추출
@@ -56,8 +56,8 @@ void ServerBlock::refineDirectives() {
         setHostPort(directive_it->second);
     if ((directive_it = m_directives_.find("server_name")) != m_directives_.end())
         server_name_ = directive_it->second;
-
     print(); /////////////////
+    common_directives_.refine(m_directives_);
 
     std::vector<LocationBlock>::iterator v_it = v_location_block_.begin();
     while (v_it != v_location_block_.end()) {
@@ -69,7 +69,7 @@ void ServerBlock::refineDirectives() {
 
 void ServerBlock::print() {
     std::cout << "[ SERVER ]" << std::endl;
-    std::cout << "host: \"" << host_ << "\"" << std::endl;
-    std::cout << "port: " << port_ << std::endl;
-    std::cout << "server_name: \"" << server_name_ << "\"" << std::endl;
+    std::cout << "- host: \"" << host_ << "\"" << std::endl;
+    std::cout << "- port: " << port_ << std::endl;
+    std::cout << "- server_name: \"" << server_name_ << "\"" << std::endl;
 }

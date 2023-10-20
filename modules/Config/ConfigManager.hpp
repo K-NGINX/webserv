@@ -9,6 +9,8 @@
 class ConfigManager {
 public:
     static ConfigManager& getInstance();
+    const ConfigBlock& getConfigBlock() const;
+
     void parse(int argc, char** argv);
 
 private:

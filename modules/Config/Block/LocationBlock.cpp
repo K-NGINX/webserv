@@ -20,12 +20,11 @@ void LocationBlock::addSubBlock(std::string& line) {
 }
 
 void LocationBlock::setAllowMethodVec(std::string& value) {
-    const std::string whitespace = " \r\n\t\v\f";
-    size_t pos_start = value.find_first_not_of(whitespace), pos_end;
+    size_t pos_start = value.find_first_not_of(Utils::whitespace), pos_end;
     std::string method;
 
     while (pos_start != std::string::npos) {
-        pos_end = value.find_first_of(whitespace, pos_start);
+        pos_end = value.find_first_of(Utils::whitespace, pos_start);
 
         method = value.substr(pos_start, pos_end - pos_start);
         if (method == "GET")
@@ -35,9 +34,9 @@ void LocationBlock::setAllowMethodVec(std::string& value) {
         else if (method == "DELETE")
             v_allow_method_.push_back(DELETE);
         else
-            throw ("invalid HTTP method");
+            throw std::runtime_error("invalid HTTP method");
 
-        pos_start = value.find_first_not_of(whitespace, pos_end);
+        pos_start = value.find_first_not_of(Utils::whitespace, pos_end);
     }
 }
 
@@ -50,14 +49,15 @@ void LocationBlock::refineDirectives() {
         cgi_path_ = directive_it->second;
     if ((directive_it = m_directives_.find("upload_path")) != m_directives_.end())
         upload_path_ = directive_it->second;
-
     print(); ///////////////////////////
+    /* 공통 지시어 정제 */
+    common_directives_.refine(m_directives_);
 }
 
 void LocationBlock::print() {
-    std::cout << "-- [LOCATION]" << std::endl;
+    std::cout << "[LOCATION]" << std::endl;
     if (!v_allow_method_.empty()) {
-        std::cout << "-- allow_method: ";
+        std::cout << "- allow_method: ";
         for (size_t i = 0; i < v_allow_method_.size(); i++) {
             if (v_allow_method_[i] == GET)
                 std::cout << "GET ";
@@ -69,7 +69,7 @@ void LocationBlock::print() {
         std::cout << std::endl;
     }
     if (cgi_path_ != "")
-        std::cout << "-- cgi_path: " << cgi_path_ << std::endl;
+        std::cout << "- cgi_path: " << cgi_path_ << std::endl;
     if (upload_path_ != "")
-        std::cout << "-- upload_path: " << upload_path_ << std::endl;
+        std::cout << "- upload_path: " << upload_path_ << std::endl;
 }
