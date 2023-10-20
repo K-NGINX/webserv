@@ -7,12 +7,12 @@ ServerManager& ServerManager::getInstance() {
 
 
 void ServerManager::initServer() {
-	ConfigManager::getInstance().
-	int server_num; // TODO: == servervec.size()
-	for (int server_idx = 0; server_idx < server_num; server_idx++) {
+	const std::vector<ServerBlock>& server_vec =
+			ConfigManager::getInstance().getConfigBlock().getServerBlockVec();
+	for (size_t server_idx = 0; server_idx < server_vec.size(); server_idx++) {
 
-		const char* hostname = "30.0.0.0"; // config 불러서 넣어주기
-		const char* port = "1";
+		const char* hostname = server_vec[server_idx].getHost().c_str(); // config 불러서 넣어주기
+		const char* port = server_vec[server_idx].getPort().c_str();
 		struct addrinfo protocol_info;
 		struct addrinfo *host_info;
 

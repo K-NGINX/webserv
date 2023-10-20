@@ -46,7 +46,7 @@ void ConfigManager::checkLineType(std::string& line, char& line_type) {
 
 /**
  * @brief 재귀적으로 블록을 파싱하는 함수
- * 
+ *
  * @param ifs conf 파일 스트림
  * @param block 현재 파싱 중인 블록
  */
