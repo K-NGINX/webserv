@@ -7,7 +7,7 @@ ServerManager& ServerManager::getInstance() {
 
 
 void ServerManager::initServer() {
-	// confmanager 인스턴스 받아서
+	ConfigManager::getInstance().
 	int server_num; // TODO: == servervec.size()
 	for (int server_idx = 0; server_idx < server_num; server_idx++) {
 
