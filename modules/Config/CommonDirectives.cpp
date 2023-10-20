@@ -29,10 +29,10 @@ void CommonDirectives::refineCommonDirectives(std::map<std::string, std::string>
         setAutoindex(directive_it->second);
     if ((directive_it = m_directives.find("client_max_body_size")) != m_directives.end())
         setClientMaxBodySize(directive_it->second);
-    if ((directive_it = m_directives.find("error_page")) != m_directives.end())
-    if ((directive_it = m_directives.find("index")) != m_directives.end())
-    if ((directive_it = m_directives.find("return")) != m_directives.end())
-    if ((directive_it = m_directives.find("root")) != m_directives.end())
+    // if ((directive_it = m_directives.find("error_page")) != m_directives.end())
+    // if ((directive_it = m_directives.find("index")) != m_directives.end())
+    // if ((directive_it = m_directives.find("return")) != m_directives.end())
+    // if ((directive_it = m_directives.find("root")) != m_directives.end())
 }
 
 void CommonDirectives::setAutoindex(const std::string& value) {
