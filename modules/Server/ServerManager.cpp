@@ -63,5 +63,6 @@ void ServerManager::initKqueue() {
 	for (int i = 0; i < v_server_fd_.size(); i++) {
 		struct kevent event;
 		// 변경사항
+		// 변경사항2
 	}
 }
