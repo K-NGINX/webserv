@@ -10,7 +10,7 @@ void ServerManager::closeAllServerFd() {
 		close(v_server_fd_[i]);
 }
 
-void ServerManager::initServer() {
+void ServerManager::init() {
 	const std::vector<ServerBlock>& server_vec =
 			ConfigManager::getInstance().getConfigBlock().getServerBlockVec();
 
@@ -52,17 +52,26 @@ void ServerManager::initServer() {
 		}
 		fcntl(socket_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	}
-	initKqueue();
 }
 
-void ServerManager::initKqueue() {
-	if (kqueue_fd_ = kqueue() == -1) {
+void ServerManager::start() {
+	if (kqueue_.fd_ == -1) {
 		closeAllServerFd();
 		throw std::runtime_error("Kqueue error");
 	}
-	for (int i = 0; i < v_server_fd_.size(); i++) {
-		struct kevent event;
-		// 변경사항
-		// 변경사항2
+
+	for (size_t i = 0; i < v_server_fd_.size(); i++)
+		kqueue_.makeNewEvent(v_server_fd_[i], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+
+	while (true) {
+		int event_num = kevent(kqueue_.fd_, &(kqueue_.v_change_[0])
+		, kqueue_.v_change_.size(), &(kqueue_.v_event_[0]), 8, NULL);
+
+		if (event_num == -1) {
+			// kevent 실패
+			// 나중에 알아볼것
+	 	} else if (event_num > 0) { // 이벤트 발생
+			
+		}
 	}
 }

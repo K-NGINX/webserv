@@ -15,17 +15,21 @@
 #include <vector>
 
 #include "../Config/ConfigManager.hpp"
+#include "Kqueue/Kqueue.hpp"
 
 class ServerManager {
 public:
 	static ServerManager& getInstance();
-	void initServer();
-	void initKqueue();
-	void closeAllServerFd();
+
+	void init();
+	void start();
+
 private:
 	ServerManager();
 	~ServerManager();
+
+	void closeAllServerFd();
+
 	std::vector<int> v_server_fd_;
-	int kqueue_fd_;
-	// std::vector<int> v_new_socket_fd_; // accept해서 내놓을 소켓
+	Kqueue kqueue_;
 };
