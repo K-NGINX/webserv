@@ -4,13 +4,14 @@
 
 #include "HttpMethod.hpp"
 
-class Utils {
+class Utils
+{
 public:
-    static void refineStr(std::string& str);
+    static void trimWhiteSpace(std::string &str);
 
     static std::string whitespace;
+
 private:
     Utils();
     ~Utils();
-
 };
