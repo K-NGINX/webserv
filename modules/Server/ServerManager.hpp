@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdlib>
 #include <fcntl.h>
 #include <iostream>
@@ -14,12 +15,14 @@
 #include <unistd.h>
 #include <vector>
 
+#include "../Client/ClientManager.hpp"
 #include "../Config/ConfigManager.hpp"
 #include "Kqueue/Kqueue.hpp"
 
-class ServerManager {
+class ServerManager
+{
 public:
-	static ServerManager& getInstance();
+	static ServerManager &getInstance();
 
 	void init();
 	void start();
@@ -28,8 +31,9 @@ private:
 	ServerManager();
 	~ServerManager();
 
-	void closeAllServerFd();
+	void closeAllServerSocket();
+	bool isServerSocket(int fd);
 
-	std::vector<int> v_server_fd_;
+	std::vector<int> v_server_socket_;
 	Kqueue kqueue_;
 };

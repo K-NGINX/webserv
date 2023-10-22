@@ -17,18 +17,18 @@ const std::string& ServerBlock::getServerName() const { return server_name_; }
 
 /**
  * @brief LocationBlock 객체를 벡터에 추가하는 함수
- * 
+ *
  * @param line "location match_directive "일 것으로 기대됨
  */
 void ServerBlock::addSubBlock(std::string& line) {
     // match_directive 추출
-    Utils::refineStr(line);
+    Utils::trimWhiteSpace(line);
     size_t pos_sepatator = line.find_last_of(Utils::whitespace);
     std::string match_directive = line.substr(pos_sepatator + 1);
 
     // 블록 이름(location) 추출
     line = line.substr(0, pos_sepatator);
-    Utils::refineStr(line);
+    Utils::trimWhiteSpace(line);
 
     if (match_directive == "" || line != "location")
         throw std::runtime_error("location blocks must start with the following format: \"location match_directive {\"");

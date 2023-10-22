@@ -42,7 +42,7 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
 }
 
 void CommonDirectives::setAutoindex(std::string& value) {
-    Utils::refineStr(value);
+    Utils::trimWhiteSpace(value);
     if (value == "on")
         is_autoindex_ = true;
     else if (value != "off")
@@ -50,14 +50,14 @@ void CommonDirectives::setAutoindex(std::string& value) {
 }
 
 void CommonDirectives::setClientMaxBodySize(std::string& value) {
-    Utils::refineStr(value);
+    Utils::trimWhiteSpace(value);
     std::istringstream iss(value);
     if (!(iss >> client_max_body_size_) || iss.eof() == false || client_max_body_size_ < 0)
         throw std::runtime_error("client_max_body_size must be an integer");
 }
 
 void CommonDirectives::setErrorPage(std::string& value) {
-    Utils::refineStr(value);
+    Utils::trimWhiteSpace(value);
     size_t pos_start = value.find_first_not_of(Utils::whitespace), pos_end;
     std::string error_str;
 
@@ -79,7 +79,7 @@ void CommonDirectives::setErrorPage(std::string& value) {
 }
 
 void CommonDirectives::setIndex(std::string& value) {
-    Utils::refineStr(value);
+    Utils::trimWhiteSpace(value);
     size_t pos_start = value.find_first_not_of(Utils::whitespace), pos_end;
     std::string page;
 
@@ -94,18 +94,18 @@ void CommonDirectives::setIndex(std::string& value) {
 }
 
 void CommonDirectives::setReturn(std::string& value) {
-    Utils::refineStr(value);
+    Utils::trimWhiteSpace(value);
     size_t pos_sepatator = value.find_last_of(Utils::whitespace);
     return_path_ = value.substr(pos_sepatator + 1);
 
     return_code_ = value.substr(0, pos_sepatator);
     if (return_code_ != "301")
         throw std::runtime_error("return must be in following format: \"return_code return_path\"");
-    Utils::refineStr(return_code_);
+    Utils::trimWhiteSpace(return_code_);
 }
 
 void CommonDirectives::setRoot(std::string& value) {
-    Utils::refineStr(value);
+    Utils::trimWhiteSpace(value);
     root_ = value;
 }
 

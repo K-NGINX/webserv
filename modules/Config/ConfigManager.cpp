@@ -55,7 +55,7 @@ void ConfigManager::parseBlock(std::ifstream& ifs, ABlock* block) {
     char line_type;
 
     while (std::getline(ifs, line)) {
-        Utils::refineStr(line);
+        Utils::trimWhiteSpace(line);
         if (line == "")
             continue;
         checkLineType(line, line_type);
