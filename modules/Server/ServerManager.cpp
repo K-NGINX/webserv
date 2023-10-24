@@ -80,11 +80,11 @@ void ServerManager::connectNewClient(int server_fd) {
 		std::cerr << "Accept error" << std::endl;
 		return ;
 	}
+	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	kqueue_.makeNewEvent(client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 	kqueue_.makeNewEvent(client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
-	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	Client client(client_socket);
-	ClientManager::getInstance().addClient(client_socket, client);
+	ClientManager::getInstance().addClient(client_socket);
 }
 
 void ServerManager::start()

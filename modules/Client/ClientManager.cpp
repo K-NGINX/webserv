@@ -9,7 +9,8 @@ bool ClientManager::isClientSocket(int fd) {
 	return m_client_.find(fd) != m_client_.end();
 }
 
-void ClientManager::addClient(int fd, Client& client) {
+void ClientManager::addClient(int fd) {
+	Client client(fd);
 	// if (m_client_.find(fd) != m_client_.end())
 	m_client_[fd] = client;
 }
