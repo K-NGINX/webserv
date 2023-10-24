@@ -33,6 +33,7 @@ private:
 
 	void closeAllServerSocket();
 	bool isServerSocket(int fd);
+	void connectNewClient(int server_fd);
 
 	std::vector<int> v_server_socket_;
 	Kqueue kqueue_;

@@ -72,8 +72,19 @@ bool ServerManager::isServerSocket(int fd) {
  *		3. 클라이언트 소켓에 대한 read, write 이벤트 kqueue에 등록
  *		4. ClientManager의 m_client_에 <client_socket, Client(client_socket)> 추가 !!!
  */
-void connectNewClient() {
-
+void ServerManager::connectNewClient(int server_fd) {
+	struct sockaddr_in client_addr;
+	socklen_t client_len = sizeof(client_addr);
+	int client_socket;
+	if (client_socket = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len) == -1) {
+		std::cerr << "Accept error" << std::endl;
+		return ;
+	}
+	kqueue_.makeNewEvent(client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+	kqueue_.makeNewEvent(client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	Client client(client_socket);
+	ClientManager::getInstance().addClient(client_socket, client);
 }
 
 void ServerManager::start()
@@ -89,7 +100,8 @@ void ServerManager::start()
 
 	while (true)
 	{
-		int event_num = kevent(kqueue_.fd_, &(kqueue_.v_change_[0]), kqueue_.v_change_.size(), &(kqueue_.v_event_[0]), 8, NULL);
+		int event_num = kevent(kqueue_.fd_, &(kqueue_.v_change_[0]),
+					kqueue_.v_change_.size(), &(kqueue_.v_event_[0]), 8, NULL);
 
 		if (event_num == -1) {
 			// kevent 실패
@@ -101,13 +113,14 @@ void ServerManager::start()
 
 				if (new_event.filter == EVFILT_READ) {
 					if (isServerSocket(new_event.ident)) {
-						connectNewClient();
-					}std::cout << new_event.ident""ntManager::getInstance().isClientSocket(new_event.ident)) {
-						// 클라이언트의 일을 함
-					} else {
-						// CGI, 파일 쓰기 등 다른 fd를 사용하는 작업
+						connectNewClient(new_event.ident);
 					}
-				} else {
+						// std::cout << new_event.identntManager::getInstance().isClientSocket(new_event.ident))"; {
+						// 클라이언트의 일을 함
+				// 	} else {
+				// 		// CGI, 파일 쓰기 등 다른 fd를 사용하는 작업
+				// 	}
+				// } else {
 
 				}
 			}
