@@ -6,8 +6,10 @@
 class LocationBlock : public ABlock {
 public:
     LocationBlock(const std::string& match_directive);
+    LocationBlock& operator=(const LocationBlock& other);
 
     /* getter */
+    const std::string& getMatchDirective() const;
     const std::vector<HttpMethod>& getAllowMethodVec() const;
     const std::string& getCgiPath() const;
     const std::string& getUploadPath() const;
@@ -15,9 +17,10 @@ public:
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
 
-    void print();
+    void print() const;
 
 private:
+    void refineLocationDirectives();
     void setAllowMethodVec(std::string& value);
 
     std::string match_directive_;

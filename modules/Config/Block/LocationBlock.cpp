@@ -5,6 +5,20 @@ match_directive_(match_directive),
 cgi_path_(""),
 upload_path_("") {}
 
+LocationBlock& LocationBlock::operator=(const LocationBlock& other) {
+    if (this != &other) {
+        common_directives_ = other.common_directives_;
+        m_directives_ = other.m_directives_;
+        match_directive_ = other.match_directive_;
+        v_allow_method_ = other.v_allow_method_;
+        cgi_path_ = other.cgi_path_;
+        upload_path_ = other.upload_path_;
+    }
+    return *this;
+}
+
+const std::string& LocationBlock::getMatchDirective() const { return match_directive_; }
+
 const std::vector<HttpMethod>& LocationBlock::getAllowMethodVec() const { return v_allow_method_;}
 
 const std::string& LocationBlock::getCgiPath() const { return cgi_path_;}
@@ -40,22 +54,36 @@ void LocationBlock::setAllowMethodVec(std::string& value) {
     }
 }
 
-void LocationBlock::refineDirectives() {
-    /* location 블록에서만 사용되는 지시어 정제 */
-    std::map<std::string, std::string>::iterator directive_it;
-    if ((directive_it = m_directives_.find("allow_method")) != m_directives_.end())
-        setAllowMethodVec(directive_it->second);
-    if ((directive_it = m_directives_.find("cgi_path")) != m_directives_.end())
-        cgi_path_ = directive_it->second;
-    if ((directive_it = m_directives_.find("upload_path")) != m_directives_.end())
-        upload_path_ = directive_it->second;
+/**
+ * @brief location 블록에서만 사용되는 지시어를 정제하는 함수
+ * 
+ */
+void LocationBlock::refineLocationDirectives() {
+    std::map<std::string, std::string>::iterator directive_it = m_directives_.begin();
+    while (directive_it != m_directives_.end()) {
+        std::string directive = directive_it->first;
+        std::string value = directive_it->second;
+
+        if (directive == "allow_method")
+            setAllowMethodVec(value);
+        else if (directive == "cgi_path")
+            cgi_path_ = value;
+        else if (directive == "upload_path")
+            upload_path_ = value;
+
+        directive_it++;
+    }
     print(); ///////////////////////////
-    /* 공통 지시어 정제 */
+}
+
+void LocationBlock::refineDirectives() {
+    refineLocationDirectives();
     common_directives_.refine(m_directives_);
 }
 
-void LocationBlock::print() {
+void LocationBlock::print() const {
     std::cout << "[LOCATION]" << std::endl;
+    common_directives_.print();
     if (!v_allow_method_.empty()) {
         std::cout << "- allow_method: ";
         for (size_t i = 0; i < v_allow_method_.size(); i++) {

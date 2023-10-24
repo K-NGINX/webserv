@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 
-#include "../Utils/Utils.hpp"
+#include "../../Utils/Utils.hpp"
 
 class CommonDirectives {
 public:
@@ -21,7 +21,7 @@ public:
     void setRoot(std::string& value);
 
     void refine(std::map<std::string, std::string>& m_directives);
-    void print();
+    void print() const;
 
 private:
     bool is_autoindex_;

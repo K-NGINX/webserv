@@ -4,8 +4,7 @@
 #include <map>
 #include <vector>
 
-#include "../../Utils/Utils.hpp"
-#include "../CommonDirectives.hpp"
+#include "../CommonDirectives/CommonDirectives.hpp"
 
 /**
  * @brief 모든 블록의 부모 클래스
@@ -26,5 +25,5 @@ public:
 
 protected:
     CommonDirectives common_directives_;
-    std::map<std::string, std::string> m_directives_;
+    std::map<std::string, std::string> m_directives_; // 지시어 정제 후에는 사용되지 않음
 };
