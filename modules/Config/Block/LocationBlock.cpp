@@ -17,6 +17,8 @@ LocationBlock& LocationBlock::operator=(const LocationBlock& other) {
     return *this;
 }
 
+const std::string& LocationBlock::getMatchDirective() const { return match_directive_; }
+
 const std::vector<HttpMethod>& LocationBlock::getAllowMethodVec() const { return v_allow_method_;}
 
 const std::string& LocationBlock::getCgiPath() const { return cgi_path_;}
@@ -79,8 +81,9 @@ void LocationBlock::refineDirectives() {
     common_directives_.refine(m_directives_);
 }
 
-void LocationBlock::print() {
+void LocationBlock::print() const {
     std::cout << "[LOCATION]" << std::endl;
+    common_directives_.print();
     if (!v_allow_method_.empty()) {
         std::cout << "- allow_method: ";
         for (size_t i = 0; i < v_allow_method_.size(); i++) {

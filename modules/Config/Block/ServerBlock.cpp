@@ -27,6 +27,42 @@ const std::string& ServerBlock::getPort() const { return port_; }
 
 const std::string& ServerBlock::getServerName() const { return server_name_; }
 
+size_t ServerBlock::getMatchLength(const std::string& uri, const std::string& match_directive) const {
+    size_t length = 0;
+
+    for (size_t i = 0; i < uri.size(); i++) {
+        if (uri[i] == match_directive[i])
+            length++;
+    }
+    return length;
+}
+
+/**
+ * @brief 요청을 처리할 때 사용할 위치 블록을 리턴하는 함수
+ * 
+ * @note 일치하는 블록이 하나도 없다면 예외가 throw됨
+ * 
+ * @details [ 규칙 ]
+ *      1. 위치 블록의 match_directive중 uri와 가장 길게 일치하는 위치 블록 리턴
+ *      2. 길이가 같다면 먼저 나오는 위치 블록 리턴
+ *      2. 만약 일치하는 블록이 하나도 없다면 404 에러
+ */
+const LocationBlock& ServerBlock::findMatchingLocationBlock(std::string uri) const {
+    size_t size = v_location_block_.size(), idx = size, match_length = 0;
+    for (size_t i = 0; i < size; i++) {
+        const LocationBlock& location_block = v_location_block_[i];
+        size_t length = getMatchLength(uri, location_block.getMatchDirective());
+        if (length > match_length) {
+            match_length = length;
+            idx = i;
+        }
+    }
+    if (idx == size)
+        throw std::runtime_error("404"); ///////////////////////////
+    else
+        return v_location_block_[idx];
+}
+
 /**
  * @brief LocationBlock 객체를 벡터에 추가하는 함수
  *
@@ -95,6 +131,7 @@ void ServerBlock::refineDirectives() {
 
 void ServerBlock::print() const {
     std::cout << "[ SERVER ]" << std::endl;
+    common_directives_.print();
     std::cout << "- ip: \"" << ip_ << "\"" << std::endl;
     std::cout << "- port: " << port_ << std::endl;
     std::cout << "- server_name: \"" << server_name_ << "\"" << std::endl;

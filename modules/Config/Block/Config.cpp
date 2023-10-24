@@ -8,10 +8,10 @@ const std::vector<ServerBlock>& Config::getServerBlockVec() const { return v_ser
 /**
  * @brief 요청을 처리할 때 사용할 서버 블록을 리턴하는 함수
  * 
- * @details [ 흐름 ]
- *      1. 먼저 ip와 port가 일치하는 서버 블록을 찾는다.
- *      2. 2개 이상이라면 server_name이 일치하는 서버 블록을 찾는다.
- *      3. 그래도 하나로 특정되지 않는다면 그 중 첫번 째 서버 블록을 리턴한다.
+ * @details [ 규칙 ]
+ *      1. 먼저 ip와 port가 일치하는 서버 블록을 찾기
+ *      2. 2개 이상이라면 server_name이 일치하는 서버 블록을 찾기
+ *      3. 그래도 하나로 특정되지 않는다면 그 중 첫번 째 서버 블록을 리턴
  */
 const ServerBlock& Config::findMatchingServerBlock(std::string host) const {
     // port 번호 구하기

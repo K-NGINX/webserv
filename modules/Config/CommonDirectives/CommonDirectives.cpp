@@ -6,7 +6,7 @@ client_max_body_size_(0),
 error_page_(""),
 return_code_(""),
 return_path_(""),
-root_(""){}
+root_("/"){}
 
 CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
     if (this != &other) {
@@ -37,8 +37,6 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
         setReturn(directive_it->second);
     if ((directive_it = m_directives.find("root")) != m_directives.end())
         setRoot(directive_it->second);
-
-    print();
 }
 
 void CommonDirectives::setAutoindex(std::string& value) {
@@ -109,7 +107,7 @@ void CommonDirectives::setRoot(std::string& value) {
     root_ = value;
 }
 
-void CommonDirectives::print() {
+void CommonDirectives::print() const {
     std::cout << "*- autoindex : " << (is_autoindex_ == true ? "on" : "off") << std::endl;
     std::cout << "*- client_max_body_size : " << client_max_body_size_ << std::endl;
     if (v_error_code_.empty() == false) {
