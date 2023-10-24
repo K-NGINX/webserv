@@ -4,14 +4,14 @@ CXXFLAGS	= -Wall -Wextra -Werror -std=c++98
 RM			= rm -f
 
 # source files
-SRCS		= modules/main.cpp							\
-			  modules/Webserv.cpp						\
-			  modules/Config/Block/ABlock.cpp			\
-			  modules/Config/Block/ConfigBlock.cpp		\
-			  modules/Config/Block/LocationBlock.cpp	\
-			  modules/Config/Block/ServerBlock.cpp		\
-			  modules/Config/CommonDirectives.cpp		\
-			  modules/Config/ConfigManager.cpp			\
+SRCS		= modules/main.cpp											\
+			  modules/Webserv.cpp										\
+			  modules/Config/Block/ABlock.cpp							\
+			  modules/Config/Block/Config.cpp						\
+			  modules/Config/Block/LocationBlock.cpp					\
+			  modules/Config/Block/ServerBlock.cpp						\
+			  modules/Config/CommonDirectives/CommonDirectives.cpp		\
+			  modules/Config/ConfigManager.cpp							\
 			  modules/Utils/Utils.cpp
 OBJS		= $(SRCS:.cpp=.o)
 

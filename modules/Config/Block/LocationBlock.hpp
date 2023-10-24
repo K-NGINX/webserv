@@ -6,6 +6,7 @@
 class LocationBlock : public ABlock {
 public:
     LocationBlock(const std::string& match_directive);
+    LocationBlock& operator=(const LocationBlock& other);
 
     /* getter */
     const std::vector<HttpMethod>& getAllowMethodVec() const;
@@ -18,6 +19,7 @@ public:
     void print();
 
 private:
+    void refineLocationDirectives();
     void setAllowMethodVec(std::string& value);
 
     std::string match_directive_;

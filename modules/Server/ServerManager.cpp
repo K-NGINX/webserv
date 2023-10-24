@@ -15,7 +15,7 @@ void ServerManager::closeAllServerSocket()
 void ServerManager::init()
 {
 	const std::vector<ServerBlock> &server_vec =
-		ConfigManager::getInstance().getConfigBlock().getServerBlockVec();
+		ConfigManager::getInstance().getConfig().getServerBlockVec();
 
 	for (size_t server_idx = 0; server_idx < server_vec.size(); server_idx++)
 	{

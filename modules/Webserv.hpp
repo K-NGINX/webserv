@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-#include "Server/ServerManager.hpp"
+#include "Config/ConfigManager.hpp"
+// #include "Server/ServerManager.hpp"
 
 # define RESET		"\033[0m"
 # define GRAY		"\033[1;90m"

@@ -9,7 +9,7 @@ ConfigManager& ConfigManager::getInstance() {
     return instance;
 }
 
-const ConfigBlock& ConfigManager::getConfigBlock() const { return config_; }
+const Config& ConfigManager::getConfig() const { return config_; }
 
 void ConfigManager::parse(int argc, char** argv) {
     /* 프로그램 인자 검사 */

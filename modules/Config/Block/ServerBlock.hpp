@@ -9,26 +9,29 @@
 class ServerBlock : public ABlock {
 public:
     ServerBlock();
+    ServerBlock& operator=(const ServerBlock& other);
 
     /* getter */
     virtual ABlock* getLastSubBlock();
     const std::vector<LocationBlock>& getLocationBlockVec() const;
-    const std::string& getHost() const;
+    const std::string& getIp() const;
     const std::string& getPort() const;
     const std::string& getServerName() const;
+    const LocationBlock& findLocationBlock() const;
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
 
-    void print();
+    void print() const;
 
 private:
-    void setHostPort(const std::string& value);
+    void refineServerDirectives();
+    void setHost(const std::string& value);
 
     std::vector<LocationBlock> v_location_block_;
 
     /* server 블록에서만 사용되는 지시어 */
-    std::string host_;
+    std::string ip_;
     std::string port_;
     std::string server_name_;
 };

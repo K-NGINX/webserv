@@ -9,7 +9,9 @@
 void Webserv::start(int argc, char** argv) {
     try {
         ConfigManager::getInstance().parse(argc, argv);
-        // ServerManager::getInstance().initServer();
+        /* test */
+        std::cout << "\n" << std::endl;
+        ConfigManager::getInstance().getConfig().findMatchingServerBlock("example.com:8080").print();
     } catch (std::exception& e) {
         std::cerr << RED << "Error: " << e.what() << RESET << std::endl;
     }

@@ -4,12 +4,12 @@
 #include <iostream>
 
 #include "../Utils/Utils.hpp"
-#include "Block/ConfigBlock.hpp"
+#include "Block/Config.hpp"
 
 class ConfigManager {
 public:
     static ConfigManager& getInstance();
-    const ConfigBlock& getConfigBlock() const;
+    const Config& getConfig() const;
 
     void parse(int argc, char** argv);
 
@@ -20,6 +20,6 @@ private:
     void checkLineType(std::string& line, char& line_type);
     void parseBlock(std::ifstream& ifs, ABlock* block);
 
-    ConfigBlock config_;
+    Config config_;
     std::string conf_path_;
 };
