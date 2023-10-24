@@ -6,7 +6,8 @@ enum ParsingRequestStatus {
 	HEADER,
 	EMPTY_LINE,
 	BODY,
-	DONE
+	DONE,
+	ERROR // error면 파싱안하고
 };
 
 class Request {
@@ -16,4 +17,5 @@ public:
 
 private:
 	ParsingRequestStatus status_;
+	
 };
