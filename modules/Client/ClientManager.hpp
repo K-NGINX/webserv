@@ -7,7 +7,7 @@ public:
 	static ClientManager& getInstance();
 
 	bool isClientSocket(int fd);
-	void addClient(int fd, Client& client);
+	void addClient(int fd);
 private:
 	ClientManager();
 	~ClientManager();
