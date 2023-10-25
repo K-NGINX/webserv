@@ -1,7 +1,6 @@
 #pragma once
 
 enum ParsingRequestStatus {
-	INIT,
 	START_LINE,
 	HEADER,
 	EMPTY_LINE,
