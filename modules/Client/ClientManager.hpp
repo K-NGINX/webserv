@@ -8,13 +8,14 @@ class ClientManager {
 public:
 	static ClientManager& getInstance();
 
-	bool isClientSocket(int fd);
 	void addClient(int fd);
 	void handleReadEvent(struct kevent event);
 
 private:
 	ClientManager();
 	~ClientManager();
+
+	Client& getClient(struct kevent event);
 
 	std::map<int, Client> m_client_;
 };
