@@ -106,7 +106,7 @@ void ServerManager::start() {
 				if (new_event.filter == EVFILT_READ) { // 읽기 이벤트
 					if (isServerSocket(new_event.ident)) { // 서버 소켓
 						connectNewClient(new_event.ident);
-					} else if (ClientManager::getInstance().isClientSocket(new_event.ident)) { // 클라이언트 소켓
+					} else { // 클라이언트 소켓/ 리소스 fd[0]
 						ClientManager::getInstance().handleReadEvent(new_event);
 					}
 				}

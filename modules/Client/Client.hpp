@@ -4,13 +4,12 @@
 #include <map>
 
 #include "Request/Request.hpp"
-// #include "Response/Response.hpp"
+#include "Response/Response.hpp"
 
 enum ClientStatus {
-	INIT,
 	PARSE_REQUEST,
 	READ_RESOURCE,
-	MAKE_RESPONSE,
+	MAKE_RESPONSE, ////
 	WRITE_RESOURCE,
 	SEND_RESPONSE,
 	DONE
@@ -22,14 +21,19 @@ public:
 
 	/* getter */
 	const ClientStatus& getStatus() const;
+	const int& getReadResourceFd() const;
 
 	/* setter */
 	void setStatus(const ClientStatus& status);
+
+	void parseRequest();
+	void makeResponse();
+	void readResponse();
 
 private:
 	int socket_; // 클라이언트 소켓
 	int resource_fd_[2]; // 0: read, 1: write
 	ClientStatus status_;
 	Request request_;
-	// Response response_;
+	Response response_;
 };
