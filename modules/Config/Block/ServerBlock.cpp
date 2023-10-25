@@ -5,18 +5,6 @@ ip_("0.0.0.0"),
 port_("80"),
 server_name_("") {}
 
-ServerBlock& ServerBlock::operator=(const ServerBlock& other) {
-    if (this != &other) {
-        common_directives_ = other.common_directives_;
-        m_directives_ = other.m_directives_;
-        v_location_block_ = other.v_location_block_;
-        ip_ = other.ip_;
-        port_ = other.port_;
-        server_name_ = other.server_name_;
-    }
-    return *this;
-}
-
 ABlock* ServerBlock::getLastSubBlock() { return &(v_location_block_.back()); }
 
 const std::vector<LocationBlock>& ServerBlock::getLocationBlockVec() const { return v_location_block_; }
@@ -114,7 +102,6 @@ void ServerBlock::refineServerDirectives() {
 
         directive_it++;
     }
-    print(); /////////////////
 }
 
 void ServerBlock::refineDirectives() {

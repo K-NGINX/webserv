@@ -4,3 +4,7 @@ Client::Client(int client_socket) : socket_(client_socket), status_(INIT) {
     resource_fd_[0] = -1;
     resource_fd_[1] = -1;
 }
+
+const ClientStatus& Client::getStatus() const { return status_; }
+
+void Client::setStatus(const ClientStatus& status) { status_ = status; }

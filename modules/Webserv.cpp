@@ -10,7 +10,6 @@ void Webserv::start(int argc, char** argv) {
     try {
         ConfigManager::getInstance().parse(argc, argv);
         /* test */
-        std::cout << "\n" << std::endl;
         const ServerBlock& server_block = ConfigManager::getInstance().getConfig().findMatchingServerBlock("localhost:80");
         server_block.print();
         const LocationBlock& location_block = server_block.findMatchingLocationBlock("/a");

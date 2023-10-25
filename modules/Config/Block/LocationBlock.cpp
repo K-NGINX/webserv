@@ -5,18 +5,6 @@ match_directive_(match_directive),
 cgi_path_(""),
 upload_path_("") {}
 
-LocationBlock& LocationBlock::operator=(const LocationBlock& other) {
-    if (this != &other) {
-        common_directives_ = other.common_directives_;
-        m_directives_ = other.m_directives_;
-        match_directive_ = other.match_directive_;
-        v_allow_method_ = other.v_allow_method_;
-        cgi_path_ = other.cgi_path_;
-        upload_path_ = other.upload_path_;
-    }
-    return *this;
-}
-
 const std::string& LocationBlock::getMatchDirective() const { return match_directive_; }
 
 const std::vector<HttpMethod>& LocationBlock::getAllowMethodVec() const { return v_allow_method_;}
@@ -73,7 +61,6 @@ void LocationBlock::refineLocationDirectives() {
 
         directive_it++;
     }
-    print(); ///////////////////////////
 }
 
 void LocationBlock::refineDirectives() {

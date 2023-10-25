@@ -5,6 +5,8 @@
 
 class Response {
 public:
+    Response();
+
     /* getter */
     const std::string& getStatusMessage() const;
 

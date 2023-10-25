@@ -20,6 +20,12 @@ class Client {
 public:
 	Client(int client_socket);
 
+	/* getter */
+	const ClientStatus& getStatus() const;
+
+	/* setter */
+	void setStatus(const ClientStatus& status);
+
 private:
 	int socket_; // 클라이언트 소켓
 	int resource_fd_[2]; // 0: read, 1: write

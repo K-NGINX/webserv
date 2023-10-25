@@ -1,24 +1,19 @@
 #include "ServerManager.hpp"
 
-ServerManager &ServerManager::getInstance()
-{
+ServerManager &ServerManager::getInstance() {
 	static ServerManager instance;
 	return instance;
 }
 
-void ServerManager::closeAllServerSocket()
-{
+void ServerManager::closeAllServerSocket() {
 	for (int i = 0; i < v_server_socket_.size(); i++)
 		close(v_server_socket_[i]);
 }
 
-void ServerManager::init()
-{
-	const std::vector<ServerBlock> &server_vec =
-		ConfigManager::getInstance().getConfig().getServerBlockVec();
+void ServerManager::init() {
+	const std::vector<ServerBlock> &server_vec = ConfigManager::getInstance().getConfig().getServerBlockVec();
 
-	for (size_t server_idx = 0; server_idx < server_vec.size(); server_idx++)
-	{
+	for (size_t server_idx = 0; server_idx < server_vec.size(); server_idx++) {
 		const char *hostname = server_vec[server_idx].getIp().c_str(); // config 불러서 넣어주기
 		const char *port = server_vec[server_idx].getPort().c_str();
 		struct addrinfo protocol_info;
@@ -30,21 +25,18 @@ void ServerManager::init()
 		protocol_info.ai_socktype = SOCK_STREAM; // TCP 소켓
 
 		int status = getaddrinfo(hostname, port, &protocol_info, &host_info);
-
 		if (status != 0)
 			throw std::runtime_error(gai_strerror(status));
 
 		int socket_socket = socket(host_info->ai_family, host_info->ai_socktype, host_info->ai_protocol);
-		if (socket_socket == -1)
-		{
+		if (socket_socket == -1) {
 			closeAllServerSocket();
 			freeaddrinfo(host_info); // 메모리 해제
 			throw std::runtime_error("Socket error");
 		}
 		v_server_socket_.push_back(socket_socket);
 
-		if (bind(socket_socket, host_info->ai_addr, host_info->ai_addrlen) == -1)
-		{
+		if (bind(socket_socket, host_info->ai_addr, host_info->ai_addrlen) == -1) {
 			closeAllServerSocket();
 			freeaddrinfo(host_info); // 메모리 해제
 			throw std::runtime_error("Bind error");
@@ -52,8 +44,7 @@ void ServerManager::init()
 		freeaddrinfo(host_info); // 메모리 해제
 
 		// 연결 요청 대기 상태로 바꿔줌
-		if (listen(socket_socket, 5) == -1)
-		{
+		if (listen(socket_socket, 5) == -1) {
 			closeAllServerSocket();
 			throw std::runtime_error("Listen error");
 		}
@@ -83,14 +74,11 @@ void ServerManager::connectNewClient(int server_fd) {
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	kqueue_.makeNewEvent(client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 	kqueue_.makeNewEvent(client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
-	Client client(client_socket);
 	ClientManager::getInstance().addClient(client_socket);
 }
 
-void ServerManager::start()
-{
-	if (kqueue_.fd_ == -1)
-	{
+void ServerManager::start() {
+	if (kqueue_.fd_ == -1) {
 		closeAllServerSocket();
 		throw std::runtime_error("Kqueue error");
 	}
@@ -98,30 +86,29 @@ void ServerManager::start()
 	for (size_t i = 0; i < v_server_socket_.size(); i++)
 		kqueue_.makeNewEvent(v_server_socket_[i], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 
-	while (true)
-	{
-		int event_num = kevent(kqueue_.fd_, &(kqueue_.v_change_[0]),
-					kqueue_.v_change_.size(), &(kqueue_.v_event_[0]), 8, NULL);
+	while (true) {
+		int event_num = kevent(
+			kqueue_.fd_,
+			&(kqueue_.v_change_[0]),
+			kqueue_.v_change_.size(),
+			&(kqueue_.v_event_[0]),
+			8,
+			NULL
+		);
 
 		if (event_num == -1) {
 			// kevent 실패
 			// 나중에 알아볼것
 		} else if (event_num > 0) { // 이벤트 발생
-			for (int i = 0; i < event_num; i++)
-			{
+			for (int i = 0; i < event_num; i++) {
 				struct kevent new_event = kqueue_.v_event_[i];
 
-				if (new_event.filter == EVFILT_READ) {
-					if (isServerSocket(new_event.ident)) {
+				if (new_event.filter == EVFILT_READ) { // 읽기 이벤트
+					if (isServerSocket(new_event.ident)) { // 서버 소켓
 						connectNewClient(new_event.ident);
+					} else if (ClientManager::getInstance().isClientSocket(new_event.ident)) { // 클라이언트 소켓
+						ClientManager::getInstance().handleReadEvent(new_event);
 					}
-						// std::cout << new_event.identntManager::getInstance().isClientSocket(new_event.ident))"; {
-						// 클라이언트의 일을 함
-				// 	} else {
-				// 		// CGI, 파일 쓰기 등 다른 fd를 사용하는 작업
-				// 	}
-				// } else {
-
 				}
 			}
 		}
