@@ -1,5 +1,7 @@
 #include "Response.hpp"
 
+Response::Response() : status_code_("200") {}
+
 const std::string& Response::getStatusMessage() const {
     if (status_code_ == "200")
         return "OK";

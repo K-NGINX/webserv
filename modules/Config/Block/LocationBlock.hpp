@@ -6,7 +6,6 @@
 class LocationBlock : public ABlock {
 public:
     LocationBlock(const std::string& match_directive);
-    LocationBlock& operator=(const LocationBlock& other);
 
     /* getter */
     const std::string& getMatchDirective() const;

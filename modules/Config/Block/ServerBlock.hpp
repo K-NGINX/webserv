@@ -9,7 +9,6 @@
 class ServerBlock : public ABlock {
 public:
     ServerBlock();
-    ServerBlock& operator=(const ServerBlock& other);
 
     /* getter */
     virtual ABlock* getLastSubBlock();
