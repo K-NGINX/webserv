@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "HttpMethod.hpp"
-
 class Utils
 {
 public:

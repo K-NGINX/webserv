@@ -8,7 +8,9 @@ void handleError(Client& client, const std::string& status_code) {
 }
 
 void handleRedirection(Client& client) {
-    client.response_.status_code_ = "301";
+    // status_code를 return_code로 설정
+    // 텍스트, 파일이라면 내용을 본문에 담고 헤더에 content-length 설정해서 보냄
+    // uri라면 location 헤더에 담아 보냄
     // 헤더에 return code page 추가
     // client.response.v_data_ 채워준 후 ?
     client.status_ = SEND_RESPONSE;
@@ -43,11 +45,11 @@ void handleDelete(Client& client) {
 
 /**
  * @details [ 요청 처리 순서 ]
- *      1. 리다이렉션
- *      2. CGI (GET, POST)
- *      3. GET (정적)
- *      4. POST
- *      5. DELETE
+ *      1. CGI (GET, POST)
+ *      2. GET (정적)
+ *      3. POST
+ *      4. DELETE
+ *      5. 리다이렉션
  */
 void handleRequest(Client& client) {
     if (client.request_.parsing_status_ == ERROR)
@@ -57,9 +59,9 @@ void handleRequest(Client& client) {
         // 위치 블록 찾기 -> 404
         // 허용 메소드인지 검사 -> 405
         // 본문이 있다면 본문 크기 검사 -> 413
-        // return(리다이렉션) 지시어 : HandleRedirection
         // cgi_pass 지시어 : HandleCgi
         // GET : HandleGet
         // POST : HandlePost
         // DELETE : HandleDelete
+        // return(리다이렉션) 지시어 : HandleRedirection
 }

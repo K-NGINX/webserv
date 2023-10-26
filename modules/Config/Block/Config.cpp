@@ -34,7 +34,7 @@ const ServerBlock& Config::findMatchingServerBlock(std::string host) const {
     if (v_match_idx.empty())
         return v_server_block_.front();
     // server_name을 기준으로 일치하는 서버 블록 찾기
-    for (size_t i = 0; i < v_match_idx.size(); i++) {\
+    for (size_t i = 0; i < v_match_idx.size(); i++) {
         if (server_name == v_server_block_[v_match_idx[i]].getServerName())
             return v_server_block_[v_match_idx[i]];
     }

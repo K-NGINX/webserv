@@ -13,6 +13,8 @@ const std::string& LocationBlock::getCgiPath() const { return cgi_path_;}
 
 const std::string& LocationBlock::getUploadPath() const { return upload_path_;}
 
+const std::string& LocationBlock::getPath() const { return common_directives_.getRoot() + match_directive_; }
+
 /**
  * @note location 블록은 하위 블록을 가질 수 없으므로, 예외를 던짐
  * 
@@ -67,10 +69,11 @@ void LocationBlock::refineLocationDirectives() {
 void LocationBlock::refineDirectives() {
     refineLocationDirectives();
     common_directives_.refine(m_directives_);
+    print();
 }
 
 void LocationBlock::print() const {
-    std::cout << "[LOCATION]" << std::endl;
+    std::cout << "[LOCATION] \"" << match_directive_ << "\"" << std::endl;
     common_directives_.print();
     if (!v_allow_method_.empty()) {
         std::cout << "- allow_method: ";

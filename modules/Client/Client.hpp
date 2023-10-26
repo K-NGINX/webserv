@@ -15,7 +15,7 @@ enum ClientStatus {
     READ_FILE,
     WRITE_FILE,
     SEND_RESPONSE,
-    DONE
+    WILL_DISCONNECT
 };
 
 class Client {

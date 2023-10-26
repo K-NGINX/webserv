@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../Utils/HttpMethod.hpp"
 #include "ABlock.hpp"
 
 class LocationBlock : public ABlock {
@@ -14,6 +13,7 @@ public:
     const std::vector<std::string>& getAllowMethodVec() const;
     const std::string& getCgiPath() const;
     const std::string& getUploadPath() const;
+    const std::string& getPath() const;
 
     void print() const;
 

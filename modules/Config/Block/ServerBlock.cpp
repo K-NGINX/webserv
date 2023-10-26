@@ -106,12 +106,13 @@ void ServerBlock::refineServerDirectives() {
 void ServerBlock::refineDirectives() {
     refineServerDirectives();
     common_directives_.refine(m_directives_);
+    print();
 
-    std::vector<LocationBlock>::iterator v_it = v_location_block_.begin();
-    while (v_it != v_location_block_.end()) {
-        v_it->setCommonDirectives(common_directives_);
-        v_it->refineDirectives();
-        v_it++;
+    std::vector<LocationBlock>::iterator location_it = v_location_block_.begin();
+    while (location_it != v_location_block_.end()) {
+        location_it->setCommonDirectives(common_directives_);
+        location_it->refineDirectives();
+        location_it++;
     }
 }
 
