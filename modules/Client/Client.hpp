@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <map>
+#include <sstream>
+#include <unistd.h>
 
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
@@ -33,6 +35,7 @@ public:
 private:
 	int socket_; // 클라이언트 소켓
 	int resource_fd_[2]; // 0: read, 1: write
+	std::string remain_buffer_;
 	ClientStatus status_;
 	Request request_;
 	Response response_;
