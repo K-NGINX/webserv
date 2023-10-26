@@ -1,20 +1,21 @@
 #pragma once
 
+#include <iostream>
+
 enum ParsingRequestStatus {
-	INIT,
-	START_LINE,
-	HEADER,
-	EMPTY_LINE,
-	BODY,
-	DONE,
-	ERROR // error면 파싱안하고
+    START_LINE,
+    HEADER,
+    EMPTY_LINE,
+    BODY,
+    DONE,
+    ERROR
 };
 
 class Request {
 public:
-	Request();
-	~Request();
+    Request();
 
-private:
-	ParsingRequestStatus status_;
+    void parse(int fd);
+
+    ParsingRequestStatus status_;
 };

@@ -9,11 +9,7 @@
 void Webserv::start(int argc, char** argv) {
     try {
         ConfigManager::getInstance().parse(argc, argv);
-        /* test */
-        const ServerBlock& server_block = ConfigManager::getInstance().getConfig().findMatchingServerBlock("localhost:80");
-        server_block.print();
-        const LocationBlock& location_block = server_block.findMatchingLocationBlock("/a");
-        location_block.print();
+        ServerManager::getInstance().start();
     } catch (std::exception& e) {
         std::cerr << RED << "Error: " << e.what() << RESET << std::endl;
     }

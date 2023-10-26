@@ -24,10 +24,9 @@ public:
     void print() const;
 
 private:
+    size_t getMatchLength(const std::string& uri, const std::string& match_directive) const;
     void refineServerDirectives();
     void setHost(const std::string& value);
-
-    size_t getMatchLength(const std::string& uri, const std::string& match_directive) const;
 
     std::vector<LocationBlock> v_location_block_;
 

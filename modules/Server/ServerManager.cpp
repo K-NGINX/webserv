@@ -11,8 +11,8 @@ void ServerManager::closeAllServerSocket() {
 }
 
 void ServerManager::init() {
+	// 서버 소켓 초기화
 	const std::vector<ServerBlock> &server_vec = ConfigManager::getInstance().getConfig().getServerBlockVec();
-
 	for (size_t server_idx = 0; server_idx < server_vec.size(); server_idx++) {
 		const char *hostname = server_vec[server_idx].getIp().c_str(); // config 불러서 넣어주기
 		const char *port = server_vec[server_idx].getPort().c_str();
@@ -50,6 +50,14 @@ void ServerManager::init() {
 		}
 		fcntl(socket_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	}
+	// kqueue 초기화
+	if ((kqueue_.fd_ = kqueue()) == -1) {
+		closeAllServerSocket();
+		throw std::runtime_error("Kqueue init error");
+	}
+	// 서버 소켓 read 이벤트 등록
+	for (size_t i = 0; i < v_server_socket_.size(); i++)
+		kqueue_.registerReadEvent(v_server_socket_[i], NULL);
 }
 
 bool ServerManager::isServerSocket(int fd) {
@@ -72,45 +80,33 @@ void ServerManager::connectNewClient(int server_fd) {
 		return ;
 	}
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	kqueue_.makeNewEvent(client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-	kqueue_.makeNewEvent(client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
-	ClientManager::getInstance().addClient(client_socket);
+	UData udata(CLIENT_SOCKET);
+	kqueue_.registerReadEvent(client_socket, &udata);
+	kqueue_.registerWriteEvent(client_socket, &udata);
+	ClientManager::getInstance().v_client_.push_back(Client(client_socket));
+}
+
+void ServerManager::handleEvent(struct kevent& event) {
+	if (isServerSocket(event.ident)) { // read 이벤트만 발생함
+		connectNewClient(event.ident);
+	} else { // 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트가 발생할 수 있음
+		UData* u_data = reinterpret_cast<UData*>(event.udata);
+		switch (u_data->getFdType() == CLIENT_SOCKET) {
+		case CLIENT_SOCKET:
+			ClientManager::getInstance().handleClientSocketEvent(event); break;
+		case CGI_FD:
+			ClientManager::getInstance().handleCgiEvent(event); break;
+		case FILE_FD:
+			ClientManager::getInstance().handleFileEvent(event); break;
+		}
+	}
 }
 
 void ServerManager::start() {
-	if (kqueue_.fd_ == -1) {
-		closeAllServerSocket();
-		throw std::runtime_error("Kqueue error");
-	}
-
-	for (size_t i = 0; i < v_server_socket_.size(); i++)
-		kqueue_.makeNewEvent(v_server_socket_[i], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-
+	init();
 	while (true) {
-		int event_num = kevent(
-			kqueue_.fd_,
-			&(kqueue_.v_change_[0]),
-			kqueue_.v_change_.size(),
-			&(kqueue_.v_event_[0]),
-			8,
-			NULL
-		);
-
-		if (event_num == -1) {
-			// kevent 실패
-			// 나중에 알아볼것
-		} else if (event_num > 0) { // 이벤트 발생
-			for (int i = 0; i < event_num; i++) {
-				struct kevent new_event = kqueue_.v_event_[i];
-
-				if (new_event.filter == EVFILT_READ) { // 읽기 이벤트
-					if (isServerSocket(new_event.ident)) { // 서버 소켓
-						connectNewClient(new_event.ident);
-					} else { // 클라이언트 소켓/ 리소스 fd[0]
-						ClientManager::getInstance().handleReadEvent(new_event);
-					}
-				}
-			}
-		}
+		int event_cnt = kqueue_.getEvents();
+		for (int i = 0; i < event_cnt; i++)
+			handleEvent(kqueue_.v_event_[i]);
 	}
 }

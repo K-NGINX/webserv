@@ -2,16 +2,13 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 
 class Response {
 public:
     Response();
 
-    /* getter */
-    const std::string& getStatusMessage() const;
-
-private:
     std::string status_code_;
     std::map<std::string, std::string> m_header_;
-    std::string body_content_;
+    std::vector<char> body_;
 };

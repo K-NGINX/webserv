@@ -1,21 +1,23 @@
 #pragma once
 
 #include <sys/event.h>
+#include <vector>
 
 #include "Client.hpp"
 
 class ClientManager {
 public:
-	static ClientManager& getInstance();
+    static ClientManager& getInstance();
+    void handleClientSocketEvent(struct kevent& event);
+    void handleCgiEvent(struct kevent& event);
+    void handleFileEvent(struct kevent& event);
 
-	void addClient(int fd);
-	void handleReadEvent(struct kevent event);
+    std::vector<Client> v_client_;
 
 private:
-	ClientManager();
-	~ClientManager();
+    ClientManager();
+    ~ClientManager();
 
-	Client& getClient(struct kevent event);
-
-	std::map<int, Client> m_client_;
+    Client& getClientBySocket(int socket);
+    Client& getClientByResourceFd(int fd);
 };

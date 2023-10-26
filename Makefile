@@ -7,7 +7,7 @@ RM			= rm -f
 SRCS		= modules/main.cpp											\
 			  modules/Webserv.cpp										\
 			  modules/Config/Block/ABlock.cpp							\
-			  modules/Config/Block/Config.cpp						\
+			  modules/Config/Block/Config.cpp							\
 			  modules/Config/Block/LocationBlock.cpp					\
 			  modules/Config/Block/ServerBlock.cpp						\
 			  modules/Config/CommonDirectives/CommonDirectives.cpp		\

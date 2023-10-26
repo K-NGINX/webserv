@@ -23,18 +23,19 @@ class ServerManager
 {
 public:
 	static ServerManager &getInstance();
-
-	void init();
 	void start();
 
+	Kqueue kqueue_;
+	
 private:
 	ServerManager();
 	~ServerManager();
 
+	void init();
 	void closeAllServerSocket();
+	void handleEvent(struct kevent& event);
 	bool isServerSocket(int fd);
 	void connectNewClient(int server_fd);
 
 	std::vector<int> v_server_socket_;
-	Kqueue kqueue_;
 };
