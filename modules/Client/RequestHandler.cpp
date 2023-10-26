@@ -50,7 +50,7 @@ void HandleDelete(Client& client) {
  *      5. DELETE
  */
 void HandleRequest(Client& client) {
-    if (client.request_.status_ == ERROR)
+    if (client.request_.parsing_status_ == ERROR)
         HandleError(client, 400); // 잘못된 요청
     // request 파싱 결과 해석
         // 서버 블록 찾기

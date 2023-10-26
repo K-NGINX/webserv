@@ -8,6 +8,7 @@
 class ClientManager {
 public:
     static ClientManager& getInstance();
+    void handleEvent(struct kevent& event);
     void handleClientSocketEvent(struct kevent& event);
     void handleCgiEvent(struct kevent& event);
     void handleFileEvent(struct kevent& event);

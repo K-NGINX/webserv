@@ -9,46 +9,20 @@ ClientManager& ClientManager::getInstance() {
     return instance;
 }
 
-Client& ClientManager::getClientBySocket(int socket) {
-    std::vector<Client>::iterator client_it = v_client_.begin();
-    while (client_it != v_client_.end()) {
-        if (client_it->socket_ == socket)
-            return *client_it;
-        client_it++;
+void ClientManager::handleEvent(struct kevent& event) {
+    Client *client = reinterpret_cast<Client*>(event.udata);
+    if (event.filter == EVFILT_READ) {
+        switch (client->status_) {
+        case RECV_REQUEST: client->handleSocketReadEvent(); break;
+        case READ_CGI: client->handleCgiReadEvent(event.ident); break;
+        case READ_FILE: client->handleFileReadEvent(event.ident); break;
+        }
+    } else if (event.filter == EVFILT_WRITE) {
+        switch (client->status_) {
+        case SEND_RESPONSE: client->handleSocketWriteEvent(); break;
+        case WRITE_CGI: client->handleCgiWriteEvent(event.ident); break;
+        case WRITE_FILE: client->handleFileWriteEvent(event.ident); break;
+        }
     }
-}
-
-Client& ClientManager::getClientByResourceFd(int fd) {
-    std::vector<Client>::iterator client_it = v_client_.begin();
-    while (client_it != v_client_.end()) {
-        if (client_it->resource_fd_[0] == fd || client_it->resource_fd_[1] == fd)
-            return *client_it;
-        client_it++;
-    }
-}
-
-void ClientManager::handleClientSocketEvent(struct kevent& event) {
-    Client& client = getClientBySocket(event.ident);
-    if (event.filter == EVFILT_READ)
-        client.handleSocketReadEvent();
-    else if (event.filter == EVFILT_WRITE)
-        client.handleSocketWriteEvent();
-}
-
-void ClientManager::handleCgiEvent(struct kevent& event) {
-    Client& client = getClientByResourceFd(event.ident);
-    if (event.filter == EVFILT_READ)
-        client.handleCgiReadEvent();
-    else if (event.filter == EVFILT_WRITE)
-        client.handleCgiWriteEvent();
-    else if (event.filter == EVFILT_TIMER)
-        client.handleCgiTimeoutEvent();
-}
-
-void ClientManager::handleFileEvent(struct kevent& event) {
-    Client& client = getClientByResourceFd(event.ident);
-    if (event.filter == EVFILT_READ)
-        client.handleFileReadEvent();
-    else if (event.filter == EVFILT_WRITE)
-        client.handleFileWriteEvent();
+    // if (client->status_ == DONE) // 해당 클라이언트 지우기
 }

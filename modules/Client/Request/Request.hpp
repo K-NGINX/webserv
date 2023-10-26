@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-enum ParsingRequestStatus {
+enum ParsingStatus {
     START_LINE,
     HEADER,
     EMPTY_LINE,
@@ -17,5 +17,5 @@ public:
 
     void parse(int fd);
 
-    ParsingRequestStatus status_;
+    ParsingStatus parsing_status_;
 };

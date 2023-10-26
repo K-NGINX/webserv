@@ -80,26 +80,17 @@ void ServerManager::connectNewClient(int server_fd) {
 		return ;
 	}
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	UData udata(CLIENT_SOCKET);
-	kqueue_.registerReadEvent(client_socket, &udata);
-	kqueue_.registerWriteEvent(client_socket, &udata);
-	ClientManager::getInstance().v_client_.push_back(Client(client_socket));
+	Client new_client(client_socket);
+	kqueue_.registerReadEvent(client_socket, &new_client);
+	kqueue_.registerWriteEvent(client_socket, &new_client);
+	ClientManager::getInstance().v_client_.push_back(new_client);
 }
 
 void ServerManager::handleEvent(struct kevent& event) {
-	if (isServerSocket(event.ident)) { // read 이벤트만 발생함
+	if (isServerSocket(event.ident)) // read 이벤트만 발생함
 		connectNewClient(event.ident);
-	} else { // 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트가 발생할 수 있음
-		UData* u_data = reinterpret_cast<UData*>(event.udata);
-		switch (u_data->getFdType() == CLIENT_SOCKET) {
-		case CLIENT_SOCKET:
-			ClientManager::getInstance().handleClientSocketEvent(event); break;
-		case CGI_FD:
-			ClientManager::getInstance().handleCgiEvent(event); break;
-		case FILE_FD:
-			ClientManager::getInstance().handleFileEvent(event); break;
-		}
-	}
+	else // 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트가 발생할 수 있음
+		ClientManager::getInstance().handleEvent(event);
 }
 
 void ServerManager::start() {
