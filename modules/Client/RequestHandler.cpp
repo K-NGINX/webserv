@@ -1,20 +1,20 @@
 #include "RequestHandler.hpp"
 #include "Client.hpp"
 
-void HandleError(Client& client, int status_code) {
+void handleError(Client& client, const std::string& status_code) {
     client.response_.status_code_ = status_code;
     // client.response.v_data_ 채워준 후 ?
     client.status_ = SEND_RESPONSE;
 }
 
-void HandleRedirection(Client& client) {
+void handleRedirection(Client& client) {
     client.response_.status_code_ = "301";
     // 헤더에 return code page 추가
     // client.response.v_data_ 채워준 후 ?
     client.status_ = SEND_RESPONSE;
 }
 
-void HandleCgi(Client& client) {
+void handleCgi(Client& client) {
 //  - CGI 환경 변수 설정
 //  - 양방향 파이프 resource_fd 생성
 //  - fork()
@@ -23,7 +23,7 @@ void HandleCgi(Client& client) {
     client.status_ = WRITE_CGI;
 }
 
-void HandleGet(Client& client) {
+void handleGet(Client& client) {
 //  - autoindex 지시어 on : 요청 경로 autoindex.html 생성 후 fd read 이벤트 등록
 //  - 디렉토리 : index 찾아 해당 파일 fd read 이벤트 등록
 //  - 파일명 : 해당 파일 fd read 이벤트 등록
@@ -31,13 +31,13 @@ void HandleGet(Client& client) {
     client.status_ = READ_FILE;
 }
 
-void HandlePost(Client& client) {
+void handlePost(Client& client) {
 //  - 기존 파일 : 해당 파일 fd write 이벤트 등록 (201)
 //  - 신규 파일 : 파일 fd write 이벤트 등록
     client.status_ = WRITE_FILE;
 }
 
-void HandleDelete(Client& client) {
+void handleDelete(Client& client) {
 
 }
 
@@ -49,9 +49,9 @@ void HandleDelete(Client& client) {
  *      4. POST
  *      5. DELETE
  */
-void HandleRequest(Client& client) {
+void handleRequest(Client& client) {
     if (client.request_.parsing_status_ == ERROR)
-        HandleError(client, 400); // 잘못된 요청
+        handleError(client, "400"); // 잘못된 요청
     // request 파싱 결과 해석
         // 서버 블록 찾기
         // 위치 블록 찾기 -> 404

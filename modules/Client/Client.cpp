@@ -1,6 +1,11 @@
 #include "Client.hpp"
 
-Client::Client(int socket) : socket_(socket), pid_(-1), status_(RECV_REQUEST) {}
+Client::Client(int socket) :
+socket_(socket),
+pid_(-1),
+status_(RECV_REQUEST),
+server_(NULL),
+location_(NULL) {}
 
 Client::~Client() {
     close(socket_);
@@ -10,7 +15,7 @@ void Client::handleSocketReadEvent() { // request가 왔다
     request_.parse(socket_);
     if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
         ServerManager::getInstance().kqueue_.unregisterReadEvent(socket_);
-        HandleRequest(*this);
+        RequestHandler::handleRequest(*this);
     }
 }
 

@@ -80,7 +80,7 @@ void ServerManager::connectNewClient(int server_fd) {
 		return ;
 	}
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	Client new_client(client_socket);
+	Client new_client(client_socket); //////// 할당하지 않아도 괜찮은지 나중에 알아보기
 	kqueue_.registerReadEvent(client_socket, &new_client);
 	kqueue_.registerWriteEvent(client_socket, &new_client);
 	ClientManager::getInstance().v_client_.push_back(new_client);
@@ -94,7 +94,6 @@ void ServerManager::handleEvent(struct kevent& event) {
 }
 
 void ServerManager::start() {
-	init();
 	while (true) {
 		int event_cnt = kqueue_.getEvents();
 		for (int i = 0; i < event_cnt; i++)

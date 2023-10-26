@@ -23,6 +23,8 @@ class ServerManager
 {
 public:
 	static ServerManager &getInstance();
+	
+	void init();
 	void start();
 
 	Kqueue kqueue_;
@@ -31,7 +33,6 @@ private:
 	ServerManager();
 	~ServerManager();
 
-	void init();
 	void closeAllServerSocket();
 	void handleEvent(struct kevent& event);
 	bool isServerSocket(int fd);
