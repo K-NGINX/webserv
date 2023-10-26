@@ -12,6 +12,15 @@ public:
     CommonDirectives();
     CommonDirectives& operator=(const CommonDirectives& other);
 
+    /* getter */
+    const bool& isAutoindex() const;
+    const int& getClientMaxBodySize() const;
+    const std::vector<std::string>& getErrorCodeVec() const;
+    const std::string& getErrorPage() const;
+    const std::vector<std::string>& getIndexVec() const;
+    const std::string& getReturnCode() const;
+    const std::string& getReturnPath() const;
+    const std::string& getRoot() const;
     /* setter */
     void setAutoindex(std::string& value);
     void setClientMaxBodySize(std::string& value);

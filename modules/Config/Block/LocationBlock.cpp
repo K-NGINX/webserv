@@ -7,11 +7,14 @@ upload_path_("") {}
 
 const std::string& LocationBlock::getMatchDirective() const { return match_directive_; }
 
-const std::vector<HttpMethod>& LocationBlock::getAllowMethodVec() const { return v_allow_method_;}
+const std::vector<std::string>& LocationBlock::getAllowMethodVec() const { return v_allow_method_;}
 
 const std::string& LocationBlock::getCgiPath() const { return cgi_path_;}
 
 const std::string& LocationBlock::getUploadPath() const { return upload_path_;}
+
+const std::string LocationBlock::getPath() const { return common_directives_.getRoot() + match_directive_; }
+
 /**
  * @note location 블록은 하위 블록을 가질 수 없으므로, 예외를 던짐
  * 
@@ -30,11 +33,11 @@ void LocationBlock::setAllowMethodVec(std::string& value) {
 
         method = value.substr(pos_start, pos_end - pos_start);
         if (method == "GET")
-            v_allow_method_.push_back(GET);
+            v_allow_method_.push_back(method);
         else if (method == "POST")
-            v_allow_method_.push_back(POST);
+            v_allow_method_.push_back(method);
         else if (method == "DELETE")
-            v_allow_method_.push_back(DELETE);
+            v_allow_method_.push_back(method);
         else
             throw std::runtime_error("invalid HTTP method");
 
@@ -66,21 +69,16 @@ void LocationBlock::refineLocationDirectives() {
 void LocationBlock::refineDirectives() {
     refineLocationDirectives();
     common_directives_.refine(m_directives_);
+    // print();
 }
 
 void LocationBlock::print() const {
-    std::cout << "[LOCATION]" << std::endl;
+    std::cout << "[LOCATION] \"" << match_directive_ << "\"" << std::endl;
     common_directives_.print();
     if (!v_allow_method_.empty()) {
         std::cout << "- allow_method: ";
-        for (size_t i = 0; i < v_allow_method_.size(); i++) {
-            if (v_allow_method_[i] == GET)
-                std::cout << "GET ";
-            else if (v_allow_method_[i] == POST)
-                std::cout << "POST ";
-            else if (v_allow_method_[i] == DELETE)
-                std::cout << "DELETE ";
-        }
+        for (size_t i = 0; i < v_allow_method_.size(); i++)
+                std::cout << v_allow_method_[i] + " ";
         std::cout << std::endl;
     }
     if (cgi_path_ != "")

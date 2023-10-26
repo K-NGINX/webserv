@@ -5,38 +5,40 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "../Config/ConfigManager.hpp"
+#include "../Server/ServerManager.hpp"
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
+#include "RequestHandler.hpp"
 
 enum ClientStatus {
-	PARSE_REQUEST,
-	READ_RESOURCE,
-	MAKE_RESPONSE, ////
-	WRITE_RESOURCE,
-	SEND_RESPONSE,
-	DONE
+    RECV_REQUEST,
+    READ_CGI,
+    WRITE_CGI,
+    READ_FILE,
+    WRITE_FILE,
+    SEND_RESPONSE,
+    WILL_DISCONNECT
 };
 
 class Client {
 public:
-	Client(int client_socket);
+    Client(int socket);
+    ~Client();
 
-	/* getter */
-	const ClientStatus& getStatus() const;
-	const int& getReadResourceFd() const;
+    void handleSocketReadEvent();
+    void handleSocketWriteEvent();
+    void handleCgiReadEvent(int fd);
+    void handleCgiWriteEvent(int fd);
+    void handleFileReadEvent(int fd);
+    void handleFileWriteEvent(int fd);
+    // void handleCgiTimeoutEvent();
 
-	/* setter */
-	void setStatus(const ClientStatus& status);
-
-	void parseRequest();
-	void makeResponse();
-	void readResponse();
-
-private:
-	int socket_; // 클라이언트 소켓
-	int resource_fd_[2]; // 0: read, 1: write
-	std::string remain_buffer_;
-	ClientStatus status_;
-	Request request_;
-	Response response_;
+    ClientStatus status_;
+    int socket_; // 클라이언트 소켓, 소멸자에서 close
+    pid_t pid_; // CGI 실행을 위한 자식 프로세스 pid
+    Request request_;
+    Response response_;
+    ServerBlock* server_;
+    LocationBlock* location_;
 };

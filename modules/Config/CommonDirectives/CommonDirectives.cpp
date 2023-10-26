@@ -39,6 +39,22 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
         setRoot(directive_it->second);
 }
 
+const bool& CommonDirectives::isAutoindex() const { return is_autoindex_; }
+
+const int& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
+
+const std::vector<std::string>& CommonDirectives::getErrorCodeVec() const { return v_error_code_; }
+
+const std::string& CommonDirectives::getErrorPage() const { return error_page_; }
+
+const std::vector<std::string>& CommonDirectives::getIndexVec() const { return v_index_; }
+
+const std::string& CommonDirectives::getReturnCode() const { return return_code_; }
+
+const std::string& CommonDirectives::getReturnPath() const { return return_path_; }
+
+const std::string& CommonDirectives::getRoot() const { return root_; }
+
 void CommonDirectives::setAutoindex(std::string& value) {
     Utils::trimWhiteSpace(value);
     if (value == "on")

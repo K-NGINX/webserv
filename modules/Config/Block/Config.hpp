@@ -11,12 +11,11 @@ public:
     /* getter */
     virtual ABlock* getLastSubBlock();
     const std::vector<ServerBlock>& getServerBlockVec() const;
-    const ServerBlock& findMatchingServerBlock(std::string host) const;
+    const ServerBlock* findMatchingServerBlock(std::string host) const;
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
 
 private:
-
     std::vector<ServerBlock> v_server_block_;
 };

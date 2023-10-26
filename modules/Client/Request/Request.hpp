@@ -9,9 +9,9 @@ enum ParsingRequestStatus {
 
 class Request {
 public:
-	Request();
-	~Request();
+    Request();
 
-private:
-	ParsingRequestStatus status_;
+    void parse(int fd);
+
+    ParsingRequestStatus parsing_status_;
 };

@@ -1,35 +1,56 @@
 #include "Client.hpp"
 
-Client::Client(int client_socket) : socket_(client_socket), status_(PARSE_REQUEST) {
-	resource_fd_[0] = -1;
-	resource_fd_[1] = -1;
+Client::Client(int socket) :
+socket_(socket),
+pid_(-1),
+status_(RECV_REQUEST),
+server_(NULL),
+location_(NULL) {}
+
+Client::~Client() {
+    close(socket_);
 }
 
-const ClientStatus& Client::getStatus() const { return status_; }
-
-const int& Client::getReadResourceFd() const { return resource_fd_[0]; }
-
-void Client::setStatus(const ClientStatus& status) { status_ = status; }
-
-void Client::parseRequest() {
-	char buffer[1024];
-	int read_size = read(socket_, buffer,sizeof(buffer));
-	if (read_size == -1) {
-		// 엌카쥐
-	}
-	remain_buffer_ += std::string(buffer);
-	std::stringstream ss(remain_buffer_);
-	std::string line, prev_line;
-	// 따로 테스트 해서 올리도록 하겠슴
-
-	// if (request_.getStatus() == DONE || request_.getStatus() == ERROR)
-		makeResponse();
+void Client::handleSocketReadEvent() { // request가 왔다
+    request_.parse(socket_);
+    if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
+        ServerManager::getInstance().kqueue_.unregisterReadEvent(socket_);
+        RequestHandler::handleRequest(*this);
+    }
 }
 
-void Client::makeResponse() {
-
+void Client::handleSocketWriteEvent() { // response 보낼 수 있다
+    // start line 세팅
+    // header 세팅
+    // response 전문 생성
+    // socket에 response 쓰기
+    // socket 제거, close
 }
 
-void Client::readResponse() {
+void Client::handleCgiReadEvent(int fd) {
+    std::cout << "handleCgiReadEvent" << std::endl;
+    // waitpid
+    // 다 읽었다면 반환값 response 헤더 파싱
+    // 읽기 실패 -> 500
+    // 양방향 파이프 resource_fd 닫기
+    status_ = SEND_RESPONSE;
+}
 
+void Client::handleCgiWriteEvent(int fd) {
+    std::cout << "handleCgiWriteEvent" << std::endl;
+    // request body fd에 쓰기
+    status_ = SEND_RESPONSE;
+}
+
+void Client::handleFileReadEvent(int fd) {
+    std::cout << "handleFileReadEvent" << std::endl;
+    // 파일 크기만큼 response 본문에 저장
+    // 읽기 실패 -> 500
+    status_ = SEND_RESPONSE;
+}
+
+void Client::handleFileWriteEvent(int fd) {
+    std::cout << "handleFileWriteEvent" << std::endl;
+    // request body fd에 쓰기
+    status_ = SEND_RESPONSE;
 }

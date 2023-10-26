@@ -17,13 +17,11 @@ void ConfigManager::parse(int argc, char** argv) {
         throw std::runtime_error("usage: ./webserv [configuration file]");
     else if (argc == 2)
         conf_path_ = argv[1];
-
     /* conf 파일 오픈 */
     std::ifstream ifs(conf_path_.c_str());
     if (ifs.fail())
         throw std::runtime_error("configuration file can't open");
-
-    /* 파싱 */
+    /* conf 파일 파싱 */
     parseBlock(ifs, &config_);
     config_.refineDirectives();
 }
@@ -55,7 +53,8 @@ void ConfigManager::parseBlock(std::ifstream& ifs, ABlock* block) {
     char line_type;
 
     while (std::getline(ifs, line)) {
-        Utils::trimWhiteSpace(line);
+        Utils::trimComment(line); // 주석 제거
+        Utils::trimWhiteSpace(line); // 공백 제거
         if (line == "")
             continue;
         checkLineType(line, line_type);
