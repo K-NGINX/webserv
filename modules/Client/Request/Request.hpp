@@ -1,14 +1,10 @@
 #pragma once
 
-#include <iostream>
-
-enum ParsingStatus {
-    START_LINE,
-    HEADER,
-    EMPTY_LINE,
-    BODY,
-    DONE,
-    ERROR
+enum ParsingRequestStatus {
+	START_LINE,
+	HEADER,
+	BODY,
+	ERROR_PARSING // error면 파싱안하고
 };
 
 class Request {
@@ -17,5 +13,5 @@ public:
 
     void parse(int fd);
 
-    ParsingStatus parsing_status_;
+    ParsingRequestStatus parsing_status_;
 };
