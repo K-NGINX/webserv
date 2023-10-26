@@ -17,6 +17,5 @@ public:
     virtual void refineDirectives();
 
 private:
-
     std::vector<ServerBlock> v_server_block_;
 };

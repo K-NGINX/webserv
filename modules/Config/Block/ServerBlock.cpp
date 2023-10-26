@@ -17,7 +17,6 @@ const std::string& ServerBlock::getServerName() const { return server_name_; }
 
 size_t ServerBlock::getMatchLength(const std::string& uri, const std::string& match_directive) const {
     size_t length = 0;
-
     for (size_t i = 0; i < uri.size(); i++) {
         if (uri[i] == match_directive[i])
             length++;
