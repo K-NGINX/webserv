@@ -27,14 +27,14 @@ size_t ServerBlock::getMatchLength(const std::string& uri, const std::string& ma
 /**
  * @brief 요청을 처리할 때 사용할 위치 블록을 리턴하는 함수
  * 
- * @note 일치하는 블록이 하나도 없다면 예외가 throw됨
+ * @note 일치하는 블록이 하나도 없다면 NULL이 리턴됨
  * 
  * @details [ 규칙 ]
  *      1. 위치 블록의 match_directive중 uri와 가장 길게 일치하는 위치 블록 리턴
  *      2. 길이가 같다면 먼저 나오는 위치 블록 리턴
  *      2. 만약 일치하는 블록이 하나도 없다면 404 에러
  */
-const LocationBlock& ServerBlock::findMatchingLocationBlock(std::string uri) const {
+const LocationBlock* ServerBlock::findMatchingLocationBlock(std::string uri) const {
     size_t size = v_location_block_.size(), idx = size, match_length = 0;
     for (size_t i = 0; i < size; i++) {
         const LocationBlock& location_block = v_location_block_[i];
@@ -45,9 +45,9 @@ const LocationBlock& ServerBlock::findMatchingLocationBlock(std::string uri) con
         }
     }
     if (idx == size)
-        throw std::runtime_error("404"); ///////////////////////////
+        return NULL;
     else
-        return v_location_block_[idx];
+        return &(v_location_block_[idx]);
 }
 
 /**
@@ -60,14 +60,12 @@ void ServerBlock::addSubBlock(std::string& line) {
     Utils::trimWhiteSpace(line);
     size_t pos_sepatator = line.find_last_of(Utils::whitespace);
     std::string match_directive = line.substr(pos_sepatator + 1);
-
     // 블록 이름(location) 추출
     line = line.substr(0, pos_sepatator);
     Utils::trimWhiteSpace(line);
 
     if (match_directive == "" || line != "location")
         throw std::runtime_error("location blocks must start with the following format: \"location match_directive {\"");
-
     v_location_block_.push_back(LocationBlock(match_directive));
 }
 
@@ -106,8 +104,7 @@ void ServerBlock::refineServerDirectives() {
 void ServerBlock::refineDirectives() {
     refineServerDirectives();
     common_directives_.refine(m_directives_);
-    print();
-
+    // print();
     std::vector<LocationBlock>::iterator location_it = v_location_block_.begin();
     while (location_it != v_location_block_.end()) {
         location_it->setCommonDirectives(common_directives_);

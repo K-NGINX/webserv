@@ -18,7 +18,7 @@ public:
     const std::string& getIp() const;
     const std::string& getPort() const;
     const std::string& getServerName() const;
-    const LocationBlock& findMatchingLocationBlock(std::string uri) const;
+    const LocationBlock* findMatchingLocationBlock(std::string uri) const;
 
     void print() const;
 
