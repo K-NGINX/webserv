@@ -6,7 +6,7 @@
 #include <map>
 #include <unistd.h>
 
-#include "../Utils/Utils.hpp"
+#include "../../Utils/Utils.hpp"
 
 #define BUFFER_SIZE 1024
 #define VERSION "HTTP/1.1"
@@ -37,8 +37,6 @@ public:
 	std::string method_;
 	std::string uri_;
 	std::string host_;
-	bool empty_line_flag = 0; /////////////////////////////
 	std::map<std::string, std::string> m_header_;
 	std::string body_; // 여기에 body 저장 append로 붙히명 \0 노상관
-	size_t transfer_encoding_chunked_size_ = -1;
 };

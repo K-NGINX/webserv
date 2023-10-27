@@ -5,8 +5,13 @@ is_autoindex_(false),
 client_max_body_size_(0),
 error_page_(""),
 return_code_(""),
-return_path_(""),
-root_("/"){}
+return_path_("") {
+    char path[1024];
+    if (getcwd(path, sizeof(path)) != NULL)
+        root_ = std::string(path);
+    else
+        root_ = "/";
+}
 
 CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
     if (this != &other) {
@@ -120,13 +125,14 @@ void CommonDirectives::setReturn(std::string& value) {
 
 void CommonDirectives::setRoot(std::string& value) {
     Utils::trimWhiteSpace(value);
-    root_ = value;
+    root_ += value;
 }
 
 void CommonDirectives::print(const std::string& indent) const {
-    std::cout << indent << "*--- common directives" << std::endl;
-    std::cout << indent << "*- autoindex : " << (is_autoindex_ == true ? "on" : "off") << std::endl;
-    std::cout << indent << "*- client_max_body_size : " << client_max_body_size_ << std::endl;
+    if (is_autoindex_ == true)
+        std::cout << indent << "*- autoindex : on" << std::endl;
+    if (client_max_body_size_ > 0)
+        std::cout << indent << "*- client_max_body_size : " << client_max_body_size_ << std::endl;
     if (v_error_code_.empty() == false) {
         std::cout << indent << "*- error_page : ";
         for (size_t i = 0; i < v_error_code_.size(); i++)
