@@ -16,6 +16,7 @@ public:
     const std::string getPath() const;
 
     void print() const;
+    bool isAllowMethod(const std::string& method) const;
 
 private:
     void refineLocationDirectives();

@@ -1,12 +1,16 @@
 #include "ServerManager.hpp"
 
+ServerManager::ServerManager() {}
+
+ServerManager::~ServerManager() {}
+
 ServerManager &ServerManager::getInstance() {
 	static ServerManager instance;
 	return instance;
 }
 
 void ServerManager::closeAllServerSocket() {
-	for (int i = 0; i < v_server_socket_.size(); i++)
+	for (size_t i = 0; i < v_server_socket_.size(); i++)
 		close(v_server_socket_[i]);
 }
 
@@ -75,7 +79,7 @@ void ServerManager::connectNewClient(int server_fd) {
 	struct sockaddr_in client_addr;
 	socklen_t client_len = sizeof(client_addr);
 	int client_socket;
-	if (client_socket = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len) == -1) {
+	if ((client_socket = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len)) == -1) {
 		std::cerr << "Accept error" << std::endl;
 		return ;
 	}

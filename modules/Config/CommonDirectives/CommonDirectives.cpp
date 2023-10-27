@@ -41,7 +41,7 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
 
 const bool& CommonDirectives::isAutoindex() const { return is_autoindex_; }
 
-const int& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
+const size_t& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
 
 const std::vector<std::string>& CommonDirectives::getErrorCodeVec() const { return v_error_code_; }
 
@@ -66,7 +66,7 @@ void CommonDirectives::setAutoindex(std::string& value) {
 void CommonDirectives::setClientMaxBodySize(std::string& value) {
     Utils::trimWhiteSpace(value);
     std::istringstream iss(value);
-    if (!(iss >> client_max_body_size_) || iss.eof() == false || client_max_body_size_ < 0)
+    if (!(iss >> client_max_body_size_) || iss.eof() == false)
         throw std::runtime_error("client_max_body_size must be an integer");
 }
 

@@ -9,8 +9,8 @@
 void Webserv::start(int argc, char** argv) {
     try {
         ConfigManager::getInstance().parse(argc, argv);
-        // ServerManager::getInstance().init();
-        // ServerManager::getInstance().start();
+        ServerManager::getInstance().init();
+        ServerManager::getInstance().start();
     } catch (std::exception& e) {
         std::cerr << RED << "Error: " << e.what() << RESET << std::endl;
     }

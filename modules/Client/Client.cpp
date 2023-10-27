@@ -1,9 +1,10 @@
 #include "Client.hpp"
+#include "RequestHandler.hpp"
 
 Client::Client(int socket) :
+status_(RECV_REQUEST),
 socket_(socket),
 pid_(-1),
-status_(RECV_REQUEST),
 server_(NULL),
 location_(NULL) {}
 
@@ -29,6 +30,7 @@ void Client::handleSocketWriteEvent() { // response 보낼 수 있다
 
 void Client::handleCgiReadEvent(int fd) {
     std::cout << "handleCgiReadEvent" << std::endl;
+    (void)fd;
     // waitpid
     // 다 읽었다면 반환값 response 헤더 파싱
     // 읽기 실패 -> 500
@@ -38,12 +40,14 @@ void Client::handleCgiReadEvent(int fd) {
 
 void Client::handleCgiWriteEvent(int fd) {
     std::cout << "handleCgiWriteEvent" << std::endl;
+    (void)fd;
     // request body fd에 쓰기
     status_ = SEND_RESPONSE;
 }
 
 void Client::handleFileReadEvent(int fd) {
     std::cout << "handleFileReadEvent" << std::endl;
+    (void)fd;
     // 파일 크기만큼 response 본문에 저장
     // 읽기 실패 -> 500
     status_ = SEND_RESPONSE;
@@ -51,6 +55,7 @@ void Client::handleFileReadEvent(int fd) {
 
 void Client::handleFileWriteEvent(int fd) {
     std::cout << "handleFileWriteEvent" << std::endl;
+    (void)fd;
     // request body fd에 쓰기
     status_ = SEND_RESPONSE;
 }

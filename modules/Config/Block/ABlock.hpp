@@ -17,6 +17,7 @@ public:
     virtual ~ABlock();
     
     virtual ABlock* getLastSubBlock();
+    const CommonDirectives& getCommonDirectives() const;
     void setCommonDirectives(CommonDirectives common_direcvites);
 
     void addDirective(const std::string& line);

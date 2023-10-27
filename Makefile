@@ -6,12 +6,19 @@ RM			= rm -f
 # source files
 SRCS		= modules/main.cpp											\
 			  modules/Webserv.cpp										\
+			  modules/Client/Request/Request.cpp						\
+			  modules/Client/Response/Response.cpp						\
+			  modules/Client/Client.cpp									\
+			  modules/Client/ClientManager.cpp							\
+			  modules/Client/RequestHandler.cpp							\
 			  modules/Config/Block/ABlock.cpp							\
 			  modules/Config/Block/Config.cpp							\
 			  modules/Config/Block/LocationBlock.cpp					\
 			  modules/Config/Block/ServerBlock.cpp						\
 			  modules/Config/CommonDirectives/CommonDirectives.cpp		\
 			  modules/Config/ConfigManager.cpp							\
+			  modules/Server/Kqueue/Kqueue.cpp							\
+			  modules/Server/ServerManager.cpp							\
 			  modules/Utils/Utils.cpp
 OBJS		= $(SRCS:.cpp=.o)
 

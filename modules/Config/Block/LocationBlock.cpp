@@ -72,6 +72,10 @@ void LocationBlock::refineDirectives() {
     // print();
 }
 
+bool LocationBlock::isAllowMethod(const std::string& method) const {
+    return std::find(v_allow_method_.begin(), v_allow_method_.end(), method) != v_allow_method_.end();
+}
+
 void LocationBlock::print() const {
     std::cout << "[LOCATION] \"" << match_directive_ << "\"" << std::endl;
     common_directives_.print();
