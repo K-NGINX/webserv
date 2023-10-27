@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include "Config/ConfigManager.hpp"
 #include "Server/ServerManager.hpp"
 

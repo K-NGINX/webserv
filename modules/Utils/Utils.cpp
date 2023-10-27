@@ -23,3 +23,7 @@ void Utils::trimWhiteSpace(std::string& str) {
         str.erase(pos_end + 1);
     }
 }
+
+int Utils::stoi(std::string str) {
+    return atoi(str.c_str());
+}

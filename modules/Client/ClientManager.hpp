@@ -1,7 +1,6 @@
 #pragma once
 
 #include <sys/event.h>
-#include <vector>
 
 #include "Client.hpp"
 class Client;
