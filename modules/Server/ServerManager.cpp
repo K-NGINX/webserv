@@ -94,7 +94,6 @@ void ServerManager::connectNewClient(int server_fd) {
 }
 
 void ServerManager::handleEvent(struct kevent& event) {
-	std::cout << "new event" << std::endl;
 	if (isServerSocket(event.ident)) // read 이벤트만 발생함
 		connectNewClient(event.ident);
 	else // 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트가 발생할 수 있음

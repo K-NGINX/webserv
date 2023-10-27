@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <vector>
 
+#define EVENT_SIZE 8
+
 class Kqueue {
 public:
 	Kqueue();
