@@ -55,9 +55,9 @@ void Request::parseStartLine(std::vector<char> &line)
 	std::string s_line(line.begin(), line.end()), tmp;
 	std::stringstream ss(s_line);
 
-	std::vector<std::string> split;
-	while (ss >> tmp)
-		split.push_back(tmp);
+// 	std::vector<std::string> split;
+// 	while (ss >> tmp)
+// 		split.push_back(tmp);
 
 	if (split.size() != 3 ||
 		(split[0] != "GET" && split[0] != "POST" && split[0] != "DELETE") ||
@@ -166,9 +166,9 @@ void Request::parse(int fd)
 	for (size_t i = 0; buffer[i]; i++)
 		remain_buffer_.push_back(buffer[i]);
 
-	std::vector<char> new_remain_buffer = getRemainBuffer(remain_buffer_);
-	std::vector<std::vector<char> > v_splited_line = splitVector(remain_buffer_);
-	remain_buffer_ = new_remain_buffer;
+// 	std::vector<char> new_remain_buffer = getRemainBuffer(remain_buffer_);
+// 	std::vector<std::vector<char> > v_splited_line = splitVector(remain_buffer_);
+// 	remain_buffer_ = new_remain_buffer;
 
 	for (size_t i = 0; i < v_splited_line.size(); i++)
 	{

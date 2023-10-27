@@ -14,7 +14,6 @@ public:
     const std::vector<std::string>& getAllowMethodVec() const;
     const std::string& getCgiPath() const;
     const std::string& getUploadPath() const;
-    const std::string getPath() const;
 
     bool isAllowMethod(const std::string& method) const;
 
