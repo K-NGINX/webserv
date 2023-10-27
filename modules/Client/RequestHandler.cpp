@@ -29,11 +29,27 @@ void RequestHandler::handleCgi(Client& client) {
     client.status_ = WRITE_CGI;
 }
 
+// autoindex 처리 아직 안함
 void RequestHandler::handleGet(Client& client) {
-//  - autoindex 지시어 on : 요청 경로 autoindex.html 생성 후 fd read 이벤트 등록
-//  - 디렉토리 : index 찾아 해당 파일 fd read 이벤트 등록
-//  - 파일명 : 해당 파일 fd read 이벤트 등록
-//  - 없으면 404
+    int read_fd = -1;
+    std::string root = client.location_->getCommonDirectives().getRoot();
+    std::string file = (root == "/") ? client.request_.uri_ : root + client.request_.uri_;
+    if (file.back() != '/') file.push_back('/');
+    if (client.request_.uri_.find('.') == std::string::npos) { // uri가 디렉토리인 경우 index 지시어에서 파일 찾기
+        const std::vector<std::string>& v_index = client.location_->getCommonDirectives().getIndexVec();
+        for (size_t i = 0; i < v_index.size(); i++) {
+            std::string temp = file + v_index[i];
+            if (access(temp.c_str(), F_OK) == 0) { // 파일이 존재하면
+                file = temp;
+                break;
+            }
+        }
+    }
+    read_fd = open(file.c_str(), O_RDONLY);
+    if (read_fd == -1)
+        return handleError(client, "404");
+	fcntl(read_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+    ServerManager::getInstance().kqueue_.registerReadEvent(read_fd, &client);
     client.status_ = READ_FILE;
 }
 
