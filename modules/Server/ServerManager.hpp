@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "../Client/ClientManager.hpp"
+#include "../Utils/Utils.hpp"
 #include "Kqueue/Kqueue.hpp"
 
 class ServerManager

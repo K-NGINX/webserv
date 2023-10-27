@@ -104,7 +104,6 @@ void ServerBlock::refineServerDirectives() {
 void ServerBlock::refineDirectives() {
     refineServerDirectives();
     common_directives_.refine(m_directives_);
-    // print();
     std::vector<LocationBlock>::iterator location_it = v_location_block_.begin();
     while (location_it != v_location_block_.end()) {
         location_it->setCommonDirectives(common_directives_);
@@ -113,10 +112,16 @@ void ServerBlock::refineDirectives() {
     }
 }
 
-void ServerBlock::print() const {
-    std::cout << "[ SERVER ]" << std::endl;
-    common_directives_.print();
-    std::cout << "- ip: \"" << ip_ << "\"" << std::endl;
-    std::cout << "- port: " << port_ << std::endl;
-    std::cout << "- server_name: \"" << server_name_ << "\"" << std::endl;
+void ServerBlock::print() {
+    std::string indent = "    ";
+    std::cout << indent << "[ SERVER ]" << std::endl;
+    std::cout << indent << "- listen: " << ip_ << ":" << port_ << std::endl;
+    std::cout << indent << "- server_name: " << server_name_ << std::endl;
+    common_directives_.print(indent);
+
+    std::vector<LocationBlock>::iterator location_it = v_location_block_.begin();
+    while (location_it != v_location_block_.end()) {
+        location_it->print();
+        location_it++;
+    }
 }

@@ -15,6 +15,7 @@ public:
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
+    virtual void print();
 
 private:
     std::vector<ServerBlock> v_server_block_;

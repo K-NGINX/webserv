@@ -76,17 +76,18 @@ bool LocationBlock::isAllowMethod(const std::string& method) const {
     return std::find(v_allow_method_.begin(), v_allow_method_.end(), method) != v_allow_method_.end();
 }
 
-void LocationBlock::print() const {
-    std::cout << "[LOCATION] \"" << match_directive_ << "\"" << std::endl;
-    common_directives_.print();
+void LocationBlock::print() {
+    std::string indent = "        ";
+    std::cout << indent << "[LOCATION] \"" << match_directive_ << "\"" << std::endl;
     if (!v_allow_method_.empty()) {
-        std::cout << "- allow_method: ";
+        std::cout << indent << "- allow_method: ";
         for (size_t i = 0; i < v_allow_method_.size(); i++)
                 std::cout << v_allow_method_[i] + " ";
         std::cout << std::endl;
     }
     if (cgi_path_ != "")
-        std::cout << "- cgi_path: " << cgi_path_ << std::endl;
+        std::cout << indent << "- cgi_path: " << cgi_path_ << std::endl;
     if (upload_path_ != "")
-        std::cout << "- upload_path: " << upload_path_ << std::endl;
+        std::cout << indent << "- upload_path: " << upload_path_ << std::endl;
+    common_directives_.print(indent);
 }

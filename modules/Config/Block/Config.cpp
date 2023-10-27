@@ -61,3 +61,11 @@ void Config::refineDirectives() {
         it++;
     }
 }
+
+void Config::print() {
+    std::vector<ServerBlock>::iterator it = v_server_block_.begin();
+    while (it != v_server_block_.end()) {
+        it->print();
+        it++;
+    }
+}

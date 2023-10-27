@@ -52,8 +52,9 @@ void ServerManager::init() {
 			closeAllServerSocket();
 			throw std::runtime_error("Listen error");
 		}
-		fcntl(socket_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+		fcntl(socket_socket, F_SETFL, O_NONBLOCK);
 	}
+	std::cout << GREEN << "📢 SERVER SOCKET INIT DONE" << RESET << std::endl;
 	// kqueue 초기화
 	if ((kqueue_.fd_ = kqueue()) == -1) {
 		closeAllServerSocket();
@@ -62,6 +63,7 @@ void ServerManager::init() {
 	// 서버 소켓 read 이벤트 등록
 	for (size_t i = 0; i < v_server_socket_.size(); i++)
 		kqueue_.registerReadEvent(v_server_socket_[i], NULL);
+	std::cout << GREEN << "📢 KQUEUE INIT DONE" << RESET << std::endl;
 }
 
 bool ServerManager::isServerSocket(int fd) {
@@ -80,7 +82,7 @@ void ServerManager::connectNewClient(int server_fd) {
 	socklen_t client_len = sizeof(client_addr);
 	int client_socket;
 	if ((client_socket = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len)) == -1) {
-		std::cerr << "Accept error" << std::endl;
+		std::cerr << RED << "Accept error" << RESET << std::endl;
 		return ;
 	}
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
@@ -88,9 +90,11 @@ void ServerManager::connectNewClient(int server_fd) {
 	kqueue_.registerReadEvent(client_socket, &new_client);
 	kqueue_.registerWriteEvent(client_socket, &new_client);
 	ClientManager::getInstance().v_client_.push_back(new_client);
+	std::cout << MAGENTA << "\nNEW CLIENT(" << client_socket << ") CONNECTED" << RESET << std::endl;
 }
 
 void ServerManager::handleEvent(struct kevent& event) {
+	std::cout << "new event" << std::endl;
 	if (isServerSocket(event.ident)) // read 이벤트만 발생함
 		connectNewClient(event.ident);
 	else // 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트가 발생할 수 있음
@@ -98,6 +102,7 @@ void ServerManager::handleEvent(struct kevent& event) {
 }
 
 void ServerManager::start() {
+	std::cout << GREEN << "📢 SERVER START" << RESET << std::endl;
 	while (true) {
 		int event_cnt = kqueue_.getEvents();
 		for (int i = 0; i < event_cnt; i++)

@@ -30,7 +30,7 @@ public:
     void setRoot(std::string& value);
 
     void refine(std::map<std::string, std::string>& m_directives);
-    void print() const;
+    void print(const std::string& indent) const;
 
 private:
     bool is_autoindex_;
