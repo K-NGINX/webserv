@@ -8,6 +8,7 @@ public:
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
+    virtual void print();
 
     const std::string& getMatchDirective() const;
     const std::vector<std::string>& getAllowMethodVec() const;
@@ -15,7 +16,7 @@ public:
     const std::string& getUploadPath() const;
     const std::string getPath() const;
 
-    void print() const;
+    bool isAllowMethod(const std::string& method) const;
 
 private:
     void refineLocationDirectives();

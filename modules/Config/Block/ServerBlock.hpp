@@ -12,6 +12,7 @@ public:
 
     virtual void addSubBlock(std::string& line);
     virtual void refineDirectives();
+    virtual void print();
 
     virtual ABlock* getLastSubBlock();
     const std::vector<LocationBlock>& getLocationBlockVec() const;
@@ -20,7 +21,6 @@ public:
     const std::string& getServerName() const;
     const LocationBlock* findMatchingLocationBlock(std::string uri) const;
 
-    void print() const;
 
 private:
     size_t getMatchLength(const std::string& uri, const std::string& match_directive) const;

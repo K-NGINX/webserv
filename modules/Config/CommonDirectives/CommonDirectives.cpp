@@ -41,7 +41,7 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
 
 const bool& CommonDirectives::isAutoindex() const { return is_autoindex_; }
 
-const int& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
+const size_t& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
 
 const std::vector<std::string>& CommonDirectives::getErrorCodeVec() const { return v_error_code_; }
 
@@ -66,7 +66,7 @@ void CommonDirectives::setAutoindex(std::string& value) {
 void CommonDirectives::setClientMaxBodySize(std::string& value) {
     Utils::trimWhiteSpace(value);
     std::istringstream iss(value);
-    if (!(iss >> client_max_body_size_) || iss.eof() == false || client_max_body_size_ < 0)
+    if (!(iss >> client_max_body_size_) || iss.eof() == false)
         throw std::runtime_error("client_max_body_size must be an integer");
 }
 
@@ -123,23 +123,24 @@ void CommonDirectives::setRoot(std::string& value) {
     root_ = value;
 }
 
-void CommonDirectives::print() const {
-    std::cout << "*- autoindex : " << (is_autoindex_ == true ? "on" : "off") << std::endl;
-    std::cout << "*- client_max_body_size : " << client_max_body_size_ << std::endl;
+void CommonDirectives::print(const std::string& indent) const {
+    std::cout << indent << "*--- common directives" << std::endl;
+    std::cout << indent << "*- autoindex : " << (is_autoindex_ == true ? "on" : "off") << std::endl;
+    std::cout << indent << "*- client_max_body_size : " << client_max_body_size_ << std::endl;
     if (v_error_code_.empty() == false) {
-        std::cout << "*- error_page : ";
+        std::cout << indent << "*- error_page : ";
         for (size_t i = 0; i < v_error_code_.size(); i++)
             std::cout << v_error_code_[i] << " ";
         std::cout << error_page_ << std::endl;
     }
     if (v_index_.empty() == false) {
-        std::cout << "*- index : ";
+        std::cout << indent << "*- index : ";
         for (size_t i = 0; i < v_index_.size(); i++)
             std::cout << v_index_[i] << " ";
         std::cout << std::endl;
     }
     if (return_code_ != "")
-        std::cout << "*- return : " << return_code_ << " " << return_path_ << std::endl;
+        std::cout << indent << "*- return : " << return_code_ << " " << return_path_ << std::endl;
     if (root_ != "")
-        std::cout << "*- root : " << root_ << std::endl;
+        std::cout << indent << "*- root : " << root_ << std::endl;
 }

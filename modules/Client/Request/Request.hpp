@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -8,12 +7,14 @@
 #include <unistd.h>
 
 #include "../Utils/Utils.hpp"
+
 #define BUFFER_SIZE 1024
 #define VERSION "HTTP/1.1"
 #define PLAIN_TEXT "text/plain"
 #define HTML_TEXT "text/html"
 #define JSON_TEXT "application/json"
-enum ParsingRequestStatus {
+
+enum RequestStatus {
 	START_LINE,
 	HEADER,
 	BODY,
@@ -31,7 +32,7 @@ public:
 	void parseBody(std::vector<char>& line);
 	void checkReadSize();
 
-    ParsingRequestStatus parsing_status_;
+    RequestStatus parsing_status_;
 	std::vector<char> remain_buffer_;
 	std::string method_;
 	std::string uri_;

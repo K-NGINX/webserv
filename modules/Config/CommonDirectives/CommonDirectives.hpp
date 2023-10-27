@@ -14,7 +14,7 @@ public:
 
     /* getter */
     const bool& isAutoindex() const;
-    const int& getClientMaxBodySize() const;
+    const size_t& getClientMaxBodySize() const;
     const std::vector<std::string>& getErrorCodeVec() const;
     const std::string& getErrorPage() const;
     const std::vector<std::string>& getIndexVec() const;
@@ -30,11 +30,11 @@ public:
     void setRoot(std::string& value);
 
     void refine(std::map<std::string, std::string>& m_directives);
-    void print() const;
+    void print(const std::string& indent) const;
 
 private:
     bool is_autoindex_;
-    int client_max_body_size_;
+    size_t client_max_body_size_;
     std::vector<std::string> v_error_code_;
     std::string error_page_;
     std::vector<std::string> v_index_;

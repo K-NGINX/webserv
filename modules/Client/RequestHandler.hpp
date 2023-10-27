@@ -1,6 +1,8 @@
 #pragma once
 
-class Client;
+#include <iostream>
+
+#include "Client.hpp"
 
 class RequestHandler {
 public:
@@ -11,4 +13,8 @@ public:
     static void handleGet(Client& client);
     static void handlePost(Client& client);
     static void handleDelete(Client& client);
+
+private:
+    RequestHandler();
+    ~RequestHandler();
 };

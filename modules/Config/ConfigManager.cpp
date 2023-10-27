@@ -12,18 +12,21 @@ ConfigManager& ConfigManager::getInstance() {
 const Config& ConfigManager::getConfig() const { return config_; }
 
 void ConfigManager::parse(int argc, char** argv) {
-    /* 프로그램 인자 검사 */
+    // 프로그램 인자 검사
     if (argc > 2)
         throw std::runtime_error("usage: ./webserv [configuration file]");
     else if (argc == 2)
         conf_path_ = argv[1];
-    /* conf 파일 오픈 */
+    // conf 파일 오픈
     std::ifstream ifs(conf_path_.c_str());
     if (ifs.fail())
         throw std::runtime_error("configuration file can't open");
-    /* conf 파일 파싱 */
+    // conf 파일 파싱
     parseBlock(ifs, &config_);
     config_.refineDirectives();
+    // 출력 ...
+    std::cout << GREEN << "📢 CONFIG PARSING DONE" << RESET << std::endl;
+    config_.print();
 }
 
 void ConfigManager::checkLineType(std::string& line, char& line_type) {
