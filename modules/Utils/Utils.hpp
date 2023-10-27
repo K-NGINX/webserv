@@ -7,6 +7,7 @@ class Utils
 public:
     static void trimComment(std::string &str);
     static void trimWhiteSpace(std::string &str);
+    static int stoi(std::string str);
 
     static std::string whitespace;
 
