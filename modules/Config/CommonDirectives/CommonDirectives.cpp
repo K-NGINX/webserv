@@ -128,6 +128,14 @@ void CommonDirectives::setRoot(std::string& value) {
     root_ += value;
 }
 
+bool CommonDirectives::isErrorCode(const std::string& error_code) const {
+    for (size_t i = 0; i < v_error_code_.size(); i++) {
+        if (error_code == v_error_code_[i])
+            return true;
+    }
+    return false;
+}
+
 void CommonDirectives::print(const std::string& indent) const {
     if (is_autoindex_ == true)
         std::cout << indent << "*- autoindex : on" << std::endl;

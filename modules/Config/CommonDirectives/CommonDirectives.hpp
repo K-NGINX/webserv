@@ -32,6 +32,7 @@ public:
 
     void refine(std::map<std::string, std::string>& m_directives);
     void print(const std::string& indent) const;
+    bool isErrorCode(const std::string& error_code) const;
 
 private:
     bool is_autoindex_;
