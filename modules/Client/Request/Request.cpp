@@ -25,7 +25,7 @@ static std::vector<char> getRemainBuffer(std::vector<char>& buffer) {
   std::vector<char> res;
   size_t last_idx = buffer.size() - 1;
   if (buffer[last_idx] != '\n' || buffer[last_idx - 1] != '\r') {
-    size_t start_remain_unit_idx;
+    size_t start_remain_unit_idx = buffer.size() - 1;
     for (size_t i = buffer.size() - 2; i >= 0; --i) {
       if (buffer[i] == '\r' && buffer[i + 1] == '\n') {
         start_remain_unit_idx = i;
@@ -85,6 +85,10 @@ void Request::parseHeader(std::vector<char>& line) {
 }
 
 void Request::parseBody(std::vector<char>& line) {
+  if (line.size() == 0) {
+	parsing_status_ = ERROR;
+	return;
+  }
   if (m_header_.find("transfer-encoding") != m_header_.end() &&
       m_header_["transfer-encoding"] == "chunked") {
     // chunked body parsing
@@ -129,9 +133,10 @@ void Request::checkValidRequest() {
 void Request::parse(int fd) {
 //   char buffer[BUFFER_SIZE] = "POST /index.html HTTP/1.1\r\nHost:www.example.com\r\ncontent-length:8\r\n\r\nbody\r\nbody\r\n\r\n";
 //   char buffer[BUFFER_SIZE] =
-//       "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n\r\n";
+//       "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n";
+// 	  (void)fd;
   char buffer[BUFFER_SIZE];
-  size_t read_size = read(fd, buffer, BUFFER_SIZE);
+  int read_size = read(fd, buffer, BUFFER_SIZE);
   if (read_size == 0) // EOF
   	checkValidRequest();
   if (read_size == -1)
@@ -164,23 +169,27 @@ void Request::parse(int fd) {
   }
 }
 
+// void printRequest(Request& req) {
+// 	  std::cout << "method:" << req.method_ << std::endl;
+//   std::cout << "uri:" << req.uri_ << std::endl;
+//   std::cout << "Host:" << req.host_ << std::endl;
+//   std::map<std::string, std::string>::iterator it = req.m_header_.begin();
+//   while (it != req.m_header_.end()) {
+// 	std::cout << it->first << ":" << it->second << std::endl;
+// 	it++;
+//   }
+//   std::cout << "bodysize:" << req.body_size_ << std::endl;
+//   std::cout << "status:" << req.parsing_status_ << std::endl;
+//   if (req.parsing_status_ == DONE)
+// 	std::cout << "DONE" << std::endl;
+//   else if (req.parsing_status_ == ERROR)
+// 	std::cout << "ERROR" << std::endl;
+// }
+
 // int main() {
 //   Request req;
 //   req.parse(0);
 
 //   req.checkValidRequest();
-//   std::cout << req.method_ << std::endl;
-//   std::cout << req.uri_ << std::endl;
-//   std::cout << req.host_ << std::endl;
-//   std::map<std::string, std::string>::iterator it = req.m_header_.begin();
-//   while (it != req.m_header_.end()) {
-//     std::cout << it->first << ":" << it->second << std::endl;
-//     it++;
-//   }
-//   std::cout << "bodysize:" << req.body_size_ << std::endl;
-//   std::cout << "status:" << req.parsing_status_ << std::endl;
-//   if (req.parsing_status_ == DONE)
-//     std::cout << "DONE" << std::endl;
-//   else if (req.parsing_status_ == ERROR)
-//     std::cout << "ERROR" << std::endl;
+//   printRequest(req);
 // }
