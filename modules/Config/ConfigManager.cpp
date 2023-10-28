@@ -1,6 +1,10 @@
 #include "ConfigManager.hpp"
 
-ConfigManager::ConfigManager() : conf_path_("default.conf") {}
+ConfigManager::ConfigManager() : conf_path_("default.conf") {
+    char path[1024];
+    getcwd(path, sizeof(path));
+    program_path_ = std::string(path);
+}
 
 ConfigManager::~ConfigManager() {}
 
@@ -10,6 +14,8 @@ ConfigManager& ConfigManager::getInstance() {
 }
 
 const Config& ConfigManager::getConfig() const { return config_; }
+
+const std::string& ConfigManager::getProgramPath() const { return program_path_; }
 
 void ConfigManager::parse(int argc, char** argv) {
     // 프로그램 인자 검사
