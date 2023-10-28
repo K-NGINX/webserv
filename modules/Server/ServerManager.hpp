@@ -1,13 +1,11 @@
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/event.h>
-#include <sys/socket.h> // server.cpp
+#include <sys/socket.h>	   // server.cpp
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -27,12 +25,12 @@ public:
 
 	Kqueue kqueue_;
 
-private:
+   private:
 	ServerManager();
 	~ServerManager();
 
 	void closeAllServerSocket();
-	void handleEvent(struct kevent& event);
+	void handleEvent(struct kevent &event);
 	bool isServerSocket(int fd);
 	void connectNewClient(int server_fd);
 

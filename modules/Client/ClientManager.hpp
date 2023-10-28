@@ -5,15 +5,15 @@
 #include "Client.hpp"
 
 class ClientManager {
-public:
-    static ClientManager& getInstance();
-    void handleEvent(struct kevent& event);
+   public:
+	static ClientManager& getInstance();
+	void handleEvent(struct kevent& event);
 
-    std::vector<Client*> v_client_;
+	std::vector<Client*> v_client_;
 
-private:
-    ClientManager();
-    ~ClientManager();
+   private:
+	ClientManager();
+	~ClientManager();
 
-    void disconnectClient(Client* client);
+	void disconnectClient(Client* client);
 };

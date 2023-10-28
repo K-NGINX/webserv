@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <map>
 #include <unistd.h>
+
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "../../Utils/Utils.hpp"
 
@@ -14,8 +15,7 @@
 #define HTML_TEXT "text/html"
 #define JSON_TEXT "application/json"
 
-enum RequestStatus
-{
+enum RequestStatus {
 	START_LINE,
 	HEADER,
 	BODY,
@@ -23,9 +23,8 @@ enum RequestStatus
 	ERROR
 };
 
-class Request
-{
-public:
+class Request {
+   public:
 	Request();
 
 	void parse(int fd);
