@@ -1,4 +1,5 @@
 #include "ServerManager.hpp"
+
 #include "../Client/ClientManager.hpp"
 
 ServerManager::ServerManager() {}

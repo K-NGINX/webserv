@@ -1,4 +1,5 @@
 #include "Client.hpp"
+
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket)
