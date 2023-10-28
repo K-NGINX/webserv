@@ -14,7 +14,7 @@ void RequestHandler::handleError(Client& client, const std::string& error_code) 
         const CommonDirectives& common_directives = client.location_->common_directives_;
         if (common_directives.isErrorCode(error_code)) // 사용자 정의 에러 페이지
             error_page = common_directives.getRoot() + common_directives.getErrorPage();
-    } 
+    }
     int fd = open(error_page.c_str(), O_RDONLY);
     if (fd == -1)
         throw std::runtime_error("error page handle failed");
@@ -41,6 +41,7 @@ void RequestHandler::handleCgi(Client& client) {
 //  - 자식 : CGI 프로그램 execve
 //  - 부모 : waitpid
 //  - GET 요청이면 READ_CGI
+    (void)client;
 }
 
 // autoindex 처리 아직 안함
