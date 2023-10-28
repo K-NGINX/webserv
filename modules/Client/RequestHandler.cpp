@@ -5,10 +5,22 @@ RequestHandler::RequestHandler() {}
 
 RequestHandler::~RequestHandler() {}
 
-void RequestHandler::handleError(Client& client, const std::string& status_code) {
-    client.response_.status_code_ = status_code;
-    // client.response.v_data_ 채워준 후 ?
-    client.status_ = SEND_RESPONSE;
+void RequestHandler::handleError(Client& client, const std::string& error_code) {
+    // 에러 코드 설정
+    client.response_.status_code_ = error_code;
+    // 에러 페이지 설정
+    std::string error_page = DEFAULT_ERROR_PAGE; // 기본 에러 페이지
+    if (client.location_ != NULL) {
+        const CommonDirectives& common_directives = client.location_->common_directives_;
+        if (common_directives.isErrorCode(error_code)) // 사용자 정의 에러 페이지
+            error_page = common_directives.getRoot() + common_directives.getErrorPage();
+    } 
+    int fd = open(error_page.c_str(), O_RDONLY);
+    if (fd == -1)
+        throw std::runtime_error("error page handle failed");
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+    ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
+    client.status_ = READ_FILE;
 }
 
 void RequestHandler::handleRedirection(Client& client) {
@@ -29,11 +41,27 @@ void RequestHandler::handleCgi(Client& client) {
     client.status_ = WRITE_CGI;
 }
 
+// autoindex 처리 아직 안함
 void RequestHandler::handleGet(Client& client) {
-//  - autoindex 지시어 on : 요청 경로 autoindex.html 생성 후 fd read 이벤트 등록
-//  - 디렉토리 : index 찾아 해당 파일 fd read 이벤트 등록
-//  - 파일명 : 해당 파일 fd read 이벤트 등록
-//  - 없으면 404
+    std::string uri = client.request_.uri_;
+    std::string root = client.location_->common_directives_.getRoot();
+    std::string file_name = (root == "/") ? uri : root + uri;
+    if (file_name.back() != '/') file_name.push_back('/');
+    if (uri.find('.') == std::string::npos) { // uri가 디렉토리인 경우 index 지시어에서 파일 찾기
+        const std::vector<std::string>& v_index = client.location_->common_directives_.getIndexVec();
+        for (size_t i = 0; i < v_index.size(); i++) {
+            std::string temp = file_name + v_index[i];
+            if (access(temp.c_str(), F_OK) == 0) { // 파일이 존재하면
+                file_name = temp;
+                break;
+            }
+        }
+    }
+    int fd = open(file_name.c_str(), O_RDONLY);
+    if (fd == -1)
+        return handleError(client, "404");
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+    ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
     client.status_ = READ_FILE;
 }
 
@@ -69,7 +97,7 @@ void RequestHandler::handleRequest(Client& client) {
         return handleError(client, "404"); // 요청은 적절하나 URI 없음
     else if (client.location_->isAllowMethod(request.method_) == false)
         return handleError(client, "405"); // 메소드 제한
-    else if (client.location_->getCommonDirectives().getClientMaxBodySize() < request.body_.size())
+    else if (client.location_->common_directives_.getClientMaxBodySize() < request.body_.size())
         return handleError(client, "413"); // 요청 객체 크기 초과
     else if (client.location_->getCgiPath() != "")
         return handleCgi(client);

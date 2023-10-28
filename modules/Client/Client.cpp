@@ -25,7 +25,7 @@ void Client::handleSocketWriteEvent() { // response 보낼 수 있다
     // header 세팅
     // response 전문 생성
     // socket에 response 쓰기
-    // socket 제거, close
+    // status_ = WILL_DISCONNECT;
 }
 
 void Client::handleCgiReadEvent(int fd) {

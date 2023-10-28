@@ -4,10 +4,6 @@ ABlock::~ABlock() {}
 
 ABlock* ABlock::getLastSubBlock() { return NULL; }
 
-const CommonDirectives& ABlock::getCommonDirectives() const { return common_directives_; }
-
-void ABlock::setCommonDirectives(CommonDirectives common_direcvites) { common_directives_ = common_direcvites; }
-
 void ABlock::addDirective(const std::string& line) {
     size_t pos_separator = line.find(' ');
     if (pos_separator == std::string::npos)

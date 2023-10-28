@@ -13,8 +13,6 @@ const std::string& LocationBlock::getCgiPath() const { return cgi_path_;}
 
 const std::string& LocationBlock::getUploadPath() const { return upload_path_;}
 
-const std::string LocationBlock::getPath() const { return common_directives_.getRoot() + match_directive_; }
-
 /**
  * @note location 블록은 하위 블록을 가질 수 없으므로, 예외를 던짐
  * 
