@@ -32,6 +32,7 @@ class Request {
 	void parseHeader(std::vector<char> &line);
 	void parseBody(std::vector<char> &line);
 	void checkValidRequest();
+	void print();
 
 	RequestStatus parsing_status_;
 	std::vector<char> remain_buffer_;

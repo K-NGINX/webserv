@@ -1,7 +1,5 @@
 #include "RequestHandler.hpp"
 
-#include "Client.hpp"
-
 RequestHandler::RequestHandler() {}
 
 RequestHandler::~RequestHandler() {}
@@ -22,7 +20,6 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }
-std::vector<std::vector<int> > a;
 
 // void RequestHandler::handleRedirection(Client& client) {
 //     // status_code를 return_code로 설정
@@ -34,44 +31,21 @@ std::vector<std::vector<int> > a;
 // }
 
 // 아직 모호함 ... :(
-void RequestHandler::handleCgi(Client &client) {
-	//  - POST 요청이면 WRITE_CGI
-	//  - CGI 환경 변수 설정
-	//  - 양방향 파이프 resource_fd 생성
-	//  - fork()
-	//  - 자식 : CGI 프로그램 execve
-	//  - 부모 : waitpid
-	//  - GET 요청이면 READ_CGI
-	(void)client;
+void RequestHandler::handleCgi(Client& client) {
+    (void)client;
+//  - POST 요청이면 WRITE_CGI
+//  - CGI 환경 변수 설정
+//  - 양방향 파이프 resource_fd 생성
+//  - fork()
+//  - 자식 : CGI 프로그램 execve
+//  - 부모 : waitpid
+//  - GET 요청이면 READ_CGI
 }
 
-// autoindex 처리 아직 안함
-void RequestHandler::handleGet(Client &client) {
-	std::string uri = client.request_.uri_;
-	std::string root = client.location_->common_directives_.getRoot();
-	std::string file_name = (root == "/") ? uri : root + uri;
-	if (file_name.back() != '/') file_name.push_back('/');
-	if (uri.find('.') == std::string::npos) {	 // uri가 디렉토리인 경우 index 지시어에서 파일 찾기
-		const std::vector<std::string> &v_index = client.location_->common_directives_.getIndexVec();
-		for (size_t i = 0; i < v_index.size(); i++) {
-			std::string temp = file_name + v_index[i];
-			if (access(temp.c_str(), F_OK) == 0) {	  // 파일이 존재하면
-				file_name = temp;
-				break;
-			}
-		}
-	}
-	int fd = open(file_name.c_str(), O_RDONLY);
-	if (fd == -1) return handleError(client, "404");
-	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
-	client.status_ = READ_FILE;
-}
-
-void RequestHandler::handlePost(Client &client) {
-	//  - 기존 파일 : 해당 파일 fd write 이벤트 등록 (201)
-	//  - 신규 파일 : 파일 fd write 이벤트 등록
-	client.status_ = WRITE_FILE;
+void RequestHandler::handlePost(Client& client) {
+//  - 기존 파일 : 해당 파일 fd write 이벤트 등록 (201)
+//  - 신규 파일 : 파일 fd write 이벤트 등록
+    client.status_ = WRITE_FILE;
 }
 
 void RequestHandler::handleDelete(Client &client) {

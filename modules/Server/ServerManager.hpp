@@ -4,23 +4,20 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
-
-#include <algorithm>
-#include <cstdlib>
-// #include <string>
 #include <sys/event.h>
 #include <sys/socket.h>	   // server.cpp
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-// #include <vector>
 
-#include "../Client/ClientManager.hpp"
 #include "../Utils/Utils.hpp"
 #include "Kqueue/Kqueue.hpp"
 
-class ServerManager {
-   public:
+class ClientManager;
+
+class ServerManager
+{
+public:
 	static ServerManager &getInstance();
 
 	void init();

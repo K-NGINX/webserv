@@ -7,9 +7,10 @@
 #include "Block/Config.hpp"
 
 class ConfigManager {
-   public:
-	static ConfigManager& getInstance();
-	const Config& getConfig() const;
+public:
+    static ConfigManager& getInstance();
+    const Config& getConfig() const;
+    const std::string& getProgramPath() const;
 
 	void parse(int argc, char** argv);
 
@@ -20,6 +21,7 @@ class ConfigManager {
 	void checkLineType(std::string& line, char& line_type);
 	void parseBlock(std::ifstream& ifs, ABlock* block);
 
-	Config config_;
-	std::string conf_path_;
+    Config config_;
+    std::string conf_path_;
+    std::string program_path_; // webserv의 경로
 };

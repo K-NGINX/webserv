@@ -1,16 +1,12 @@
 #include "CommonDirectives.hpp"
 
-CommonDirectives::CommonDirectives() : is_autoindex_(false),
-									   client_max_body_size_(0),
-									   error_page_(""),
-									   return_code_(""),
-									   return_path_("") {
-	char path[1024];
-	if (getcwd(path, sizeof(path)) != NULL)
-		root_ = std::string(path);
-	else
-		root_ = "/";
-}
+CommonDirectives::CommonDirectives() :
+is_autoindex_(false),
+client_max_body_size_(0),
+error_page_(""),
+return_code_(""),
+return_path_(""),
+root_("/") {}
 
 CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
 	if (this != &other) {
