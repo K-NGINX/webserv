@@ -7,19 +7,19 @@
 #include "Block/Config.hpp"
 
 class ConfigManager {
-public:
-    static ConfigManager& getInstance();
-    const Config& getConfig() const;
+   public:
+	static ConfigManager& getInstance();
+	const Config& getConfig() const;
 
-    void parse(int argc, char** argv);
+	void parse(int argc, char** argv);
 
-private:
-    ConfigManager();
-    ~ConfigManager();
+   private:
+	ConfigManager();
+	~ConfigManager();
 
-    void checkLineType(std::string& line, char& line_type);
-    void parseBlock(std::ifstream& ifs, ABlock* block);
+	void checkLineType(std::string& line, char& line_type);
+	void parseBlock(std::ifstream& ifs, ABlock* block);
 
-    Config config_;
-    std::string conf_path_;
+	Config config_;
+	std::string conf_path_;
 };

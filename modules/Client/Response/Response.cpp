@@ -1,3 +1,4 @@
 #include "Response.hpp"
 
-Response::Response() : status_code_("200") {}
+Response::Response()
+	: status_code_("200") {}
