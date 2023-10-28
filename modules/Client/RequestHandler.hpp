@@ -10,7 +10,7 @@ class RequestHandler {
 public:
     static void handleRequest(Client& client);
     static void handleError(Client& client, const std::string& error_code);
-    static void handleRedirection(Client& client);
+    // static void handleRedirection(Client& client);
     static void handleCgi(Client& client);
     static void handleGet(Client& client);
     static void handlePost(Client& client);

@@ -1,4 +1,22 @@
 #include "Request.hpp"
+#include "errno.h"
+
+void printRequest(Request& req) {
+	  std::cout << "method:" << req.method_ << std::endl;
+  std::cout << "uri:" << req.uri_ << std::endl;
+  std::cout << "Host:" << req.host_ << std::endl;
+//   std::map<std::string, std::string>::iterator it = req.m_header_.begin();
+//   while (it != req.m_header_.end()) {
+// 	std::cout << it->first << ":" << it->second << std::endl;
+// 	it++;
+//   }
+  std::cout << "bodysize:" << req.body_size_ << std::endl;
+  std::cout << "status:" << req.parsing_status_ << std::endl;
+  if (req.parsing_status_ == DONE)
+	std::cout << "DONE" << std::endl;
+  else if (req.parsing_status_ == ERROR)
+	std::cout << "ERROR" << std::endl;
+}
 
 Request::Request()
     : parsing_status_(START_LINE), host_("no_host"), body_size_(0) {}
@@ -141,8 +159,10 @@ void Request::parse(int fd) {
   	checkValidRequest();
   if (read_size == -1)
   	parsing_status_ = ERROR;
-  if (parsing_status_ == ERROR || parsing_status_ == DONE)
+  if (parsing_status_ == ERROR || parsing_status_ == DONE) {
+	printRequest(*this);
   	return ;
+  }
   // remainbuf에 이어붙힌다.
   for (size_t i = 0; buffer[i]; i++)
     remain_buffer_.push_back(buffer[i]);
@@ -168,23 +188,6 @@ void Request::parse(int fd) {
     }
   }
 }
-
-// void printRequest(Request& req) {
-// 	  std::cout << "method:" << req.method_ << std::endl;
-//   std::cout << "uri:" << req.uri_ << std::endl;
-//   std::cout << "Host:" << req.host_ << std::endl;
-//   std::map<std::string, std::string>::iterator it = req.m_header_.begin();
-//   while (it != req.m_header_.end()) {
-// 	std::cout << it->first << ":" << it->second << std::endl;
-// 	it++;
-//   }
-//   std::cout << "bodysize:" << req.body_size_ << std::endl;
-//   std::cout << "status:" << req.parsing_status_ << std::endl;
-//   if (req.parsing_status_ == DONE)
-// 	std::cout << "DONE" << std::endl;
-//   else if (req.parsing_status_ == ERROR)
-// 	std::cout << "ERROR" << std::endl;
-// }
 
 // int main() {
 //   Request req;

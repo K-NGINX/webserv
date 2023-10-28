@@ -11,10 +11,11 @@ ClientManager& ClientManager::getInstance() {
 
 void ClientManager::disconnectClient(Client* client) {
 	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
-    std::vector<Client>::iterator client_it = v_client_.begin();
+    std::vector<Client*>::iterator client_it = v_client_.begin();
     while (client_it != v_client_.end()) {
-        if (client_it->socket_ == client->socket_) {
+        if ((*client_it)->socket_ == client->socket_) {
             v_client_.erase(client_it);
+            delete client;
             break;
         }
         client_it++;
