@@ -3,7 +3,6 @@
 #include <sys/event.h>
 
 #include "Client.hpp"
-class Client;
 
 class ClientManager {
 public:

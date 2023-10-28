@@ -7,10 +7,11 @@ RM			= rm -f
 SRCS		= modules/main.cpp											\
 			  modules/Webserv.cpp										\
 			  modules/Client/Request/Request.cpp						\
+			  modules/Client/RequestHandler/HandleGet.cpp				\
+			  modules/Client/RequestHandler/RequestHandler.cpp			\
 			  modules/Client/Response/Response.cpp						\
 			  modules/Client/Client.cpp									\
 			  modules/Client/ClientManager.cpp							\
-			  modules/Client/RequestHandler.cpp							\
 			  modules/Config/Block/ABlock.cpp							\
 			  modules/Config/Block/Config.cpp							\
 			  modules/Config/Block/LocationBlock.cpp					\

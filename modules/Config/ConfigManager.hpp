@@ -10,6 +10,7 @@ class ConfigManager {
 public:
     static ConfigManager& getInstance();
     const Config& getConfig() const;
+    const std::string& getProgramPath() const;
 
     void parse(int argc, char** argv);
 
@@ -22,4 +23,5 @@ private:
 
     Config config_;
     std::string conf_path_;
+    std::string program_path_; // webserv의 경로
 };

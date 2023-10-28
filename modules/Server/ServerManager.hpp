@@ -6,17 +6,16 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
-// #include <string>
 #include <sys/event.h>
 #include <sys/socket.h> // server.cpp
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-// #include <vector>
 
-#include "../Client/ClientManager.hpp"
 #include "../Utils/Utils.hpp"
 #include "Kqueue/Kqueue.hpp"
+
+class ClientManager;
 
 class ServerManager
 {
