@@ -84,6 +84,7 @@ void Request::parseHeader(std::vector<char> &line) {
 	// key value로 나눠서 넣어준다.
 	std::string key(line.begin(), line.begin() + sep_idx);
 	std::string value(line.begin() + sep_idx + 1, line.end());
+	Utils::trimWhiteSpace(value);
 	// body 파일 제한
 	if (key == "Content-Type" && value != PLAIN_TEXT && value != HTML_TEXT && value != JSON_TEXT) {
 		parsing_status_ = ERROR;

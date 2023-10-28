@@ -56,6 +56,9 @@ void Client::handleFileReadEvent(int fd) {
 		for (int i = 0; i < read_size; i++)
 			this->response_.body_.push_back(buffer[i]);
 	}
+	for (size_t i = 0; i < response_.body_.size(); i++)
+		std::cout << response_.body_[i];
+	std::cout << std::endl;
 	status_ = SEND_RESPONSE;
 }
 
