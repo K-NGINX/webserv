@@ -4,6 +4,6 @@
 #include "Server/ServerManager.hpp"
 
 class Webserv {
-public:
-    void start(int argc, char **argv);
+   public:
+	void start(int argc, char **argv);
 };
