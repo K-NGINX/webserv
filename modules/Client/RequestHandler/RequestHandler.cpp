@@ -64,6 +64,7 @@ void RequestHandler::handleDelete(Client &client) {
  */
 void RequestHandler::handleRequest(Client &client) {
 	Request &request = client.request_;
+	request.print();
 	if (request.parsing_status_ == ERROR) return handleError(client, "400");	// 잘못된 문법의 요청
 	// 요청에 사용할 서버 블록과 위치 블록 찾기
 	client.server_ = ConfigManager::getInstance().getConfig().findMatchingServerBlock(request.host_);
