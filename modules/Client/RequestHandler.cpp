@@ -23,22 +23,24 @@ void RequestHandler::handleError(Client& client, const std::string& error_code) 
     client.status_ = READ_FILE;
 }
 
-void RequestHandler::handleRedirection(Client& client) {
-    // status_code를 return_code로 설정
-    // 텍스트, 파일이라면 내용을 본문에 담고 헤더에 content-length 설정해서 보냄
-    // uri라면 location 헤더에 담아 보냄
-    // 헤더에 return code page 추가
-    // client.response.v_data_ 채워준 후 ?
-    client.status_ = SEND_RESPONSE;
-}
+// void RequestHandler::handleRedirection(Client& client) {
+//     // status_code를 return_code로 설정
+//     // 텍스트, 파일이라면 내용을 본문에 담고 헤더에 content-length 설정해서 보냄
+//     // uri라면 location 헤더에 담아 보냄
+//     // 헤더에 return code page 추가
+//     // client.response.v_data_ 채워준 후 ?
+//     client.status_ = SEND_RESPONSE;
+// }
 
+// 아직 모호함 ... :(
 void RequestHandler::handleCgi(Client& client) {
+//  - POST 요청이면 WRITE_CGI
 //  - CGI 환경 변수 설정
 //  - 양방향 파이프 resource_fd 생성
 //  - fork()
 //  - 자식 : CGI 프로그램 execve
-//  - 부모 : resource fd read, write 이벤트 등록
-    client.status_ = WRITE_CGI;
+//  - 부모 : waitpid
+//  - GET 요청이면 READ_CGI
 }
 
 // autoindex 처리 아직 안함

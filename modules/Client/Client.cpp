@@ -21,6 +21,7 @@ void Client::handleSocketReadEvent() { // request가 왔다
 }
 
 void Client::handleSocketWriteEvent() { // response 보낼 수 있다
+    // std::cout << "handleSocketWriteEvent" << std::endl;
     // start line 세팅
     // header 세팅
     // response 전문 생성

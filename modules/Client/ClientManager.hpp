@@ -10,7 +10,7 @@ public:
     static ClientManager& getInstance();
     void handleEvent(struct kevent& event);
 
-    std::vector<Client> v_client_;
+    std::vector<Client*> v_client_;
 
 private:
     ClientManager();
