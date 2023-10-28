@@ -42,9 +42,20 @@ void Client::handleCgiWriteEvent(int fd) {
 
 void Client::handleFileReadEvent(int fd) {
 	std::cout << "handleFileReadEvent" << std::endl;
-	(void)fd;
 	// 파일 크기만큼 response 본문에 저장
 	// 읽기 실패 -> 500
+	int read_size = 0;
+	char buffer[BUFFER_SIZE];
+	while (true) {
+		read_size = read(fd, buffer, BUFFER_SIZE);
+		if (read_size == -1) {
+			this->response_.status_code_ = "500";
+			return;
+		} else if (read_size == 0)
+			break;
+		for (int i = 0; i < read_size; i++)
+			this->response_.body_.push_back(buffer[i]);
+	}
 	status_ = SEND_RESPONSE;
 }
 

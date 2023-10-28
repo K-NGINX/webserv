@@ -31,6 +31,7 @@ bool handleAutoindex(Client& client, std::string& file) {
 void RequestHandler::handleGet(Client& client) {
 	std::string root = ConfigManager::getInstance().getProgramPath() + client.location_->common_directives_.getRoot();
 	std::string file = root + client.request_.uri_;
+  
 	if (isFileType(file) || isIndex(client, file) || handleAutoindex(client, file)) {
 		int fd = open(file.c_str(), O_RDONLY);
 		if (fd == -1)
