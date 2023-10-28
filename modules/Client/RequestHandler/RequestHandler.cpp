@@ -31,21 +31,21 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 // }
 
 // 아직 모호함 ... :(
-void RequestHandler::handleCgi(Client& client) {
-    (void)client;
-//  - POST 요청이면 WRITE_CGI
-//  - CGI 환경 변수 설정
-//  - 양방향 파이프 resource_fd 생성
-//  - fork()
-//  - 자식 : CGI 프로그램 execve
-//  - 부모 : waitpid
-//  - GET 요청이면 READ_CGI
+void RequestHandler::handleCgi(Client &client) {
+	(void)client;
+	//  - POST 요청이면 WRITE_CGI
+	//  - CGI 환경 변수 설정
+	//  - 양방향 파이프 resource_fd 생성
+	//  - fork()
+	//  - 자식 : CGI 프로그램 execve
+	//  - 부모 : waitpid
+	//  - GET 요청이면 READ_CGI
 }
 
-void RequestHandler::handlePost(Client& client) {
-//  - 기존 파일 : 해당 파일 fd write 이벤트 등록 (201)
-//  - 신규 파일 : 파일 fd write 이벤트 등록
-    client.status_ = WRITE_FILE;
+void RequestHandler::handlePost(Client &client) {
+	//  - 기존 파일 : 해당 파일 fd write 이벤트 등록 (201)
+	//  - 신규 파일 : 파일 fd write 이벤트 등록
+	client.status_ = WRITE_FILE;
 }
 
 void RequestHandler::handleDelete(Client &client) {

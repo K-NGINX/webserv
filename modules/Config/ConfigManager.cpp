@@ -1,9 +1,9 @@
 #include "ConfigManager.hpp"
 
 ConfigManager::ConfigManager() : conf_path_("default.conf") {
-    char path[1024];
-    getcwd(path, sizeof(path));
-    program_path_ = std::string(path);
+	char path[1024];
+	getcwd(path, sizeof(path));
+	program_path_ = std::string(path);
 }
 
 ConfigManager::~ConfigManager() {}
