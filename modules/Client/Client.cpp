@@ -42,7 +42,7 @@ void Client::handleCgiWriteEvent(int fd) {
     std::cout << "handleCgiWriteEvent" << std::endl;
     (void)fd;
     // request body fd에 쓰기
-    status_ = SEND_RESPONSE;
+    status_ = READ_CGI;
 }
 
 void Client::handleFileReadEvent(int fd) {
