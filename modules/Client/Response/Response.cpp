@@ -1,9 +1,13 @@
 #include "Response.hpp"
 
-Response::Response()
-	: status_code_("200") {}
+Response::Response() : status_code_("200") {}
 
-void Response::makeResponse(std::vector<char> &msg){
+void Response::clear() {
+	status_code_ = "200";
+	m_header_.clear();
+	body_.clear();
+}
+void Response::makeResponse(std::vector<char> &msg) {
 	std::vector<char> status_line = getStatusLine(status_code_);
 	std::vector<char> rn;
 	rn.push_back('\r');
@@ -21,8 +25,7 @@ void Response::makeResponse(std::vector<char> &msg){
 	msg.insert(msg.end(), body_.begin(), body_.end());
 }
 
-
-std::vector<char> Response::getStatusLine(const std::string& status_code_) const {
+std::vector<char> Response::getStatusLine(const std::string &status_code_) const {
 	static std::map<std::string, std::string> m_status;
 	// 한번만 실행됨 !
 	if (m_status.empty()) {
@@ -41,7 +44,7 @@ std::vector<char> Response::getStatusLine(const std::string& status_code_) const
 	return std::vector<char>(status_line.begin(), status_line.end());
 }
 
-void Response::makeHeaderLine(){
+void Response::makeHeaderLine() {
 	m_header_["Date"] = getResponseDate(NULL);
 	if (body_.size() != 0)
 		m_header_["Content-length"] = ntos(body_.size());
@@ -55,8 +58,8 @@ std::string Response::getResponseDate(std::time_t *t) {
 		current_time = std::time(NULL);
 	else
 		current_time = *t;
-	std::tm* timeInfo = std::gmtime(&current_time);
+	std::tm *timeInfo = std::gmtime(&current_time);
 	std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", timeInfo);
 
-  return buffer;
+	return buffer;
 }

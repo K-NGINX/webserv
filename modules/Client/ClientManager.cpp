@@ -11,7 +11,7 @@ ClientManager &ClientManager::getInstance() {
 
 void ClientManager::disconnectClient(Client *client) {
 	if (client->is_keep_alive_)
-		return client->clearStatus();
+		return client->clear();
 
 	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
 	// 배열에서 삭제

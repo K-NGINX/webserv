@@ -1,19 +1,25 @@
 #include "Request.hpp"
 
-#include "errno.h"
-
-Request::Request() : parsing_status_(START_LINE), body_size_(0), is_chunked(false) {
-}
+Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false) {}
 
 void Request::clear() {
-
+	parsing_status_ = INIT;
+	remain_buffer_.clear();
+	method_.clear();
+	uri_.clear();
+	host_.clear();
+	m_header_.clear();
+	body_.clear();
+	body_size_ = 0;
+	is_chunked = false;
+	connection_.clear();
 }
 
 void Request::print() {
 	std::cout << "[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
-	std::cout << "Host:" << host_ << std::endl;
-	std::cout << "BodySize:" << body_size_ << std::endl;
+	std::cout << "Host: " << host_ << std::endl;
+	std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
 		std::cout << "-> DONE" << std::endl;
 	else if (parsing_status_ == ERROR)
@@ -80,14 +86,14 @@ void Request::parseHeader(std::vector<char> &line) {
 		parsing_status_ = BODY;
 		return;
 	}
-	size_t sep_idx = std::find(line.begin(), line.end(), ':') - line.begin();
-	if (sep_idx == line.size()) {
+	std::vector<char>::iterator it = std::find(line.begin(), line.end(), ':');
+	if (it == line.end()) {
 		parsing_status_ = ERROR;
 		return;
 	}
 	// key value로 나눠서 넣어준다.
-	std::string key(line.begin(), line.begin() + sep_idx);
-	std::string value(line.begin() + sep_idx + 1, line.end());
+	std::string key(line.begin(), it);
+	std::string value(it + 1, line.end());
 	Utils::trimWhiteSpace(value);
 	if (value == "") {
 		parsing_status_ = ERROR;
@@ -135,8 +141,7 @@ void Request::checkValidRequest() {
 	// post일때 유효한 request일 경우
 	if (method_ == "POST") {
 		// chunked 일때 분기도 추가
-		if (m_header_.find("content-length") != m_header_.end()
-			&& body_size_ != Utils::stoi(m_header_["content-length"])) {
+		if (m_header_.find("content-length") != m_header_.end() && body_size_ != Utils::stoi(m_header_["content-length"])) {
 			parsing_status_ = ERROR;
 			return;
 		}
@@ -169,12 +174,17 @@ void Request::parse(int fd) {
 	//   char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n";
 	char buffer[BUFFER_SIZE];
 	int read_size = read(fd, buffer, BUFFER_SIZE);
+	if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
+		return;
+	if (parsing_status_ == INIT)
+		parsing_status_ = START_LINE;
 	if (read_size == 0)	   // EOF
 		checkValidRequest();
 	if (read_size == -1)
 		parsing_status_ = ERROR;
 	if (parsing_status_ == ERROR || parsing_status_ == DONE)
 		return;
+	std::cout << buffer;	///////////////////////
 	// remainbuf에 이어붙힌다.
 	for (size_t i = 0; buffer[i]; i++)
 		remain_buffer_.push_back(buffer[i]);
@@ -199,8 +209,7 @@ void Request::parse(int fd) {
 					}
 					parseChunkedBody(v_splited_line[i], v_splited_line[i + 1]);
 					i++;
-				}
-				else
+				} else
 					parseBody(v_splited_line[i]);
 				break;
 			default:
