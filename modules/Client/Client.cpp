@@ -1,10 +1,11 @@
 #include "Client.hpp"
+
 #include <cstdlib>
 
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket)
-	: status_(RECV_REQUEST), socket_(socket), pid_(-1), server_(NULL), location_(NULL), written(0) {}
+	: status_(RECV_REQUEST), socket_(socket), is_keep_alive_(true), pid_(-1), server_(NULL), location_(NULL), written_(0) {}
 
 Client::~Client() { close(socket_); }
 
@@ -14,11 +15,13 @@ Client::~Client() { close(socket_); }
  */
 void Client::clear() {
 	status_ = RECV_REQUEST;
+	is_keep_alive_ = true;
 	pid_ = -1;
 	request_.clear();
 	response_.clear();
 	server_ = NULL;
 	location_ = NULL;
+	written_ = 0;
 	ServerManager::getInstance().kqueue_.registerReadEvent(socket_, this);
 }
 
@@ -42,13 +45,13 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 	std::vector<char> msg;
 	response_.makeResponse(msg);
 	std::cout << "[ RESPONSE ] \n";
-	ssize_t cnt = msg.size() - written;
-	//if (cnt == 0)
+	ssize_t cnt = msg.size() - written_;
+	// if (cnt == 0)
 	//	std::cout << "alsejfailwjfleaiwj iflejwalifj ilawefjil!!\n";
-	cnt = write(socket_, msg.data() + written, cnt);
-	//if (cnt == 0 || cnt == -1)
+	cnt = write(socket_, msg.data() + written_, cnt);
+	// if (cnt == 0 || cnt == -1)
 	//	std::cout << "error !!!\n";
-	written += cnt;
+	written_ += cnt;
 	for (size_t i = 0; i < msg.size(); i++)
 		std::cout << msg[i];
 	std::cout << std::endl;

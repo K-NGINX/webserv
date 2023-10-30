@@ -16,6 +16,7 @@
 #define JSON_TEXT "application/json"
 
 enum RequestStatus {
+	INIT,
 	START_LINE,
 	HEADER,
 	BODY,
