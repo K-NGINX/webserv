@@ -15,5 +15,5 @@ class Response {
 	std::vector<char> body_;
 
 	private:
-		const std::vector<char>& getStatusLine(const std::string& status_code_) const;
+		std::vector<char> getStatusLine(const std::string& status_code_) const;
 };
