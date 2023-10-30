@@ -32,6 +32,7 @@ class Client {
 	void handleFileWriteEvent(int fd);
 	// void handleCgiTimeoutEvent();
 
+	Config config_;
 	ClientStatus status_;
 	int socket_;	// 클라이언트 소켓: 식별자로 사용됨, 소멸자에서 close
 	pid_t pid_;		// CGI 실행을 위한 자식 프로세스 pid
@@ -39,4 +40,5 @@ class Client {
 	Response response_;
 	const ServerBlock* server_;
 	const LocationBlock* location_;
+	ssize_t written;
 };

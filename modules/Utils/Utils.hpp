@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 
 #define RESET "\033[0m"
 #define GRAY "\033[1;90m"
@@ -19,7 +20,16 @@ class Utils {
 
 	static std::string whitespace;
 
+	template <typename T>
+	std::string ntos(T n) {
+	std::stringstream ss;
+	ss << n;
+	return ss.str();
+	}
+
    private:
 	Utils();
 	~Utils();
 };
+
+

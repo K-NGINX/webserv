@@ -1,9 +1,10 @@
 #include "Client.hpp"
+#include <cstdlib>
 
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket)
-	: status_(RECV_REQUEST), socket_(socket), pid_(-1), server_(NULL), location_(NULL) {}
+	: status_(RECV_REQUEST), socket_(socket), pid_(-1), server_(NULL), location_(NULL), written(0) {}
 
 Client::~Client() { close(socket_); }
 
@@ -20,7 +21,20 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 										   // header 세팅
 										   // response 전문 생성
 										   // socket에 response 쓰기
-										   // status_ = WILL_DISCONNECT;
+	std::vector<char> msg;
+	response_.makeResponse(msg);
+	std::cout << "[ RESPONSE ] \n";
+	ssize_t cnt = msg.size() - written;
+	//if (cnt == 0)
+	//	std::cout << "alsejfailwjfleaiwj iflejwalifj ilawefjil!!\n";
+	cnt = write(socket_, msg.data() + written, cnt);
+	//if (cnt == 0 || cnt == -1)
+	//	std::cout << "error !!!\n";
+	written += cnt;
+	for (size_t i = 0; i < msg.size(); i++)
+		std::cout << msg[i];
+	std::cout << std::endl;
+	status_ = WILL_DISCONNECT;
 }
 
 void Client::handleCgiReadEvent(int fd) {
