@@ -1,15 +1,16 @@
 #include "Client.hpp"
+#include <cstdlib>
 
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket)
-	: status_(RECV_REQUEST), socket_(socket), is_keep_alive_(true), pid_(-1), server_(NULL), location_(NULL) {}
+	: status_(RECV_REQUEST), socket_(socket), pid_(-1), server_(NULL), location_(NULL), written(0) {}
 
 Client::~Client() { close(socket_); }
 
 /**
  * @brief keep-alive 옵션을 위해 클라이언트의 연결을 끊지 않고 다시 요청을 받을 수 있는 상태로 만들어줌
- * 
+ *
  */
 void Client::clear() {
 	status_ = RECV_REQUEST;
@@ -38,7 +39,20 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 										   // header 세팅
 										   // response 전문 생성
 										   // socket에 response 쓰기
-										   // status_ = WILL_DISCONNECT;
+	std::vector<char> msg;
+	response_.makeResponse(msg);
+	std::cout << "[ RESPONSE ] \n";
+	ssize_t cnt = msg.size() - written;
+	//if (cnt == 0)
+	//	std::cout << "alsejfailwjfleaiwj iflejwalifj ilawefjil!!\n";
+	cnt = write(socket_, msg.data() + written, cnt);
+	//if (cnt == 0 || cnt == -1)
+	//	std::cout << "error !!!\n";
+	written += cnt;
+	for (size_t i = 0; i < msg.size(); i++)
+		std::cout << msg[i];
+	std::cout << std::endl;
+	status_ = WILL_DISCONNECT;
 }
 
 void Client::handleCgiReadEvent(int fd) {
@@ -72,7 +86,7 @@ void Client::handleFileReadEvent(int fd) {
 		for (int i = 0; i < read_size; i++)
 			response_.body_.push_back(buffer[i]);
 	}
-	for (size_t i = 0; i < response_.body_.size(); i++) /////////////////////
+	for (size_t i = 0; i < response_.body_.size(); i++)
 		std::cout << response_.body_[i];
 	std::cout << std::endl;
 	status_ = SEND_RESPONSE;

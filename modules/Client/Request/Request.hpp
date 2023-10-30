@@ -41,9 +41,9 @@ class Request {
 	std::string method_;
 	std::string uri_;
 	std::string host_;
-	std::string connection_;
 	std::map<std::string, std::string> m_header_; ////////////////////
 	std::vector<char> body_;
 	int body_size_;
 	bool is_chunked;
+	std::string connection_;
 };

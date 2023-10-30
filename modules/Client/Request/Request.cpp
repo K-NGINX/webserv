@@ -6,15 +6,7 @@ Request::Request() : parsing_status_(START_LINE), body_size_(0), is_chunked(fals
 }
 
 void Request::clear() {
-	parsing_status_ = START_LINE;
-	remain_buffer_.clear();
-	method_.clear();
-	uri_.clear();
-	host_.clear();
-	m_header_.clear();
-	body_.clear();
-	body_size_ = 0;
-	is_chunked = false;
+	
 }
 
 void Request::print() {
@@ -97,6 +89,10 @@ void Request::parseHeader(std::vector<char> &line) {
 	std::string key(line.begin(), it);
 	std::string value(it + 1, line.end());
 	Utils::trimWhiteSpace(value);
+	if (value == "") {
+		parsing_status_ = ERROR;
+		return;
+	}
 	// body 파일 제한
 	if (key == "Content-Type" && value != PLAIN_TEXT && value != HTML_TEXT && value != JSON_TEXT) {
 		parsing_status_ = ERROR;
@@ -106,6 +102,8 @@ void Request::parseHeader(std::vector<char> &line) {
 		is_chunked = true;
 	if (key == "Host")
 		host_ = value;
+	if (key == "Connection")
+		connection_ = value;
 	m_header_[key] = value;
 }
 
