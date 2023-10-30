@@ -24,13 +24,13 @@ class Client {
 	Client(int socket);
 	~Client();
 
+	void willDisconnect();
 	void handleSocketReadEvent();
 	void handleSocketWriteEvent();
 	void handleCgiReadEvent(int fd);
 	void handleCgiWriteEvent(int fd);
 	void handleFileReadEvent(int fd);
 	void handleFileWriteEvent(int fd);
-	// void handleCgiTimeoutEvent();
 
 	ClientStatus status_;
 	int socket_;	// 클라이언트 소켓: 식별자로 사용됨, 소멸자에서 close

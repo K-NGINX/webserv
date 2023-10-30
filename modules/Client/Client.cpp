@@ -7,6 +7,10 @@ Client::Client(int socket)
 
 Client::~Client() { close(socket_); }
 
+void Client::willDisconnect() {
+	status_ = WILL_DISCONNECT;
+}
+
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	request_.parse(socket_);
 	if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
