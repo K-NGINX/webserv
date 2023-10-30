@@ -2,6 +2,13 @@
 
 #include "errno.h"
 
+Request::Request() : parsing_status_(START_LINE), host_("no_host"), body_size_(0), is_chunked(false) {
+}
+
+void Request::clear() {
+	
+}
+
 void Request::print() {
 	std::cout << "[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
@@ -11,9 +18,6 @@ void Request::print() {
 		std::cout << "-> DONE" << std::endl;
 	else if (parsing_status_ == ERROR)
 		std::cout << "-> ERROR" << std::endl;
-}
-
-Request::Request() : parsing_status_(START_LINE), host_("no_host"), body_size_(0), is_chunked(false) {
 }
 
 static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {

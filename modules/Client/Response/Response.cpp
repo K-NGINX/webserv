@@ -3,6 +3,10 @@
 Response::Response()
 	: status_code_("200") {}
 
+void Response::clear() {
+	
+}
+
 std::vector<char> Response::getStatusLine(const std::string& status_code_) const {
 	static std::map<std::string, std::string> m_status;
 	// 한번만 실행됨 !

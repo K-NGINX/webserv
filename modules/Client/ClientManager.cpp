@@ -10,16 +10,22 @@ ClientManager &ClientManager::getInstance() {
 }
 
 void ClientManager::disconnectClient(Client *client) {
+	if (client->is_keep_alive_)
+		return client->clearStatus();
+
 	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
+	// 배열에서 삭제
 	std::vector<Client *>::iterator client_it = v_client_.begin();
 	while (client_it != v_client_.end()) {
 		if ((*client_it)->socket_ == client->socket_) {
 			v_client_.erase(client_it);
-			delete client;
 			break;
 		}
 		client_it++;
 	}
+	// 이벤트 해제 후 객체 삭제
+	ServerManager::getInstance().kqueue_.unregisterWriteEvent(client->socket_);
+	delete client;
 }
 
 void ClientManager::handleEvent(struct kevent &event) {
