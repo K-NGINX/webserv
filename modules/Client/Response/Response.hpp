@@ -27,7 +27,7 @@ class Response {
 };
 
 template <typename T>
-std::string ntos(T number) {
+std::string ntos(T number) { //히익
   std::stringstream ss;
   ss << number;
   return ss.str();
