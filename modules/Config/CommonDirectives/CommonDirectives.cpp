@@ -118,7 +118,7 @@ void CommonDirectives::setReturn(std::string& value) {
 
 void CommonDirectives::setRoot(std::string& value) {
 	Utils::trimWhiteSpace(value);
-	root_ += value;
+	root_ = value;
 }
 
 bool CommonDirectives::isErrorCode(const std::string& error_code) const {

@@ -17,7 +17,7 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	// 에러 페이지에 대한 fd 읽기 이벤트 등록
 	int fd = open(error_page.c_str(), O_RDONLY);
 	if (fd == -1)	 // 실패했다면 클라이언트 연결 끊어주기
-		return client.willDisconnect();
+		return client.setStatus(WILL_DISCONNECT);
 	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
 	client.status_ = READ_FILE;
@@ -52,7 +52,10 @@ void RequestHandler::handleDelete(Client &client) {
 void RequestHandler::handleRequest(Client &client) {
 	Request &request = client.request_;
 	request.print();
-	if (request.parsing_status_ == ERROR) return handleError(client, "400");	// 잘못된 문법의 요청
+	if (request.parsing_status_ == ERROR)	 // 잘못된 문법의 요청
+		return handleError(client, "400");
+	if (request.connection_ == "close")
+		client.is_keep_alive_ = false;
 	// 요청에 사용할 서버 블록과 위치 블록 찾기
 	client.server_ = ConfigManager::getInstance().getConfig().findMatchingServerBlock(request.host_);
 	client.location_ = client.server_->findMatchingLocationBlock(request.uri_);

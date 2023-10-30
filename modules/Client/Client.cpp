@@ -11,16 +11,18 @@ Client::~Client() { close(socket_); }
  * @brief keep-alive 옵션을 위해 클라이언트의 연결을 끊지 않고 다시 요청을 받을 수 있는 상태로 만들어줌
  * 
  */
-void Client::clearStatus() {
+void Client::clear() {
 	status_ = RECV_REQUEST;
 	pid_ = -1;
+	request_.clear();
+	response_.clear();
 	server_ = NULL;
 	location_ = NULL;
 	ServerManager::getInstance().kqueue_.registerReadEvent(socket_, this);
 }
 
-void Client::willDisconnect() {
-	status_ = WILL_DISCONNECT;
+void Client::setStatus(const ClientStatus& status) {
+	status_ = status;
 }
 
 void Client::handleSocketReadEvent() {	  // request가 왔다
@@ -57,22 +59,20 @@ void Client::handleCgiWriteEvent(int fd) {
 }
 
 void Client::handleFileReadEvent(int fd) {
-	std::cout << "handleFileReadEvent" << std::endl;
 	// 파일 크기만큼 response 본문에 저장
 	// 읽기 실패 -> 500
 	int read_size = 0;
 	char buffer[BUFFER_SIZE];
 	while (true) {
 		read_size = read(fd, buffer, BUFFER_SIZE);
-		if (read_size == -1) {
-			this->response_.status_code_ = "500";
+		if (read_size == -1)
 			return RequestHandler::handleError(*this, "500");
-		} else if (read_size == 0)
+		else if (read_size == 0)
 			break;
 		for (int i = 0; i < read_size; i++)
-			this->response_.body_.push_back(buffer[i]);
+			response_.body_.push_back(buffer[i]);
 	}
-	for (size_t i = 0; i < response_.body_.size(); i++)
+	for (size_t i = 0; i < response_.body_.size(); i++) /////////////////////
 		std::cout << response_.body_[i];
 	std::cout << std::endl;
 	status_ = SEND_RESPONSE;

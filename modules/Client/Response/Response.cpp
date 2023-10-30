@@ -4,7 +4,9 @@ Response::Response()
 	: status_code_("200") {}
 
 void Response::clear() {
-	
+	status_code_ = "200";
+	m_header_.clear();
+	body_.clear();
 }
 
 std::vector<char> Response::getStatusLine(const std::string& status_code_) const {

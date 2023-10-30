@@ -24,8 +24,8 @@ class Client {
 	Client(int socket);
 	~Client();
 
-	void clearStatus();
-	void willDisconnect();
+	void clear();
+	void setStatus(const ClientStatus& status);
 	void handleSocketReadEvent();
 	void handleSocketWriteEvent();
 	void handleCgiReadEvent(int fd);

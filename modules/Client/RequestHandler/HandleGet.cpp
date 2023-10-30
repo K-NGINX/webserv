@@ -10,7 +10,7 @@ static bool isIndex(Client& client, std::string& resource) {
 	const std::vector<std::string>& v_index = client.location_->common_directives_.getIndexVec();
 	// index 배열을 순회하면서 존재하는 파일이 있으면 true 리턴
 	for (size_t i = 0; i < v_index.size(); i++) {
-		std::string temp = resource + v_index[i];
+		std::string temp = resource + "/" + v_index[i];
 		if (access(temp.c_str(), F_OK) == 0) {
 			resource = temp;
 			return true;
@@ -52,6 +52,11 @@ void RequestHandler::handleGet(Client& client) {
 	const CommonDirectives& common_direcvties = client.location_->common_directives_;
 	std::string root = ConfigManager::getInstance().getProgramPath() + common_direcvties.getRoot();
 	std::string resource = root + client.request_.uri_;
+	if (resource.back() == '/')
+		resource.pop_back();
+	std::cout << "\nprogram path : " << ConfigManager::getInstance().getProgramPath() << std::endl;
+	std::cout << "root : " << common_direcvties.getRoot() << std::endl;
+	std::cout << "resource : " << resource << std::endl;
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
 	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex())
 		return handleAutoindex(client, resource);
