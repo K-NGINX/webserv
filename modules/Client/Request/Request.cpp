@@ -2,11 +2,11 @@
 
 #include "errno.h"
 
-Request::Request() : parsing_status_(START_LINE), host_("no_host"), body_size_(0), is_chunked(false) {
+Request::Request() : parsing_status_(START_LINE), body_size_(0), is_chunked(false) {
 }
 
 void Request::clear() {
-	
+
 }
 
 void Request::print() {
@@ -89,6 +89,10 @@ void Request::parseHeader(std::vector<char> &line) {
 	std::string key(line.begin(), line.begin() + sep_idx);
 	std::string value(line.begin() + sep_idx + 1, line.end());
 	Utils::trimWhiteSpace(value);
+	if (value == "") {
+		parsing_status_ = ERROR;
+		return;
+	}
 	// body 파일 제한
 	if (key == "Content-Type" && value != PLAIN_TEXT && value != HTML_TEXT && value != JSON_TEXT) {
 		parsing_status_ = ERROR;
@@ -98,6 +102,8 @@ void Request::parseHeader(std::vector<char> &line) {
 		is_chunked = true;
 	if (key == "Host")
 		host_ = value;
+	if (key == "Connection")
+		connection_ = value;
 	m_header_[key] = value;
 }
 
@@ -118,7 +124,7 @@ void Request::parseBody(std::vector<char> &line) {
 }
 
 void Request::checkValidRequest() {
-	if (host_ == "no_host") {
+	if (host_ == "") {
 		parsing_status_ = ERROR;
 		return;
 	}

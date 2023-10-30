@@ -9,7 +9,7 @@ Client::~Client() { close(socket_); }
 
 /**
  * @brief keep-alive 옵션을 위해 클라이언트의 연결을 끊지 않고 다시 요청을 받을 수 있는 상태로 만들어줌
- * 
+ *
  */
 void Client::clearStatus() {
 	status_ = RECV_REQUEST;
@@ -72,9 +72,6 @@ void Client::handleFileReadEvent(int fd) {
 		for (int i = 0; i < read_size; i++)
 			this->response_.body_.push_back(buffer[i]);
 	}
-	for (size_t i = 0; i < response_.body_.size(); i++)
-		std::cout << response_.body_[i];
-	std::cout << std::endl;
 	status_ = SEND_RESPONSE;
 }
 
