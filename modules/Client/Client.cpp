@@ -10,7 +10,7 @@ Client::~Client() { close(socket_); }
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	request_.parse(socket_);
 	if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
-		ServerManager::getInstance().kqueue_.unregisterReadEvent(socket_);
+		ServerManager::getInstance().kqueue_.unregisterReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
 		RequestHandler::handleRequest(*this);
 	}
 }

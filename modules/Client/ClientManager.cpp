@@ -10,7 +10,6 @@ ClientManager &ClientManager::getInstance() {
 }
 
 void ClientManager::disconnectClient(Client *client) {
-	(void)client;
 	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
 	std::vector<Client *>::iterator client_it = v_client_.begin();
 	while (client_it != v_client_.end()) {
