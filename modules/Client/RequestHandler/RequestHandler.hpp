@@ -4,7 +4,7 @@
 
 #include "../Client.hpp"
 
-#define DEFAULT_ERROR_PAGE "/var/www/html/default_error.html"
+#define DEFAULT_ERROR_PAGE "./var/www/html/default_error.html"
 
 class RequestHandler {
    public:
