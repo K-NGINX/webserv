@@ -34,7 +34,7 @@ static void handleAutoindex(Client& client, const std::string& resource) {
 	}
     closedir(dp);
     autoindex_html += "</table></ul></body></html>";
-
+	// 응답 body에 써주기
 	for (size_t i = 0; i < autoindex_html.size(); i++)
 		client.response_.body_.push_back(autoindex_html[i]);
 	client.status_ = SEND_RESPONSE;
