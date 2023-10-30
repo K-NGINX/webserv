@@ -67,8 +67,6 @@ void RequestHandler::handleRequest(Client &client) {
 		return handleCgi(client);
 	else if (request.method_ == "GET")
 		return handleGet(client);
-	else if (request.method_ == "POST")
-		return handlePost(client);
 	else if (request.method_ == "DELETE")
 		return handleDelete(client);
 }
