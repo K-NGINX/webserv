@@ -2,6 +2,13 @@
 
 #include "errno.h"
 
+Request::Request() : parsing_status_(START_LINE), body_size_(0), is_chunked(false) {
+}
+
+void Request::clear() {
+
+}
+
 void Request::print() {
 	std::cout << "[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
@@ -11,9 +18,6 @@ void Request::print() {
 		std::cout << "-> DONE" << std::endl;
 	else if (parsing_status_ == ERROR)
 		std::cout << "-> ERROR" << std::endl;
-}
-
-Request::Request() : parsing_status_(START_LINE), host_("no_host"), body_size_(0) {
 }
 
 static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
@@ -85,13 +89,21 @@ void Request::parseHeader(std::vector<char> &line) {
 	std::string key(line.begin(), line.begin() + sep_idx);
 	std::string value(line.begin() + sep_idx + 1, line.end());
 	Utils::trimWhiteSpace(value);
+	if (value == "") {
+		parsing_status_ = ERROR;
+		return;
+	}
 	// body 파일 제한
 	if (key == "Content-Type" && value != PLAIN_TEXT && value != HTML_TEXT && value != JSON_TEXT) {
 		parsing_status_ = ERROR;
 		return;
 	}
+	if (key == "Transfer-Encoding" && value == "chunked")
+		is_chunked = true;
 	if (key == "Host")
 		host_ = value;
+	if (key == "Connection")
+		connection_ = value;
 	m_header_[key] = value;
 }
 
@@ -100,12 +112,6 @@ void Request::parseBody(std::vector<char> &line) {
 		parsing_status_ = ERROR;
 		return;
 	}
-	if (m_header_.find("transfer-encoding") != m_header_.end() && m_header_["transfer-encoding"] == "chunked") {
-		// chunked body parsing
-		// chunked size가 -1이면 아직 size를 못읽었다는 뜻
-		return;
-	}
-
 	// for (size_t i = 0; i < line.size(); i++)
 	// 	std::cout << line[i];
 	// std::cout << std::endl;
@@ -118,7 +124,7 @@ void Request::parseBody(std::vector<char> &line) {
 }
 
 void Request::checkValidRequest() {
-	if (host_ == "no_host") {
+	if (host_ == "") {
 		parsing_status_ = ERROR;
 		return;
 	}
@@ -128,11 +134,14 @@ void Request::checkValidRequest() {
 	}
 	// post일때 유효한 request일 경우
 	if (method_ == "POST") {
-		if (m_header_.find("content-length") != m_header_.end() &&
-			body_size_ == Utils::stoi(m_header_["content-length"])) {
-			parsing_status_ = DONE;
+		// chunked 일때 분기도 추가
+		if (m_header_.find("content-length") != m_header_.end()
+			&& body_size_ != Utils::stoi(m_header_["content-length"])) {
+			parsing_status_ = ERROR;
 			return;
 		}
+		parsing_status_ = DONE;
+		return;
 	} else if ((method_ == "GET" || method_ == "DELETE") && body_size_ == 0) {
 		parsing_status_ = DONE;
 		return;
@@ -140,12 +149,24 @@ void Request::checkValidRequest() {
 	parsing_status_ = ERROR;
 }
 
+void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line) {
+	std::string s_size(size.begin(), size.end());
+	size_t line_size = Utils::stoi(s_size);
+	if (line_size != line.size()) {
+		parsing_status_ = ERROR;
+		return;
+	}
+	line.push_back('\r');
+	line.push_back('\n');
+	body_size_ += line_size;
+	for (size_t i = 0; i < line.size(); i++)
+		body_.push_back(line[i]);
+}
+
 void Request::parse(int fd) {
-	//   char buffer[BUFFER_SIZE] = "POST /index.html
-	//   HTTP/1.1\r\nHost:www.example.com\r\ncontent-length:8\r\n\r\nbody\r\nbody\r\n\r\n";
-	//   char buffer[BUFFER_SIZE] =
-	//       "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n";
-	// 	  (void)fd;
+	// (void)fd;
+	// char buffer[BUFFER_SIZE] = "POST /index.html HTTP/1.1\r\nHost:www.example.com\r\nTransfer-Encoding:chunked\r\n\r\n4\r\nbody\r\n4\r\nbody\r\n";
+	//   char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n";
 	char buffer[BUFFER_SIZE];
 	int read_size = read(fd, buffer, BUFFER_SIZE);
 	if (read_size == 0)	   // EOF
@@ -171,8 +192,16 @@ void Request::parse(int fd) {
 				parseHeader(v_splited_line[i]);
 				break;
 			case BODY:
-				// chunked면 유형 맞는지 체크
-				parseBody(v_splited_line[i]);
+				if (is_chunked) {
+					if (i + 1 >= v_splited_line.size()) {
+						parsing_status_ = ERROR;
+						return;
+					}
+					parseChunkedBody(v_splited_line[i], v_splited_line[i + 1]);
+					i++;
+				}
+				else
+					parseBody(v_splited_line[i]);
 				break;
 			default:
 				return;
@@ -185,5 +214,5 @@ void Request::parse(int fd) {
 //   req.parse(0);
 
 //   req.checkValidRequest();
-//   printRequest(req);
+//   req.print();
 // }

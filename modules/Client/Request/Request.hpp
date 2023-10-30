@@ -26,11 +26,13 @@ enum RequestStatus {
 class Request {
    public:
 	Request();
+	void clear();
 
 	void parse(int fd);
 	void parseStartLine(std::vector<char> &line);
 	void parseHeader(std::vector<char> &line);
 	void parseBody(std::vector<char> &line);
+	void parseChunkedBody(std::vector<char> &size, std::vector<char> &line);
 	void checkValidRequest();
 	void print();
 
@@ -42,4 +44,6 @@ class Request {
 	std::map<std::string, std::string> m_header_;
 	std::vector<char> body_;
 	int body_size_;
+	bool is_chunked;
+	std::string connection_;
 };

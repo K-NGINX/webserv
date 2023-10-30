@@ -5,30 +5,23 @@ RequestHandler::RequestHandler() {}
 RequestHandler::~RequestHandler() {}
 
 void RequestHandler::handleError(Client &client, const std::string &error_code) {
-	// 에러 코드 설정
 	client.response_.status_code_ = error_code;
 	// 에러 페이지 설정
 	std::string error_page = DEFAULT_ERROR_PAGE;	// 기본 에러 페이지
 	if (client.location_ != NULL) {
 		const CommonDirectives &common_directives = client.location_->common_directives_;
-		if (common_directives.isErrorCode(error_code))	  // 사용자 정의 에러 페이지
-			error_page = common_directives.getRoot() + common_directives.getErrorPage();
+		if (common_directives.isErrorCode(error_code))
+			error_page = common_directives.getRoot() + common_directives.getErrorPage();	// 사용자 정의 에러 페이지
 	}
+	error_page = ConfigManager::getInstance().getProgramPath() + error_page;
+	// 에러 페이지에 대한 fd 읽기 이벤트 등록
 	int fd = open(error_page.c_str(), O_RDONLY);
-	if (fd == -1) throw std::runtime_error("error page handle failed");
+	if (fd == -1)	 // 실패했다면 클라이언트 연결 끊어주기
+		return client.willDisconnect();
 	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }
-
-// void RequestHandler::handleRedirection(Client& client) {
-//     // status_code를 return_code로 설정
-//     // 텍스트, 파일이라면 내용을 본문에 담고 헤더에 content-length 설정해서 보냄
-//     // uri라면 location 헤더에 담아 보냄
-//     // 헤더에 return code page 추가
-//     // client.response.v_data_ 채워준 후 ?
-//     client.status_ = SEND_RESPONSE;
-// }
 
 // 아직 모호함 ... :(
 void RequestHandler::handleCgi(Client &client) {
@@ -40,12 +33,6 @@ void RequestHandler::handleCgi(Client &client) {
 	//  - 자식 : CGI 프로그램 execve
 	//  - 부모 : waitpid
 	//  - GET 요청이면 READ_CGI
-}
-
-void RequestHandler::handlePost(Client &client) {
-	//  - 기존 파일 : 해당 파일 fd write 이벤트 등록 (201)
-	//  - 신규 파일 : 파일 fd write 이벤트 등록
-	client.status_ = WRITE_FILE;
 }
 
 void RequestHandler::handleDelete(Client &client) {
@@ -80,8 +67,6 @@ void RequestHandler::handleRequest(Client &client) {
 		return handleCgi(client);
 	else if (request.method_ == "GET")
 		return handleGet(client);
-	else if (request.method_ == "POST")
-		return handlePost(client);
 	else if (request.method_ == "DELETE")
 		return handleDelete(client);
 }

@@ -8,6 +8,22 @@ Client::Client(int socket)
 
 Client::~Client() { close(socket_); }
 
+/**
+ * @brief keep-alive 옵션을 위해 클라이언트의 연결을 끊지 않고 다시 요청을 받을 수 있는 상태로 만들어줌
+ *
+ */
+void Client::clearStatus() {
+	status_ = RECV_REQUEST;
+	pid_ = -1;
+	server_ = NULL;
+	location_ = NULL;
+	ServerManager::getInstance().kqueue_.registerReadEvent(socket_, this);
+}
+
+void Client::willDisconnect() {
+	status_ = WILL_DISCONNECT;
+}
+
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	request_.parse(socket_);
 	if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
@@ -64,15 +80,12 @@ void Client::handleFileReadEvent(int fd) {
 		read_size = read(fd, buffer, BUFFER_SIZE);
 		if (read_size == -1) {
 			this->response_.status_code_ = "500";
-			return;
+			return RequestHandler::handleError(*this, "500");
 		} else if (read_size == 0)
 			break;
 		for (int i = 0; i < read_size; i++)
 			this->response_.body_.push_back(buffer[i]);
 	}
-	for (size_t i = 0; i < response_.body_.size(); i++)
-		std::cout << response_.body_[i];
-	std::cout << std::endl;
 	status_ = SEND_RESPONSE;
 }
 
