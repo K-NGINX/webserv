@@ -9,6 +9,7 @@
 class Response {
    public:
 	Response();
+	void clear();
 
 	std::string status_code_;
 	std::map<std::string, std::string> m_header_;

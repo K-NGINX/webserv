@@ -26,6 +26,7 @@ enum RequestStatus {
 class Request {
    public:
 	Request();
+	void clear();
 
 	void parse(int fd);
 	void parseStartLine(std::vector<char> &line);

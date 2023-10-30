@@ -3,9 +3,21 @@
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket)
-	: status_(RECV_REQUEST), socket_(socket), pid_(-1), server_(NULL), location_(NULL) {}
+	: status_(RECV_REQUEST), socket_(socket), is_keep_alive_(true), pid_(-1), server_(NULL), location_(NULL) {}
 
 Client::~Client() { close(socket_); }
+
+/**
+ * @brief keep-alive 옵션을 위해 클라이언트의 연결을 끊지 않고 다시 요청을 받을 수 있는 상태로 만들어줌
+ * 
+ */
+void Client::clearStatus() {
+	status_ = RECV_REQUEST;
+	pid_ = -1;
+	server_ = NULL;
+	location_ = NULL;
+	ServerManager::getInstance().kqueue_.registerReadEvent(socket_, this);
+}
 
 void Client::willDisconnect() {
 	status_ = WILL_DISCONNECT;
