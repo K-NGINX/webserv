@@ -45,4 +45,5 @@ class Request {
 	std::vector<char> body_;
 	int body_size_;
 	bool is_chunked;
+	std::string connection_;
 };
