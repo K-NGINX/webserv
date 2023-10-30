@@ -54,9 +54,6 @@ void RequestHandler::handleGet(Client& client) {
 	std::string resource = root + client.request_.uri_;
 	if (resource.back() == '/')
 		resource.pop_back();
-	std::cout << "\nprogram path : " << ConfigManager::getInstance().getProgramPath() << std::endl;
-	std::cout << "root : " << common_direcvties.getRoot() << std::endl;
-	std::cout << "resource : " << resource << std::endl;
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
 	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex())
 		return handleAutoindex(client, resource);

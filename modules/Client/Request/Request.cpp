@@ -184,9 +184,8 @@ void Request::parse(int fd) {
 		parsing_status_ = ERROR;
 	if (parsing_status_ == ERROR || parsing_status_ == DONE)
 		return;
-	std::cout << buffer;	///////////////////////
 	// remainbuf에 이어붙힌다.
-	for (size_t i = 0; buffer[i]; i++)
+	for (int i = 0; i < read_size; i++)
 		remain_buffer_.push_back(buffer[i]);
 
 	std::vector<char> new_remain_buffer = getRemainBuffer(remain_buffer_);
