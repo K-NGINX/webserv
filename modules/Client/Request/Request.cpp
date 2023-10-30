@@ -215,6 +215,7 @@ void Request::parse(int fd) {
 				return;
 		}
 	}
+	checkValidRequest();///////////////////
 }
 
 // int main() {
