@@ -66,7 +66,7 @@ void Client::handleFileReadEvent(int fd) {
 		read_size = read(fd, buffer, BUFFER_SIZE);
 		if (read_size == -1) {
 			this->response_.status_code_ = "500";
-			return;
+			return RequestHandler::handleError(*this, "500");
 		} else if (read_size == 0)
 			break;
 		for (int i = 0; i < read_size; i++)
