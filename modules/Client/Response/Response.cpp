@@ -3,7 +3,7 @@
 Response::Response()
 	: status_code_("200") {}
 
-const std::vector<char>& Response::getStatusMessage(const std::string& status_code_) const {
+const std::vector<char>& Response::getStatusLine(const std::string& status_code_) const {
 	static std::map<std::string, std::string> m_status;
 	// 한번만 실행됨 !
 	if (m_status.empty()) {
@@ -18,6 +18,6 @@ const std::vector<char>& Response::getStatusMessage(const std::string& status_co
 		m_status["500"] = "Internal Server Error";
 	}
 
-	std::string status_message = m_status[status_code_];
-	return std::vector<char>(status_message.begin(), status_message.end());
+	std::string status_line = status_code_ + " " + m_status[status_code_] + " " + VERSION;
+	return std::vector<char>(status_line.begin(), status_line.end());
 }
