@@ -29,9 +29,9 @@ static void handleAutoindex(Client& client, const std::string& resource) {
 	if (dp != NULL) {
 		while ((entry = readdir(dp))) {
 			std::string entry_name = entry->d_name;
-			std::string entry_path = resource + "/" + entry_name;
 			if (entry_name == "." || entry_name == "..") continue;
-			autoindex_html += "<tr><td><a href='" + entry_path + "'>" + entry_name + "</a></td></tr>";
+			// 각 파일에 대한 링크는 요청한 URL에 대한 상대 경로
+			autoindex_html += "<tr><td><a href='" + entry_name + "'>" + entry_name + "</a></td></tr>";
 		}
     	closedir(dp);
 	}
