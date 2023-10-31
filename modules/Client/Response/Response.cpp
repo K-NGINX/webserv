@@ -48,7 +48,7 @@ void Response::makeHeaderLine(bool is_keep_alive) {
 	m_header_["Date"] = getResponseDate(NULL);
 	if (body_.size() != 0)
 		m_header_["Content-Length"] = ntos(body_.size());
-	m_header_["Connection"] = is_keep_alive == true ? "keep-alive" : "closed";
+	m_header_["Connection"] = is_keep_alive == true ? "keep-alive" : "Closed";
 }
 
 std::string Response::getResponseDate(std::time_t *t) {

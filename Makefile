@@ -1,6 +1,6 @@
 # compile options
 NAME		= webserv
-CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -g3
+CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -g3 -fsanitize=address
 RM			= rm -f
 
 # source files
