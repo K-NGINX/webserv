@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false) {}
+Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false), is_chunked_body_end(false) {}
 
 void Request::clear() {
 	parsing_status_ = INIT;
@@ -12,6 +12,7 @@ void Request::clear() {
 	body_.clear();
 	body_size_ = 0;
 	is_chunked = false;
+	is_chunked_body_end = false;
 	connection_.clear();
 }
 
@@ -130,11 +131,7 @@ void Request::parseBody(std::vector<char> &line) {
 }
 
 void Request::checkValidRequest() {
-	if (host_ == "") {
-		parsing_status_ = ERROR;
-		return;
-	}
-	if (remain_buffer_.size() != 0 || parsing_status_ != BODY) {
+	if (host_ == "" || remain_buffer_.size() != 0 || parsing_status_ != BODY || (is_chunked && is_chunked_body_end == false)) {	   // chunked인데 end가 아니거나
 		parsing_status_ = ERROR;
 		return;
 	}
@@ -166,6 +163,8 @@ void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line)
 	body_size_ += line_size;
 	for (size_t i = 0; i < line.size(); i++)
 		body_.push_back(line[i]);
+	if (body_size_ == 0)
+		is_chunked_body_end = true;
 }
 
 void Request::parse(int fd) {
@@ -202,7 +201,7 @@ void Request::parse(int fd) {
 				break;
 			case BODY:
 				if (is_chunked) {
-					if (i + 1 >= v_splited_line.size()) {
+					if (is_chunked_body_end == true || i + 1 >= v_splited_line.size()) {
 						parsing_status_ = ERROR;
 						return;
 					}
@@ -214,6 +213,9 @@ void Request::parse(int fd) {
 			default:
 				return;
 		}
+	}	 // chuneked면 ㅇ
+	if (parsing_status_ == BODY && remain_buffer_.size() == 0) {
+		checkValidRequest();	///////////////////
 	}
 }
 
