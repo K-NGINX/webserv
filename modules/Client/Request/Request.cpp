@@ -17,14 +17,14 @@ void Request::clear() {
 }
 
 void Request::print() {
-	std::cout << "[ REQUEST ]" << std::endl;
+	std::cout << GRAY << "\n[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
 	std::cout << "Host: " << host_ << std::endl;
 	std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
-		std::cout << "-> DONE" << std::endl;
+		std::cout << "-> DONE" << RESET << std::endl;
 	else if (parsing_status_ == ERROR)
-		std::cout << "-> ERROR" << std::endl;
+		std::cout << "-> ERROR" << RESET << std::endl;
 }
 
 static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
@@ -101,7 +101,7 @@ void Request::parseHeader(std::vector<char> &line) {
 		return;
 	}
 	// body 파일 제한
-	if (key == "Content-Type" && value != PLAIN_TEXT && value != HTML_TEXT && value != JSON_TEXT) {
+	if (key == "Content-Type" && Utils::checkMIMEType(value) == false) {
 		parsing_status_ = ERROR;
 		return;
 	}

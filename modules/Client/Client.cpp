@@ -44,16 +44,13 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 										   // socket에 response 쓰기
 	std::vector<char> msg;
 	response_.makeResponse(msg, is_keep_alive_);
-	std::cout << "[ RESPONSE ] \n";
 	ssize_t cnt = msg.size() - written_;
+	cnt = write(socket_, msg.data() + written_, cnt);
+	written_ += cnt;
 	// if (cnt == 0)
 	//	std::cout << "alsejfailwjfleaiwj iflejwalifj ilawefjil!!\n";
-	cnt = write(socket_, msg.data() + written_, cnt);
 	// if (cnt == 0 || cnt == -1)
 	//	std::cout << "error !!!\n";
-	written_ += cnt;
-	for (ssize_t i = 0; i < cnt; i++)
-		std::cout << msg[i];
 	status_ = WILL_DISCONNECT;
 }
 
@@ -88,9 +85,9 @@ void Client::handleFileReadEvent(int fd) {
 		for (int i = 0; i < read_size; i++)
 			response_.body_.push_back(buffer[i]);
 	}
-	for (size_t i = 0; i < response_.body_.size(); i++)
-		std::cout << response_.body_[i];
-	std::cout << std::endl;
+	// for (size_t i = 0; i < response_.body_.size(); i++) /////////////////
+	// 	std::cout << response_.body_[i];
+	// std::cout << std::endl;
 	status_ = SEND_RESPONSE;
 }
 

@@ -51,7 +51,7 @@ void RequestHandler::handleDelete(Client &client) {
  */
 void RequestHandler::handleRequest(Client &client) {
 	Request &request = client.request_;
-	request.print();
+	request.print(); ////////////////////////
 	if (request.parsing_status_ == ERROR)	 // 잘못된 문법의 요청
 		return handleError(client, "400");
 	if (request.connection_ == "close")

@@ -1,6 +1,16 @@
 #include "Utils.hpp"
 
 std::string Utils::whitespace = " \r\n\t\v\f";
+// MIME
+std::map<std::string, std::string> initializeMIMEMap() {
+	std::map<std::string, std::string> m_mime;
+	m_mime["html"] = "text/html";
+	m_mime["png"] = "image/png";
+	m_mime["ico"] = "image/x-icon";
+
+	return m_mime;
+}
+std::map<std::string, std::string> Utils::m_mime = initializeMIMEMap();
 
 Utils::Utils() {}
 
@@ -22,6 +32,23 @@ void Utils::trimWhiteSpace(std::string& str) {
 	if (pos_end != std::string::npos) {
 		str.erase(pos_end + 1);
 	}
+}
+
+std::string Utils::getMIMEType(const std::string& file_type) {
+	if (m_mime.find(file_type) != m_mime.end())
+		return m_mime[file_type];
+	else
+		return "";
+}
+
+bool Utils::checkMIMEType(const std::string& mime_type) {
+	std::map<std::string, std::string>::iterator mime_it = m_mime.begin();
+	while (mime_it != m_mime.end()) {
+		if (mime_it->second == mime_type)
+			return true;
+		mime_it++;
+	}
+	return false;
 }
 
 int Utils::stoi(std::string str) {
