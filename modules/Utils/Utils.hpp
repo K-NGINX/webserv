@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <map>
 #include <sstream>
 
 #define RESET "\033[0m"
@@ -19,6 +20,7 @@ class Utils {
 	static int stoi(std::string str);
 
 	static std::string whitespace;
+	static std::map<std::string, std::string> mime;
 
 	template <typename T>
 	std::string ntos(T n) {

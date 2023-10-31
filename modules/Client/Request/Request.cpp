@@ -27,6 +27,16 @@ void Request::print() {
 		std::cout << "-> ERROR" << RESET << std::endl;
 }
 
+static bool checkContentType(const std::string& value) {
+    std::map<std::string, std::string>::iterator mime_it = Utils::mime.begin();
+    while (mime_it != Utils::mime.end()) {
+        if (mime_it->second == value)
+            return true;
+        mime_it++;
+    }
+    return false;
+}
+
 static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
 	std::vector<std::vector<char> > res;
 	std::vector<char> temp;
@@ -101,7 +111,7 @@ void Request::parseHeader(std::vector<char> &line) {
 		return;
 	}
 	// body 파일 제한
-	if (key == "Content-Type" && value != PLAIN_TEXT && value != HTML_TEXT && value != JSON_TEXT) {
+	if (key == "Content-Type" && checkContentType(value) == false) {
 		parsing_status_ = ERROR;
 		return;
 	}

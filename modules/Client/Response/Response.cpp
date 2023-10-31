@@ -7,8 +7,26 @@ void Response::clear() {
 	m_header_.clear();
 	body_.clear();
 }
+
+void Response::print() {
+	std::cout << GRAY << "[ RESPONSE ]" << std::endl;
+	std::map<std::string, std::string>::iterator header_it = m_header_.begin();
+	std::vector<char> status_line = getStatusLine();
+	std::cout << std::string(status_line.begin(), status_line.end()) << std::endl;
+	while (header_it != m_header_.end()) {
+		std::cout << header_it->first << ": " << header_it->second << std::endl;
+		header_it++;
+	}
+}
+
+void Response::setContentType(const std::string& resource) {
+	std::string file_type = resource.substr(resource.find('.') + 1);
+	// Request에서 파일 타입 제한을 이미 했기 때문에 여기로 흘러온 이상 무조건 있다고 판단
+	content_type_ = Utils::mime[file_type];
+}
+
 void Response::makeResponse(std::vector<char> &msg, bool is_keep_alive) {
-	std::vector<char> status_line = getStatusLine(status_code_);
+	std::vector<char> status_line = getStatusLine();
 	std::vector<char> rn;
 	rn.push_back('\r');
 	rn.push_back('\n');
@@ -23,9 +41,11 @@ void Response::makeResponse(std::vector<char> &msg, bool is_keep_alive) {
 	msg.insert(msg.end(), header.begin(), header.end());
 	msg.insert(msg.end(), rn.begin(), rn.end());
 	msg.insert(msg.end(), body_.begin(), body_.end());
+
+	print();
 }
 
-std::vector<char> Response::getStatusLine(const std::string &status_code_) const {
+std::vector<char> Response::getStatusLine() const {
 	static std::map<std::string, std::string> m_status;
 	// 한번만 실행됨 !
 	if (m_status.empty()) {
@@ -48,6 +68,7 @@ void Response::makeHeaderLine(bool is_keep_alive) {
 	m_header_["Date"] = getResponseDate(NULL);
 	if (body_.size() != 0)
 		m_header_["Content-Length"] = ntos(body_.size());
+	m_header_["Content-Type"] = content_type_;
 	m_header_["Connection"] = is_keep_alive == true ? "keep-alive" : "Closed";
 }
 

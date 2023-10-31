@@ -11,9 +11,9 @@
 
 #define BUFFER_SIZE 1024
 #define VERSION "HTTP/1.1"
-#define PLAIN_TEXT "text/plain"
-#define HTML_TEXT "text/html"
-#define JSON_TEXT "application/json"
+// #define PLAIN_TEXT "text/plain"
+// #define HTML_TEXT "text/html"
+// #define JSON_TEXT "application/json"
 
 enum RequestStatus {
 	INIT,

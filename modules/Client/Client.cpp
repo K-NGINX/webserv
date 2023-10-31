@@ -51,11 +51,6 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 	//	std::cout << "alsejfailwjfleaiwj iflejwalifj ilawefjil!!\n";
 	// if (cnt == 0 || cnt == -1)
 	//	std::cout << "error !!!\n";
-
-	std::cout << GRAY << "\n[ RESPONSE ]" << std::endl;; ///////////////
-	for (ssize_t i = 0; i < cnt; i++)
-		std::cout << msg[i];
-	std::cout << RESET << std::endl;
 	status_ = WILL_DISCONNECT;
 }
 

@@ -1,8 +1,14 @@
 #include "Utils.hpp"
 
 std::string Utils::whitespace = " \r\n\t\v\f";
+std::map<std::string, std::string> Utils::mime;
 
-Utils::Utils() {}
+Utils::Utils() {
+	// MIME 타입
+	mime["html"] = "text/html";
+	mime["png"] = "image/png";
+	mime["ico"] = "image/x-icon";
+}
 
 Utils::~Utils() {}
 
