@@ -42,6 +42,13 @@ void ServerManager::init() {
 		}
 		v_server_socket_.push_back(server_socket);
 
+		int enable = 1;
+		if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) == -1) {
+			closeAllServerSocket();
+			freeaddrinfo(host_info);	// 메모리 해제
+			throw std::runtime_error("Setsockopt error");
+		}
+
 		if (bind(server_socket, host_info->ai_addr, host_info->ai_addrlen) == -1) {
 			closeAllServerSocket();
 			freeaddrinfo(host_info);	// 메모리 해제

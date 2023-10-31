@@ -9,7 +9,7 @@ void Response::clear() {
 }
 
 void Response::print() {
-	std::cout << GRAY << "[ RESPONSE ]" << std::endl;
+	std::cout << GRAY << "\n[ RESPONSE ]" << std::endl;
 	std::map<std::string, std::string>::iterator header_it = m_header_.begin();
 	std::vector<char> status_line = getStatusLine();
 	std::cout << std::string(status_line.begin(), status_line.end()) << std::endl;
@@ -22,7 +22,7 @@ void Response::print() {
 void Response::setContentType(const std::string& resource) {
 	std::string file_type = resource.substr(resource.find('.') + 1);
 	// Request에서 파일 타입 제한을 이미 했기 때문에 여기로 흘러온 이상 무조건 있다고 판단
-	content_type_ = Utils::mime[file_type];
+	content_type_ = Utils::getMIMEType(file_type);
 }
 
 void Response::makeResponse(std::vector<char> &msg, bool is_keep_alive) {
