@@ -12,7 +12,7 @@
 class Response {
    public:
 	Response();
-	void clear();
+	Response& operator=(const Response& obj);
 	void print();
 
 	std::string status_code_;

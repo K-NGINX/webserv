@@ -17,10 +17,6 @@ Request& Request::operator=(const Request& obj) {
 	return *this;
 }
 
-void Request::clear() {
-	*this = Request();
-}
-
 void Request::print() {
 	std::cout << GRAY << "\n[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;

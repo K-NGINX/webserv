@@ -17,8 +17,8 @@ void Client::clear() {
 	status_ = RECV_REQUEST;
 	is_keep_alive_ = true;
 	pid_ = -1;
-	request_.clear();
-	response_.clear();
+	request_ = Request();
+	response_ = Response();
 	server_ = NULL;
 	location_ = NULL;
 	written_ = 0;

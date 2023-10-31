@@ -2,10 +2,12 @@
 
 Response::Response() : status_code_("200") {}
 
-void Response::clear() {
-	status_code_ = "200";
-	m_header_.clear();
-	body_.clear();
+Response& Response::operator=(const Response& obj) {
+	status_code_ = obj.status_code_;
+	content_type_ = obj.content_type_;
+	m_header_ = obj.m_header_;
+	body_ = obj.body_;
+	return *this;
 }
 
 void Response::print() {
