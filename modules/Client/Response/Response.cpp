@@ -4,6 +4,7 @@ Response::Response() : status_code_("200") {}
 
 void Response::clear() {
 	status_code_ = "200";
+	content_type_.clear();
 	m_header_.clear();
 	body_.clear();
 }
