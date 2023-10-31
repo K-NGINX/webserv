@@ -43,7 +43,7 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 										   // response 전문 생성
 										   // socket에 response 쓰기
 	std::vector<char> msg;
-	response_.makeResponse(msg);
+	response_.makeResponse(msg, is_keep_alive_);
 	std::cout << "[ RESPONSE ] \n";
 	ssize_t cnt = msg.size() - written_;
 	// if (cnt == 0)
@@ -52,9 +52,10 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 	// if (cnt == 0 || cnt == -1)
 	//	std::cout << "error !!!\n";
 	written_ += cnt;
-	for (size_t i = 0; i < msg.size(); i++)
+	std::cout << "-" << std::endl;
+	for (ssize_t i = 0; i < cnt; i++)
 		std::cout << msg[i];
-	std::cout << std::endl;
+	std::cout << "-" << std::endl;
 	status_ = WILL_DISCONNECT;
 }
 

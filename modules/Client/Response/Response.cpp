@@ -7,13 +7,13 @@ void Response::clear() {
 	m_header_.clear();
 	body_.clear();
 }
-void Response::makeResponse(std::vector<char> &msg) {
+void Response::makeResponse(std::vector<char> &msg, bool is_keep_alive) {
 	std::vector<char> status_line = getStatusLine(status_code_);
 	std::vector<char> rn;
 	rn.push_back('\r');
 	rn.push_back('\n');
 	std::string header;
-	makeHeaderLine();
+	makeHeaderLine(is_keep_alive);
 	std::map<std::string, std::string>::const_iterator it = this->m_header_.begin();
 
 	msg.insert(msg.end(), status_line.begin(), status_line.end());
@@ -40,14 +40,15 @@ std::vector<char> Response::getStatusLine(const std::string &status_code_) const
 		m_status["500"] = "Internal Server Error";
 	}
 
-	std::string status_line = status_code_ + " " + m_status[status_code_] + " " + VERSION + "\r\n";
+	std::string status_line = std::string(VERSION) + " " + status_code_ + " " + m_status[status_code_] + "\r\n";
 	return std::vector<char>(status_line.begin(), status_line.end());
 }
 
-void Response::makeHeaderLine() {
+void Response::makeHeaderLine(bool is_keep_alive) {
 	m_header_["Date"] = getResponseDate(NULL);
 	if (body_.size() != 0)
-		m_header_["Content-length"] = ntos(body_.size());
+		m_header_["Content-Length"] = ntos(body_.size());
+	m_header_["Connection"] = is_keep_alive == true ? "keep-alive" : "closed";
 }
 
 std::string Response::getResponseDate(std::time_t *t) {
