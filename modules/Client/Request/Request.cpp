@@ -2,18 +2,23 @@
 
 Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false), is_chunked_body_end(false) {}
 
+Request& Request::operator=(const Request& obj) {
+	parsing_status_ = obj.parsing_status_;
+	remain_buffer_ = obj.remain_buffer_;
+	method_ = obj.method_;
+	uri_ = obj.uri_;
+	host_ = obj.host_;
+	m_header_ = obj.m_header_;
+	body_ = obj.body_;
+	body_size_ = obj.body_size_;
+	is_chunked = obj.is_chunked;
+	is_chunked_body_end = obj.is_chunked;
+	connection_ = obj.connection_;
+	return *this;
+}
+
 void Request::clear() {
-	parsing_status_ = INIT;
-	remain_buffer_.clear();
-	method_.clear();
-	uri_.clear();
-	host_.clear();
-	m_header_.clear();
-	body_.clear();
-	body_size_ = 0;
-	is_chunked = false;
-	is_chunked_body_end = false;
-	connection_.clear();
+	*this = Request();
 }
 
 void Request::print() {
@@ -49,20 +54,25 @@ static std::vector<char> getRemainBuffer(std::vector<char> &buffer) {
 	std::vector<char> res;
 	size_t last_idx = buffer.size() - 1;
 	if (buffer[last_idx] != '\n' || buffer[last_idx - 1] != '\r') {
-		size_t start_remain_unit_idx = buffer.size() - 1;
+		size_t seperator_idx = buffer.size() - 1;
 		for (size_t i = buffer.size() - 2; i >= 0; --i) {
 			if (buffer[i] == '\r' && buffer[i + 1] == '\n') {
-				start_remain_unit_idx = i;
+				seperator_idx = i;
 				break;
 			}
 		}
-		for (size_t i = start_remain_unit_idx + 2; i < buffer.size(); i++)
+		for (size_t i = seperator_idx + 2; i < buffer.size(); i++)
 			res.push_back(buffer[i]);
 		// 원래 버퍼 뒤에 붙어있던 것들은 다 지워준다.
-		while (buffer.size() >= start_remain_unit_idx + 2)
+		while (buffer.size() >= seperator_idx + 2)
 			buffer.pop_back();
 	}
 	return res;
+}
+static bool isValidMethod(std::string& str) {
+	if (str == "GET" || str == "POST" || str == "DELETE")
+		return true;
+	return false;
 }
 
 void Request::parseStartLine(std::vector<char> &line) {
@@ -73,7 +83,7 @@ void Request::parseStartLine(std::vector<char> &line) {
 	while (ss >> tmp)
 		split.push_back(tmp);
 
-	if (split.size() != 3 || (split[0] != "GET" && split[0] != "POST" && split[0] != "DELETE") || split[2] != VERSION) {
+	if (split.size() != 3 || isValidMethod(split[0]) == false || split[2] != VERSION) {
 		parsing_status_ = ERROR;
 		return;
 	}
@@ -119,10 +129,6 @@ void Request::parseBody(std::vector<char> &line) {
 		parsing_status_ = ERROR;
 		return;
 	}
-	// for (size_t i = 0; i < line.size(); i++)
-	// 	std::cout << line[i];
-	// std::cout << std::endl;
-
 	body_size_ += line.size();
 	line.push_back('\r');
 	line.push_back('\n');
@@ -214,9 +220,8 @@ void Request::parse(int fd) {
 				return;
 		}
 	}	 // chuneked면 ㅇ
-	if (parsing_status_ == BODY && remain_buffer_.size() == 0) {
-		checkValidRequest();	///////////////////
-	}
+	if (parsing_status_ == BODY && remain_buffer_.size() == 0)
+		checkValidRequest();
 }
 
 // int main() {

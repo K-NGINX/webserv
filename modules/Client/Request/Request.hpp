@@ -27,6 +27,7 @@ enum RequestStatus {
 class Request {
    public:
 	Request();
+	Request& operator=(const Request& obj);
 	void clear();
 
 	void parse(int fd);
