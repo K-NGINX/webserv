@@ -18,11 +18,11 @@ class Response {
 	std::map<std::string, std::string> m_header_;
 	std::vector<char> body_;
 
-	void makeResponse(std::vector<char> &msg);
+	void makeResponse(std::vector<char> &msg, bool is_keep_alive);
 
 	private:
 		std::vector<char> getStatusLine(const std::string &status_code_) const;
-		void makeHeaderLine();
+		void makeHeaderLine(bool is_keep_alive);
 		std::string getResponseDate(std::time_t *t);
 };
 
