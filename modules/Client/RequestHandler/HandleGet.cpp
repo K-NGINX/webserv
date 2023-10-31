@@ -33,8 +33,8 @@ static void handleAutoindex(Client& client, const std::string& resource) {
 			if (entry_name == "." || entry_name == "..") continue;
 			autoindex_html += "<tr><td><a href='" + entry_path + "'>" + entry_name + "</a></td></tr>";
 		}
+    	closedir(dp);
 	}
-    closedir(dp);
     autoindex_html += "</table></ul></body></html>";
 	// 응답 body에 써주기
 	client.response_.body_ = std::vector<char>(autoindex_html.begin(), autoindex_html.end());
