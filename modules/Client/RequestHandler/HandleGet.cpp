@@ -1,5 +1,6 @@
-#include "RequestHandler.hpp"
 #include <dirent.h>
+
+#include "RequestHandler.hpp"
 
 static bool isFileType(std::string& resource) {
 	// 점('.')이 포함되어 있고, 해당 경로에 존재하면 파일 타입이라고 판단
@@ -19,23 +20,25 @@ static bool isIndex(Client& client, std::string& resource) {
 	return false;
 }
 
-static void handleAutoindex(Client& client, const std::string& resource) {
+static void handleAutoindex(Client& client, const std::string& resource, std::string uri) {
 	// html 코드 생성
-	std::string autoindex_html = "<html><body><h1>List</h1><ul>";
-    autoindex_html += "<table>";
+	std::string autoindex_html = "<html><body><h1>" + uri.substr(1) + " List</h1><ul>";
+	autoindex_html += "<table>";
 	// 목록 채우기
-	struct dirent *entry;
-    DIR *dp = opendir(resource.c_str());
+	struct dirent* entry;
+	DIR* dp = opendir(resource.c_str());
 	if (dp != NULL) {
 		while ((entry = readdir(dp))) {
 			std::string entry_name = entry->d_name;
+			if (uri.back() != '/') uri.push_back('/');
+			std::string entry_path = uri + entry_name;
 			if (entry_name == "." || entry_name == "..") continue;
 			// 각 파일에 대한 링크는 요청한 URL에 대한 상대 경로
-			autoindex_html += "<tr><td><a href='" + entry_name + "'>" + entry_name + "</a></td></tr>";
+			autoindex_html += "<tr><td><a href='" + entry_path + "'>" + entry_name + "</a></td></tr>";
 		}
-    	closedir(dp);
+		closedir(dp);
 	}
-    autoindex_html += "</table></ul></body></html>";
+	autoindex_html += "</table></ul></body></html>";
 	// 응답 body에 써주기
 	client.response_.body_ = std::vector<char>(autoindex_html.begin(), autoindex_html.end());
 	client.status_ = SEND_RESPONSE;
@@ -58,7 +61,7 @@ void RequestHandler::handleGet(Client& client) {
 		resource.pop_back();
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
 	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex())
-		return handleAutoindex(client, resource);
+		return handleAutoindex(client, resource, client.request_.uri_);
 	// uri가 파일 형식이라면 uri 자체를, 디렉토리 형식이라면 기본 파일(index)을 사용
 	int fd = open(resource.c_str(), O_RDONLY);
 	if (fd == -1)

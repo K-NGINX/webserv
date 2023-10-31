@@ -18,6 +18,7 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	int fd = open(error_page.c_str(), O_RDONLY);
 	if (fd == -1)	 // 실패했다면 클라이언트 연결 끊어주기
 		return client.setStatus(WILL_DISCONNECT);
+	std::cout << YELLOW << error_page << RESET << std::endl;
 	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
 	client.status_ = READ_FILE;
