@@ -20,7 +20,7 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 		return client.setStatus(WILL_DISCONNECT);
 	std::cout << YELLOW << error_page << RESET << std::endl;
 	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	ServerManager::getInstance().kqueue_.registerReadEvent(fd, &client);
+	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }
 
@@ -52,7 +52,7 @@ void RequestHandler::handleDelete(Client &client) {
  */
 void RequestHandler::handleRequest(Client &client) {
 	Request &request = client.request_;
-	request.print(); ////////////////////////
+	request.print();						 ////////////////////////
 	if (request.parsing_status_ == ERROR)	 // 잘못된 문법의 요청
 		return handleError(client, "400");
 	if (request.connection_ == "close")

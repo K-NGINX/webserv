@@ -16,10 +16,10 @@ class Kqueue {
 	~Kqueue();
 
 	int getEvents();
-	void registerReadEvent(int ident, void *udata);
-	void registerWriteEvent(int ident, void *udata);
-	void unregisterReadEvent(int ident);
-	void unregisterWriteEvent(int ident);
+	void startMonitoringReadEvent(int ident, void *udata);
+	void startMonitoringWriteEvent(int ident, void *udata);
+	void stopMonitoringReadEvent(int ident);
+	void stopMonitoringWriteEvent(int ident);
 
 	int fd_;
 	std::vector<struct kevent> v_change_;

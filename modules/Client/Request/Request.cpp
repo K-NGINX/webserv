@@ -131,7 +131,10 @@ void Request::parseBody(std::vector<char> &line) {
 	for (size_t i = 0; i < line.size(); i++)
 		body_.push_back(line[i]);
 }
-
+/**
+ * @brief 모든 request를 읽었을때 호출되며 request 형식에 부합하는지 마지막으로 검증하는 함수
+ *
+ */
 void Request::checkValidRequest() {
 	if (host_ == "" || remain_buffer_.size() != 0 || parsing_status_ != BODY || (is_chunked && is_chunked_body_end == false)) {	   // chunked인데 end가 아니거나
 		parsing_status_ = ERROR;
@@ -139,7 +142,6 @@ void Request::checkValidRequest() {
 	}
 	// post일때 유효한 request일 경우
 	if (method_ == "POST") {
-		// chunked 일때 분기도 추가
 		if (m_header_.find("content-length") != m_header_.end() && body_size_ != Utils::stoi(m_header_["content-length"])) {
 			parsing_status_ = ERROR;
 			return;
@@ -179,7 +181,7 @@ void Request::parse(int fd) {
 		return;
 	if (parsing_status_ == INIT)
 		parsing_status_ = START_LINE;
-	if (read_size == 0)	   // EOF
+	if (read_size == 0)	// EOF
 		checkValidRequest();
 	if (read_size == -1)
 		parsing_status_ = ERROR;
@@ -215,7 +217,7 @@ void Request::parse(int fd) {
 			default:
 				return;
 		}
-	}	 // chuneked면 ㅇ
+	}
 	if (parsing_status_ == BODY && remain_buffer_.size() == 0)
 		checkValidRequest();
 }
