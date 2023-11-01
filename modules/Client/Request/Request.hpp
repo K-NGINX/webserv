@@ -36,16 +36,23 @@ class Request {
 	void parseChunkedBody(std::vector<char> &size, std::vector<char> &line);
 	void checkValidRequest();
 	void print();
-
+ // gettersetter
+	std::string getConnection();
+	RequestStatus getParsing_status();
+	std::string getMethod();
+	std::string getUri();
+	std::string getHost();
+	int getBodySize();
+   private:
+	std::string connection_;
 	RequestStatus parsing_status_;
-	std::vector<char> remain_buffer_;
 	std::string method_;
 	std::string uri_;
 	std::string host_;
+	std::vector<char> remain_buffer_;
 	std::map<std::string, std::string> m_header_; ////////////////////
 	std::vector<char> body_;
 	int body_size_;
 	bool is_chunked;
 	bool is_chunked_body_end;
-	std::string connection_;
 };
