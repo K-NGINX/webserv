@@ -60,12 +60,16 @@ void RequestHandler::handleGet(Client& client) {
 	if (resource.back() == '/')
 		resource.pop_back();
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
-	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex())
-		return handleAutoindex(client, resource, client.request_.uri_);
+	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex()) {
+		handleAutoindex(client, resource, client.request_.uri_);
+		return ;
+	}
 	// uri가 파일 형식이라면 uri 자체를, 디렉토리 형식이라면 기본 파일(index)을 사용
 	int fd = open(resource.c_str(), O_RDONLY);
-	if (fd == -1)
-		return handleError(client, "404");
+	if (fd == -1) {
+		handleError(client, "404");
+		return ;
+	}
 	// 파일 형식에 따른 Content-Type 설정
 	client.response_.setContentType(resource);
 	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
