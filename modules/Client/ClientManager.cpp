@@ -24,13 +24,17 @@ void ClientManager::disconnectClient(Client *client) {
 		client_it++;
 	}
 	// 이벤트 해제 후 객체 삭제
-	ServerManager::getInstance().kqueue_.unregisterWriteEvent(client->socket_);
+	ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(client->socket_);
 	delete client;
 }
-
+/**
+ * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트 처리 하는 함수
+ *
+ * @param event 해당 이벤트
+ */
 void ClientManager::handleEvent(struct kevent &event) {
 	Client *client = reinterpret_cast<Client *>(event.udata);
-	if (event.filter == EVFILT_READ) {
+	if (event.filter == EVFILT_READ) {	  // read_event
 		switch (client->status_) {
 			case RECV_REQUEST:
 				client->handleSocketReadEvent();
@@ -44,7 +48,7 @@ void ClientManager::handleEvent(struct kevent &event) {
 			default:
 				break;
 		}
-	} else if (event.filter == EVFILT_WRITE) {
+	} else if (event.filter == EVFILT_WRITE) {	  // write_event
 		switch (client->status_) {
 			case SEND_RESPONSE:
 				client->handleSocketWriteEvent();

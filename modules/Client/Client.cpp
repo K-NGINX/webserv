@@ -22,7 +22,7 @@ void Client::clear() {
 	server_ = NULL;
 	location_ = NULL;
 	written_ = 0;
-	ServerManager::getInstance().kqueue_.registerReadEvent(socket_, this);
+	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(socket_, this);
 }
 
 void Client::setStatus(const ClientStatus& status) {
@@ -32,7 +32,7 @@ void Client::setStatus(const ClientStatus& status) {
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	request_.parse(socket_);
 	if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
-		ServerManager::getInstance().kqueue_.unregisterReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
 		RequestHandler::handleRequest(*this);
 	}
 }

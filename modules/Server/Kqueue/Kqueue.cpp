@@ -13,13 +13,13 @@ int Kqueue::getEvents() {
 	return event_cnt;
 }
 
-void Kqueue::registerReadEvent(int ident, void *udata) { addChangeList(ident, EVFILT_READ, EV_ADD | EV_ENABLE, udata); }
+void Kqueue::startMonitoringReadEvent(int ident, void *udata) { addChangeList(ident, EVFILT_READ, EV_ADD | EV_ENABLE, udata); }
 
-void Kqueue::registerWriteEvent(int ident, void *udata) { addChangeList(ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, udata); }
+void Kqueue::startMonitoringWriteEvent(int ident, void *udata) { addChangeList(ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, udata); }
 
-void Kqueue::unregisterReadEvent(int ident) { addChangeList(ident, EVFILT_READ, EV_DISABLE | EV_DELETE, NULL); }
+void Kqueue::stopMonitoringReadEvent(int ident) { addChangeList(ident, EVFILT_READ, EV_DISABLE | EV_DELETE, NULL); }
 
-void Kqueue::unregisterWriteEvent(int ident) { addChangeList(ident, EVFILT_WRITE, EV_DISABLE | EV_DELETE, NULL); }
+void Kqueue::stopMonitoringWriteEvent(int ident) { addChangeList(ident, EVFILT_WRITE, EV_DISABLE | EV_DELETE, NULL); }
 
 void Kqueue::addChangeList(int ident, int16_t filter, uint16_t flags, void *udata) {
 	struct kevent new_event;

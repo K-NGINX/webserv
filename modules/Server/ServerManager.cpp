@@ -15,7 +15,10 @@ void ServerManager::closeAllServerSocket() {
 	for (size_t i = 0; i < v_server_socket_.size(); i++)
 		close(v_server_socket_[i]);
 }
-
+/**
+ * @brief 클라이언트 연결 요청을 받는 서버소켓을 만들고 kevent에 등록해주는 함수
+ *
+ */
 void ServerManager::init() {
 	// 서버 소켓 초기화
 	const std::vector<ServerBlock> &server_vec = ConfigManager::getInstance().getConfig().getServerBlockVec();
@@ -34,6 +37,7 @@ void ServerManager::init() {
 		if (status != 0)
 			throw std::runtime_error(gai_strerror(status));
 
+		// 소켓을 열어 v_server_socket에 등록해준다.
 		int server_socket = socket(host_info->ai_family, host_info->ai_socktype, host_info->ai_protocol);
 		if (server_socket == -1) {
 			closeAllServerSocket();
@@ -41,21 +45,20 @@ void ServerManager::init() {
 			throw std::runtime_error("Socket error");
 		}
 		v_server_socket_.push_back(server_socket);
-
+		// 이전에 webserv를 시그널로 닫아 다시 bind할 때 이전 소켓 주소를 재사용 가능하게 해줌
 		int enable = 1;
 		if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) == -1) {
 			closeAllServerSocket();
 			freeaddrinfo(host_info);	// 메모리 해제
 			throw std::runtime_error("Setsockopt error");
 		}
-
+		// 주어진 소켓에 ip주소:port를 등록한다.
 		if (bind(server_socket, host_info->ai_addr, host_info->ai_addrlen) == -1) {
 			closeAllServerSocket();
 			freeaddrinfo(host_info);	// 메모리 해제
 			throw std::runtime_error("Bind error");
 		}
 		freeaddrinfo(host_info);	// 메모리 해제
-
 		// 연결 요청 대기 상태로 바꿔줌
 		if (listen(server_socket, 5) == -1) {
 			closeAllServerSocket();
@@ -72,7 +75,7 @@ void ServerManager::init() {
 	}
 	// 서버 소켓 read 이벤트 등록
 	for (size_t i = 0; i < v_server_socket_.size(); i++)
-		kqueue_.registerReadEvent(v_server_socket_[i], NULL);
+		kqueue_.startMonitoringReadEvent(v_server_socket_[i], NULL);
 	std::cout << GREEN << "📢 KQUEUE INIT DONE" << RESET << std::endl;
 }
 
@@ -95,8 +98,8 @@ void ServerManager::connectNewClient(int server_socket) {
 	}
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	Client *new_client = new Client(client_socket);
-	kqueue_.registerReadEvent(client_socket, new_client);
-	kqueue_.registerWriteEvent(client_socket, new_client);
+	kqueue_.startMonitoringReadEvent(client_socket, new_client);
+	kqueue_.startMonitoringWriteEvent(client_socket, new_client);
 	ClientManager::getInstance().v_client_.push_back(new_client);
 	std::cout << MAGENTA << "\nNEW CLIENT(" << client_socket << ") CONNECTED" << RESET << std::endl;
 }
@@ -111,7 +114,7 @@ void ServerManager::handleEvent(struct kevent &event) {
 void ServerManager::start() {
 	std::cout << GREEN << "📢 SERVER START" << RESET << std::endl;
 	while (true) {
-		int event_cnt = kqueue_.getEvents();
+		int event_cnt = kqueue_.getEvents();	// 현재 쌓인 이벤트의 개수 리턴
 		for (int i = 0; i < event_cnt; i++)
 			handleEvent(kqueue_.v_event_[i]);
 	}
