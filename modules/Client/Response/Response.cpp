@@ -2,14 +2,16 @@
 
 Response::Response() : status_code_("200") {}
 
-
-Response& Response::operator=(const Response& obj) {
+Response &Response::operator=(const Response &obj) {
 	status_code_ = obj.status_code_;
 	content_type_ = obj.content_type_;
 	m_header_ = obj.m_header_;
 	body_ = obj.body_;
 	return *this;
 }
+
+void Response::setBody(std::vector<char> obj) { body_ = obj; }
+void Response::setStatusCode(std::string obj) { status_code_ = obj; }
 
 void Response::print() {
 	std::cout << GRAY << "\n[ RESPONSE ]" << std::endl;
@@ -22,7 +24,7 @@ void Response::print() {
 	}
 }
 
-void Response::setContentType(const std::string& resource) {
+void Response::setContentType(const std::string &resource) {
 	std::string file_type = resource.substr(resource.find('.') + 1);
 	// Request에서 파일 타입 제한을 이미 했기 때문에 여기로 흘러온 이상 무조건 있다고 판단
 	content_type_ = Utils::getMIMEType(file_type);

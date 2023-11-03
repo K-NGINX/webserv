@@ -31,7 +31,7 @@ void Client::setStatus(const ClientStatus& status) {
 
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	request_.parse(socket_);
-	if (request_.parsing_status_ == DONE || request_.parsing_status_ == ERROR) {
+	if (request_.getParsing_status() == DONE || request_.getParsing_status() == ERROR) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
 		RequestHandler::handleRequest(*this);
 	}
@@ -76,6 +76,7 @@ void Client::handleFileReadEvent(int fd) {
 	// 읽기 실패 -> 500
 	int read_size = 0;
 	char buffer[BUFFER_SIZE];
+	std::vector<char> response_body;
 	while (true) {
 		read_size = read(fd, buffer, BUFFER_SIZE);
 		if (read_size == -1)
@@ -83,8 +84,9 @@ void Client::handleFileReadEvent(int fd) {
 		else if (read_size == 0)
 			break;
 		for (int i = 0; i < read_size; i++)
-			response_.body_.push_back(buffer[i]);
+			response_body.push_back(buffer[i]);
 	}
+	response_.setBody(response_body);
 	// for (size_t i = 0; i < response_.body_.size(); i++) /////////////////
 	// 	std::cout << response_.body_[i];
 	// std::cout << std::endl;

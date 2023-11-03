@@ -2,7 +2,14 @@
 
 Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false), is_chunked_body_end(false) {}
 
-Request& Request::operator=(const Request& obj) {
+std::string Request::getConnection() { return connection_; }
+RequestStatus Request::getParsing_status() { return parsing_status_; }
+std::string Request::getMethod() { return method_; }
+std::string Request::getUri() { return uri_; }
+std::string Request::getHost() { return host_; }
+int Request::getBodySize() { return body_size_; }
+
+Request &Request::operator=(const Request &obj) {
 	parsing_status_ = obj.parsing_status_;
 	remain_buffer_ = obj.remain_buffer_;
 	method_ = obj.method_;
@@ -65,7 +72,7 @@ static std::vector<char> getRemainBuffer(std::vector<char> &buffer) {
 	}
 	return res;
 }
-static bool isValidMethod(std::string& str) {
+static bool isValidMethod(std::string &str) {
 	if (str == "GET" || str == "POST" || str == "DELETE")
 		return true;
 	return false;
@@ -181,7 +188,7 @@ void Request::parse(int fd) {
 		return;
 	if (parsing_status_ == INIT)
 		parsing_status_ = START_LINE;
-	if (read_size == 0)	// EOF
+	if (read_size == 0)	   // EOF
 		checkValidRequest();
 	if (read_size == -1)
 		parsing_status_ = ERROR;
