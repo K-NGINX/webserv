@@ -9,7 +9,7 @@
 
 #include "../../Utils/Utils.hpp"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 100000
 #define VERSION "HTTP/1.1"
 // #define PLAIN_TEXT "text/plain"
 // #define HTML_TEXT "text/html"
@@ -42,6 +42,7 @@ class Request {
 	std::string getMethod() const;
 	std::string getUri() const;
 	std::string getHost() const;
+	const std::vector<char>& getBody() const;
 	int getBodySize();
    private:
 	std::string connection_;
@@ -53,6 +54,7 @@ class Request {
 	std::map<std::string, std::string> m_header_; ////////////////////
 	std::vector<char> body_;
 	int body_size_;
-	bool is_chunked;
-	bool is_chunked_body_end;
+	bool is_chunked_;
+	bool is_chunked_body_end_;
+	std::string boundary_;
 };

@@ -1,12 +1,13 @@
 #include "Request.hpp"
 
-Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false), is_chunked_body_end(false) {}
+Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked_(false), is_chunked_body_end_(false) {}
 
 std::string Request::getConnection() const { return connection_; }
 RequestStatus Request::getParsing_status() const { return parsing_status_; }
 std::string Request::getMethod() const { return method_; }
 std::string Request::getUri() const { return uri_; }
 std::string Request::getHost() const { return host_; }
+const std::vector<char>& Request::getBody() const { return body_; }
 int Request::getBodySize() { return body_size_; }
 
 Request &Request::operator=(const Request &obj) {
@@ -18,8 +19,8 @@ Request &Request::operator=(const Request &obj) {
 	m_header_ = obj.m_header_;
 	body_ = obj.body_;
 	body_size_ = obj.body_size_;
-	is_chunked = obj.is_chunked;
-	is_chunked_body_end = obj.is_chunked;
+	is_chunked_ = obj.is_chunked_;
+	is_chunked_body_end_ = obj.is_chunked_;
 	connection_ = obj.connection_;
 	return *this;
 }
@@ -28,6 +29,8 @@ void Request::print() {
 	std::cout << GRAY << "\n[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
 	std::cout << "Host: " << host_ << std::endl;
+	if (m_header_.find("Content-Length") != m_header_.end())
+		std::cout << "Content-Length: " << m_header_["Content-Length"] << std::endl;
 	std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
 		std::cout << "-> DONE" << RESET << std::endl;
@@ -88,11 +91,28 @@ void Request::parseStartLine(std::vector<char> &line) {
 
 	if (split.size() != 3 || isValidMethod(split[0]) == false || split[2] != VERSION) {
 		parsing_status_ = ERROR;
+		std::cout << RED << split[2] << RESET << std::endl;
 		return;
 	}
 	method_ = split[0];
 	uri_ = split[1];
 	parsing_status_ = HEADER;
+}
+
+/**
+ * @brief content-type value 뒤에 ----boundary_ 잘라주는 함수
+ * 
+ * @param value content-type 뒤에 붙는 ---boundary_ 달려있는 value
+ * @return true ; 있어서 잘 짤라줌
+ * @return false ; 없어서 오류
+ */
+static bool refineContentType(std::string& value) {
+	size_t semi_colon = value.find(';');
+	if (semi_colon == std::string::npos)
+		return false;
+	
+	value.erase(semi_colon);
+	return true;
 }
 
 void Request::parseHeader(std::vector<char> &line) {
@@ -114,12 +134,12 @@ void Request::parseHeader(std::vector<char> &line) {
 		return;
 	}
 	// body 파일 제한
-	if (key == "Content-Type" && Utils::checkMIMEType(value) == false) {
+	if (key == "Content-Type" && refineContentType(value) && Utils::checkMIMEType(value) == false) {
 		parsing_status_ = ERROR;
 		return;
 	}
 	if (key == "Transfer-Encoding" && value == "chunked")
-		is_chunked = true;
+		is_chunked_ = true;
 	if (key == "Host")
 		host_ = value;
 	if (key == "Connection")
@@ -128,10 +148,11 @@ void Request::parseHeader(std::vector<char> &line) {
 }
 
 void Request::parseBody(std::vector<char> &line) {
-	if (line.size() == 0) {
-		parsing_status_ = ERROR;
-		return;
-	}
+	// if (line.size() == 0) {
+	// 	parsing_status_ = ERROR;
+	// 	std::cout << RED << ":!!!!!!!!!!!!!!!" << RESET << std::endl;
+	// 	return;
+	// }
 	body_size_ += line.size();
 	line.push_back('\r');
 	line.push_back('\n');
@@ -143,14 +164,15 @@ void Request::parseBody(std::vector<char> &line) {
  *
  */
 void Request::checkValidRequest() {
-	if (host_ == "" || remain_buffer_.size() != 0 || parsing_status_ != BODY || (is_chunked && is_chunked_body_end == false)) {	   // chunked인데 end가 아니거나
+	if (host_ == "" || remain_buffer_.size() != 0 || parsing_status_ != BODY || (is_chunked_ && is_chunked_body_end_ == false)) {	   // chunked인데 end가 아니거나
 		parsing_status_ = ERROR;
 		return;
 	}
 	// post일때 유효한 request일 경우
 	if (method_ == "POST") {
-		if (m_header_.find("content-length") != m_header_.end() && body_size_ != Utils::stoi(m_header_["content-length"])) {
+		if (m_header_.find("Content-Length") != m_header_.end() && body_size_ != Utils::stoi(m_header_["Content-Length"])) {
 			parsing_status_ = ERROR;
+			std::cout << RED << "here !!!!!!!!!!!!!!!!!" << RESET << std::endl;
 			return;
 		}
 		parsing_status_ = DONE;
@@ -175,7 +197,7 @@ void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line)
 	for (size_t i = 0; i < line.size(); i++)
 		body_.push_back(line[i]);
 	if (body_size_ == 0)
-		is_chunked_body_end = true;
+		is_chunked_body_end_ = true;
 }
 
 void Request::parse(int fd) {
@@ -184,6 +206,9 @@ void Request::parse(int fd) {
 	//   char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n";
 	char buffer[BUFFER_SIZE];
 	int read_size = read(fd, buffer, BUFFER_SIZE);
+	// for (int i = 0; i < read_size; i++)
+	// 	std::cout << buffer[i];
+	// std::cout << std::endl << std::endl;
 	if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
 		return;
 	if (parsing_status_ == INIT)
@@ -211,8 +236,8 @@ void Request::parse(int fd) {
 				parseHeader(v_splited_line[i]);
 				break;
 			case BODY:
-				if (is_chunked) {
-					if (is_chunked_body_end == true || i + 1 >= v_splited_line.size()) {
+				if (is_chunked_) {
+					if (is_chunked_body_end_ == true || i + 1 >= v_splited_line.size()) {
 						parsing_status_ = ERROR;
 						return;
 					}
@@ -225,8 +250,11 @@ void Request::parse(int fd) {
 				return;
 		}
 	}
-	if (parsing_status_ == BODY && remain_buffer_.size() == 0)
+	if (parsing_status_ == BODY && remain_buffer_.size() == 0) {
+		if (method_ == "POST" && m_header_.find("Content-Length") != m_header_.end() && body_size_ < Utils::stoi(m_header_["Content-Length"]))
+			return;
 		checkValidRequest();
+	}
 }
 
 // int main() {

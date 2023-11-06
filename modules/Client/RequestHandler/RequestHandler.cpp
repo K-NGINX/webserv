@@ -26,18 +26,6 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	client.status_ = READ_FILE;
 }
 
-// 아직 모호함 ... :(
-void RequestHandler::handleCgi(Client &client) {
-	(void)client;
-	//  - POST 요청이면 WRITE_CGI
-	//  - CGI 환경 변수 설정
-	//  - 양방향 파이프 resource_fd 생성
-	//  - fork()
-	//  - 자식 : CGI 프로그램 execve
-	//  - 부모 : waitpid
-	//  - GET 요청이면 READ_CGI
-}
-
 void RequestHandler::handleDelete(Client &client) {
 	//  - 삭제 파일 있음 : 200
 	//  - 삭제 파일 없음 : (204)
