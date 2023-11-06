@@ -73,6 +73,12 @@ bool LocationBlock::isAllowMethod(const std::string& method) const {
 	return std::find(v_allow_method_.begin(), v_allow_method_.end(), method) != v_allow_method_.end();
 }
 
+bool LocationBlock::checkBodySize(const int& body_size) const {
+	if (common_directives_.getClientMaxBodySize() > 0)
+		return body_size <= common_directives_.getClientMaxBodySize();
+	return true;
+}
+
 void LocationBlock::print() {
 	std::string indent = "        ";
 	std::cout << indent << "[LOCATION] \"" << match_directive_ << "\"" << std::endl;
