@@ -57,7 +57,7 @@ void RequestHandler::handleRequest(Client &client) {
 		handleError(client, "404");	  // 요청은 적절하나 URI 없음
 	else if (client.location_->isAllowMethod(request.getMethod()) == false)
 		handleError(client, "405");	  // 메소드 제한
-	else if (client.location_->common_directives_.getClientMaxBodySize() < static_cast<size_t>(request.getBodySize()))
+	else if (client.location_->checkBodySize(request.getBodySize()) == false)
 		handleError(client, "413");	  // 요청 객체 크기 초과
 	else if (client.location_->getCgiPath() != "")
 		handleCgi(client);

@@ -35,7 +35,6 @@ void Request::print() {
 		std::cout << "-> DONE" << RESET << std::endl;
 	else if (parsing_status_ == ERROR)
 		std::cout << "-> ERROR" << RESET << std::endl;
-	std::cout << parsing_status_ << std::endl;
 }
 
 static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
@@ -58,25 +57,33 @@ static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
 
 static std::vector<char> getRemainBuffer(std::vector<char> &buffer) {
 	std::vector<char> res;
+	ssize_t buffer_size = buffer.size();
+	ssize_t seperator_idx = buffer_size - 2;
+
+	// 벡터의 범위를 벗어나지 않도록 확인
+    if (buffer_size < 2) {
+        res = buffer;
+        buffer.clear();
+        return res;
+    }
+
 	// size_t last_idx = buffer.size() - 1;
 	// if (buffer[last_idx] != '\n' || buffer[last_idx - 1] != '\r') {
-		ssize_t buffer_size = buffer.size();
-		ssize_t seperator_idx = buffer_size - 2;
-		while (seperator_idx >= 0) {
-			if (buffer[seperator_idx] == '\r' && buffer[seperator_idx + 1] == '\n')
-				break;
-			seperator_idx--;
-		}
-		if (seperator_idx == -1) { // \r\n이 없는 경우
-			res = buffer;
-			buffer.clear();
-			return res;
-		} // ab\r\n1
-		for (ssize_t i = seperator_idx + 2; i < buffer_size; i++)
-			res.push_back(buffer[i]);
-		// 원래 버퍼 뒤에 붙어있던 것들은 다 지워준다.
-		while (buffer_size > seperator_idx + 2)
-			buffer.pop_back();
+	while (seperator_idx >= 0) {
+		if (buffer[seperator_idx] == '\r' && buffer[seperator_idx + 1] == '\n')
+			break;
+		seperator_idx--;
+	}
+	if (seperator_idx == -1) { // \r\n이 없는 경우
+		res = buffer;
+		buffer.clear();
+		return res;
+	}
+	for (ssize_t i = seperator_idx + 2; i < buffer_size; i++)
+		res.push_back(buffer[i]);
+	// 원래 버퍼 뒤에 붙어있던 것들은 다 지워준다.
+	while (!buffer.empty() && buffer_size > seperator_idx + 2)
+		buffer.pop_back();
 	// }
 	return res;
 }
@@ -144,6 +151,8 @@ void Request::parseHeader(std::vector<char> &line) {
 		parsing_status_ = ERROR;
 		return;
 	}
+	if (key == "Content-Length") ////////////////////////////////////
+		std::cout << "Content-Length : " << value << std::endl;
 	// body 파일 제한
 	if (key == "Content-Length" && value != "0" && (method_ == "GET" || method_ == "DELETE")) {
 		parsing_status_ = ERROR;
@@ -163,11 +172,12 @@ void Request::parseHeader(std::vector<char> &line) {
 }
 
 void Request::parseBody(std::vector<char> &line) {
-	body_size_ += line.size();
 	line.push_back('\r');
 	line.push_back('\n');
+	body_size_ += line.size() - 1;
 	for (size_t i = 0; i < line.size(); i++)
 		body_.push_back(line[i]);
+	std::cout << body_size_ << std::endl;
 	if (body_size_ == Utils::stoi(m_header_["Content-Length"])) {
 		parsing_status_ = DONE;
 		CheckEmptyRemainBuffer();
@@ -203,38 +213,37 @@ void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line)
 }
 
 void Request::parse(int fd) {
-	(void)fd;
+	// (void)fd;
 	// char buffer[BUFFER_SIZE] = "POST /index.html HTTP/1.1\r\nHost:www.example.com\r\nTransfer-Encoding:chunked\r\n\r\n4\r\nbody\r\n4\r\nbody\r\n";
-	  char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\ndfd";
-	// char buffer[BUFFER_SIZE];
-	// int read_size = read(fd, buffer, BUFFER_SIZE);
-	// for (int i = 0; i < read_size; i++)
-	// 	std::cout << buffer[i];
-	// std::cout << std::endl << std::endl;
-	// if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
-	// 	return;
+	//   char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\ndfd";
+	char buffer[BUFFER_SIZE];
+	int read_size = read(fd, buffer, BUFFER_SIZE);
+	for (int i = 0; i < read_size; i++)
+		std::cout << buffer[i];
+	std::cout << std::endl << std::endl;
+	if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
+		return;
 	if (parsing_status_ == INIT)
 		parsing_status_ = START_LINE;
-	// if (read_size == 0 && parsing_status_ != DONE)	   // EOF
-	// 	CheckEmptyRemainBuffer();
-	// if (read_size == -1)
-	// 	parsing_status_ = ERROR;
-	// if (parsing_status_ == ERROR || parsing_status_ == DONE)
-	// 	return;
+	if (read_size == 0 && parsing_status_ != DONE)	   // EOF
+		CheckEmptyRemainBuffer();
+	if (read_size == -1)
+		parsing_status_ = ERROR;
+	if (parsing_status_ == ERROR || parsing_status_ == DONE)
+		return;
 	// remainbuf에 이어붙힌다.
-	// for (int i = 0; i < read_size; i++)
-	for (int i = 0; buffer[i]; i++)
+	for (int i = 0; i < read_size; i++)
 		remain_buffer_.push_back(buffer[i]);
-	// if (remain_buffer_.size() == 0) { ////////////////////
-	// 	parsing_status_ = ERROR;
-	// 	return ;
-	// }
+	if (remain_buffer_.size() == 0) { ////////////////////
+		parsing_status_ = ERROR;
+		return ;
+	}
 
 	std::vector<char> new_remain_buffer = getRemainBuffer(remain_buffer_);
-	std::cout << "|";
-	for (int i = 0; i < new_remain_buffer.size(); i++)
-		std::cout << new_remain_buffer[i];
-	std::cout << "|" << std::endl;
+	// std::cout << "|";
+	// for (int i = 0; i < new_remain_buffer.size(); i++)
+	// 	std::cout << new_remain_buffer[i];
+	// std::cout << "|" << std::endl;
 
 	std::vector<std::vector<char> > v_splited_line = splitVector(remain_buffer_);
 	remain_buffer_ = new_remain_buffer;
@@ -268,10 +277,10 @@ void Request::parse(int fd) {
 	// 	checkValidRequest();
 	// }
 }
-int main() {
-  Request req;
-  req.parse(0);
+// int main() {
+//   Request req;
+//   req.parse(0);
 
-  req.CheckEmptyRemainBuffer();
-  req.print();
-}
+//   req.CheckEmptyRemainBuffer();
+//   req.print();
+// }

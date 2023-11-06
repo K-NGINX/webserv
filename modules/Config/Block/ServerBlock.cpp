@@ -19,6 +19,8 @@ size_t ServerBlock::getMatchLength(const std::string& uri, const std::string& ma
 	for (size_t i = 0; i < uri.size(); i++) {
 		if (uri[i] == match_directive[i])
 			length++;
+		else
+			break;
 	}
 	return length;
 }

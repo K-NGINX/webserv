@@ -16,6 +16,7 @@ class LocationBlock : public ABlock {
 	const std::string& getUploadPath() const;
 
 	bool isAllowMethod(const std::string& method) const;
+	bool checkBodySize(const int& body_size) const;
 
    private:
 	void refineLocationDirectives();

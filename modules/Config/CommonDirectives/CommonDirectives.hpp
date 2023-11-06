@@ -16,7 +16,7 @@ class CommonDirectives {
 
 	/* getter */
 	const bool& isAutoindex() const;
-	const size_t& getClientMaxBodySize() const;
+	const int& getClientMaxBodySize() const;
 	const std::vector<std::string>& getErrorCodeVec() const;
 	const std::string& getErrorPage() const;
 	const std::vector<std::string>& getIndexVec() const;
@@ -37,7 +37,7 @@ class CommonDirectives {
 
    private:
 	bool is_autoindex_;
-	size_t client_max_body_size_;
+	int client_max_body_size_;
 	std::vector<std::string> v_error_code_;
 	std::string error_page_;
 	std::vector<std::string> v_index_;

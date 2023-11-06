@@ -40,7 +40,7 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
 
 const bool& CommonDirectives::isAutoindex() const { return is_autoindex_; }
 
-const size_t& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
+const int& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
 
 const std::vector<std::string>& CommonDirectives::getErrorCodeVec() const { return v_error_code_; }
 
