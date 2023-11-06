@@ -2,11 +2,11 @@
 
 Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked(false), is_chunked_body_end(false) {}
 
-std::string Request::getConnection() { return connection_; }
-RequestStatus Request::getParsing_status() { return parsing_status_; }
-std::string Request::getMethod() { return method_; }
-std::string Request::getUri() { return uri_; }
-std::string Request::getHost() { return host_; }
+std::string Request::getConnection() const { return connection_; }
+RequestStatus Request::getParsing_status() const { return parsing_status_; }
+std::string Request::getMethod() const { return method_; }
+std::string Request::getUri() const { return uri_; }
+std::string Request::getHost() const { return host_; }
 int Request::getBodySize() { return body_size_; }
 
 Request &Request::operator=(const Request &obj) {

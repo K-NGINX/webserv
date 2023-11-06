@@ -37,11 +37,11 @@ class Request {
 	void checkValidRequest();
 	void print();
  // gettersetter
-	std::string getConnection();
-	RequestStatus getParsing_status();
-	std::string getMethod();
-	std::string getUri();
-	std::string getHost();
+	std::string getConnection() const;
+	RequestStatus getParsing_status() const;
+	std::string getMethod() const;
+	std::string getUri() const;
+	std::string getHost() const;
 	int getBodySize();
    private:
 	std::string connection_;
