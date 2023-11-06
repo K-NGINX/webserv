@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked_(false), is_chunked_body_end_(false) {}
+Request::Request() : parsing_status_(INIT), body_size_(0), is_chunked_(false) {}
 
 std::string Request::getConnection() const { return connection_; }
 RequestStatus Request::getParsing_status() const { return parsing_status_; }
@@ -20,7 +20,6 @@ Request &Request::operator=(const Request &obj) {
 	body_ = obj.body_;
 	body_size_ = obj.body_size_;
 	is_chunked_ = obj.is_chunked_;
-	is_chunked_body_end_ = obj.is_chunked_;
 	connection_ = obj.connection_;
 	return *this;
 }
@@ -36,6 +35,7 @@ void Request::print() {
 		std::cout << "-> DONE" << RESET << std::endl;
 	else if (parsing_status_ == ERROR)
 		std::cout << "-> ERROR" << RESET << std::endl;
+	std::cout << parsing_status_ << std::endl;
 }
 
 static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
@@ -58,23 +58,29 @@ static std::vector<std::vector<char> > splitVector(std::vector<char> &line) {
 
 static std::vector<char> getRemainBuffer(std::vector<char> &buffer) {
 	std::vector<char> res;
-	size_t last_idx = buffer.size() - 1;
-	if (buffer[last_idx] != '\n' || buffer[last_idx - 1] != '\r') {
-		size_t seperator_idx = buffer.size() - 1;
-		for (size_t i = buffer.size() - 2; i >= 0; --i) {
-			if (buffer[i] == '\r' && buffer[i + 1] == '\n') {
-				seperator_idx = i;
+	// size_t last_idx = buffer.size() - 1;
+	// if (buffer[last_idx] != '\n' || buffer[last_idx - 1] != '\r') {
+		ssize_t buffer_size = buffer.size();
+		ssize_t seperator_idx = buffer_size - 2;
+		while (seperator_idx >= 0) {
+			if (buffer[seperator_idx] == '\r' && buffer[seperator_idx + 1] == '\n')
 				break;
-			}
+			seperator_idx--;
 		}
-		for (size_t i = seperator_idx + 2; i < buffer.size(); i++)
+		if (seperator_idx == -1) { // \r\n이 없는 경우
+			res = buffer;
+			buffer.clear();
+			return res;
+		} // ab\r\n1
+		for (ssize_t i = seperator_idx + 2; i < buffer_size; i++)
 			res.push_back(buffer[i]);
 		// 원래 버퍼 뒤에 붙어있던 것들은 다 지워준다.
-		while (buffer.size() >= seperator_idx + 2)
+		while (buffer_size > seperator_idx + 2)
 			buffer.pop_back();
-	}
+	// }
 	return res;
 }
+
 static bool isValidMethod(std::string &str) {
 	if (str == "GET" || str == "POST" || str == "DELETE")
 		return true;
@@ -101,7 +107,7 @@ void Request::parseStartLine(std::vector<char> &line) {
 
 /**
  * @brief content-type value 뒤에 ----boundary_ 잘라주는 함수
- * 
+ *
  * @param value content-type 뒤에 붙는 ---boundary_ 달려있는 value
  * @return true ; 있어서 잘 짤라줌
  * @return false ; 없어서 오류
@@ -110,14 +116,19 @@ static bool refineContentType(std::string& value) {
 	size_t semi_colon = value.find(';');
 	if (semi_colon == std::string::npos)
 		return false;
-	
+
 	value.erase(semi_colon);
 	return true;
 }
 
 void Request::parseHeader(std::vector<char> &line) {
 	if (line.size() == 0) {
-		parsing_status_ = BODY;
+		if (method_ == "POST")
+			parsing_status_ = BODY;
+		else
+			parsing_status_ = DONE;
+		if (host_ == "")
+			parsing_status_ = ERROR;
 		return;
 	}
 	std::vector<char>::iterator it = std::find(line.begin(), line.end(), ':');
@@ -134,6 +145,10 @@ void Request::parseHeader(std::vector<char> &line) {
 		return;
 	}
 	// body 파일 제한
+	if (key == "Content-Length" && value != "0" && (method_ == "GET" || method_ == "DELETE")) {
+		parsing_status_ = ERROR;
+		return;
+	}
 	if (key == "Content-Type" && refineContentType(value) && Utils::checkMIMEType(value) == false) {
 		parsing_status_ = ERROR;
 		return;
@@ -148,40 +163,25 @@ void Request::parseHeader(std::vector<char> &line) {
 }
 
 void Request::parseBody(std::vector<char> &line) {
-	// if (line.size() == 0) {
-	// 	parsing_status_ = ERROR;
-	// 	std::cout << RED << ":!!!!!!!!!!!!!!!" << RESET << std::endl;
-	// 	return;
-	// }
 	body_size_ += line.size();
 	line.push_back('\r');
 	line.push_back('\n');
 	for (size_t i = 0; i < line.size(); i++)
 		body_.push_back(line[i]);
+	if (body_size_ == Utils::stoi(m_header_["Content-Length"])) {
+		parsing_status_ = DONE;
+		CheckEmptyRemainBuffer();
+	}
 }
 /**
  * @brief 모든 request를 읽었을때 호출되며 request 형식에 부합하는지 마지막으로 검증하는 함수
  *
  */
-void Request::checkValidRequest() {
-	if (host_ == "" || remain_buffer_.size() != 0 || parsing_status_ != BODY || (is_chunked_ && is_chunked_body_end_ == false)) {	   // chunked인데 end가 아니거나
+void Request::CheckEmptyRemainBuffer() {
+	if (remain_buffer_.size() != 0) {	   // chunked인데 end가 아니거나
 		parsing_status_ = ERROR;
 		return;
 	}
-	// post일때 유효한 request일 경우
-	if (method_ == "POST") {
-		if (m_header_.find("Content-Length") != m_header_.end() && body_size_ != Utils::stoi(m_header_["Content-Length"])) {
-			parsing_status_ = ERROR;
-			std::cout << RED << "here !!!!!!!!!!!!!!!!!" << RESET << std::endl;
-			return;
-		}
-		parsing_status_ = DONE;
-		return;
-	} else if ((method_ == "GET" || method_ == "DELETE") && body_size_ == 0) {
-		parsing_status_ = DONE;
-		return;
-	}
-	parsing_status_ = ERROR;
 }
 
 void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line) {
@@ -196,34 +196,46 @@ void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line)
 	body_size_ += line_size;
 	for (size_t i = 0; i < line.size(); i++)
 		body_.push_back(line[i]);
-	if (body_size_ == 0)
-		is_chunked_body_end_ = true;
+	if (body_size_ == 0) {
+		parsing_status_ = DONE;
+		CheckEmptyRemainBuffer();
+	}
 }
 
 void Request::parse(int fd) {
-	// (void)fd;
+	(void)fd;
 	// char buffer[BUFFER_SIZE] = "POST /index.html HTTP/1.1\r\nHost:www.example.com\r\nTransfer-Encoding:chunked\r\n\r\n4\r\nbody\r\n4\r\nbody\r\n";
-	//   char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\n\r\n";
-	char buffer[BUFFER_SIZE];
-	int read_size = read(fd, buffer, BUFFER_SIZE);
+	  char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\ndfd";
+	// char buffer[BUFFER_SIZE];
+	// int read_size = read(fd, buffer, BUFFER_SIZE);
 	// for (int i = 0; i < read_size; i++)
 	// 	std::cout << buffer[i];
 	// std::cout << std::endl << std::endl;
-	if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
-		return;
+	// if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
+	// 	return;
 	if (parsing_status_ == INIT)
 		parsing_status_ = START_LINE;
-	if (read_size == 0)	   // EOF
-		checkValidRequest();
-	if (read_size == -1)
-		parsing_status_ = ERROR;
-	if (parsing_status_ == ERROR || parsing_status_ == DONE)
-		return;
+	// if (read_size == 0 && parsing_status_ != DONE)	   // EOF
+	// 	CheckEmptyRemainBuffer();
+	// if (read_size == -1)
+	// 	parsing_status_ = ERROR;
+	// if (parsing_status_ == ERROR || parsing_status_ == DONE)
+	// 	return;
 	// remainbuf에 이어붙힌다.
-	for (int i = 0; i < read_size; i++)
+	// for (int i = 0; i < read_size; i++)
+	for (int i = 0; buffer[i]; i++)
 		remain_buffer_.push_back(buffer[i]);
+	// if (remain_buffer_.size() == 0) { ////////////////////
+	// 	parsing_status_ = ERROR;
+	// 	return ;
+	// }
 
 	std::vector<char> new_remain_buffer = getRemainBuffer(remain_buffer_);
+	std::cout << "|";
+	for (int i = 0; i < new_remain_buffer.size(); i++)
+		std::cout << new_remain_buffer[i];
+	std::cout << "|" << std::endl;
+
 	std::vector<std::vector<char> > v_splited_line = splitVector(remain_buffer_);
 	remain_buffer_ = new_remain_buffer;
 
@@ -237,11 +249,11 @@ void Request::parse(int fd) {
 				break;
 			case BODY:
 				if (is_chunked_) {
-					if (is_chunked_body_end_ == true || i + 1 >= v_splited_line.size()) {
+					parseChunkedBody(v_splited_line[i], v_splited_line[i + 1]);
+					if (parsing_status_ == DONE || i + 1 >= v_splited_line.size()) { // 아직 읽은 데이터가 남아있으면
 						parsing_status_ = ERROR;
 						return;
 					}
-					parseChunkedBody(v_splited_line[i], v_splited_line[i + 1]);
 					i++;
 				} else
 					parseBody(v_splited_line[i]);
@@ -250,17 +262,16 @@ void Request::parse(int fd) {
 				return;
 		}
 	}
-	if (parsing_status_ == BODY && remain_buffer_.size() == 0) {
-		if (method_ == "POST" && m_header_.find("Content-Length") != m_header_.end() && body_size_ < Utils::stoi(m_header_["Content-Length"]))
-			return;
-		checkValidRequest();
-	}
+	// if (parsing_status_ == BODY && remain_buffer_.size() == 0) {
+	// 	if (method_ == "POST" && m_header_.find("Content-Length") != m_header_.end() && body_size_ < Utils::stoi(m_header_["Content-Length"]))
+	// 		return;
+	// 	checkValidRequest();
+	// }
 }
+int main() {
+  Request req;
+  req.parse(0);
 
-// int main() {
-//   Request req;
-//   req.parse(0);
-
-//   req.checkValidRequest();
-//   req.print();
-// }
+  req.CheckEmptyRemainBuffer();
+  req.print();
+}

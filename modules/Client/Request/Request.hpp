@@ -34,7 +34,7 @@ class Request {
 	void parseHeader(std::vector<char> &line);
 	void parseBody(std::vector<char> &line);
 	void parseChunkedBody(std::vector<char> &size, std::vector<char> &line);
-	void checkValidRequest();
+	void CheckEmptyRemainBuffer();
 	void print();
  // gettersetter
 	std::string getConnection() const;
@@ -55,6 +55,5 @@ class Request {
 	std::vector<char> body_;
 	int body_size_;
 	bool is_chunked_;
-	bool is_chunked_body_end_;
 	std::string boundary_;
 };
