@@ -1,6 +1,6 @@
 #include "ConfigManager.hpp"
 
-ConfigManager::ConfigManager() : conf_path_("default.conf") {
+ConfigManager::ConfigManager() : conf_path_("./etc/k-nginx/k-nginx.conf") {
 	char path[1024];
 	getcwd(path, sizeof(path));
 	program_path_ = std::string(path);

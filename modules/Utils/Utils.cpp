@@ -7,7 +7,7 @@ std::map<std::string, std::string> initializeMIMEMap() {
 	m_mime["html"] = "text/html";
 	m_mime["png"] = "image/png";
 	m_mime["ico"] = "image/x-icon";
-
+	m_mime["binary"] = "multipart/form-data";
 	return m_mime;
 }
 std::map<std::string, std::string> Utils::m_mime = initializeMIMEMap();

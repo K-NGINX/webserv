@@ -17,11 +17,12 @@ void Response::print() {
 	std::cout << GRAY << "\n[ RESPONSE ]" << std::endl;
 	std::map<std::string, std::string>::iterator header_it = m_header_.begin();
 	std::vector<char> status_line = getStatusLine();
-	std::cout << std::string(status_line.begin(), status_line.end()) << std::endl;
+	std::cout << std::string(status_line.begin(), status_line.end());
 	while (header_it != m_header_.end()) {
 		std::cout << header_it->first << ": " << header_it->second << std::endl;
 		header_it++;
 	}
+	std::cout << RESET << std::endl;
 }
 
 void Response::setContentType(const std::string &resource) {
