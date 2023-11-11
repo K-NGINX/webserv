@@ -31,7 +31,9 @@ void Client::setStatus(const ClientStatus& status) {
 
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	// std::cout << "." << std::endl;
-	request_.parse(socket_);
+	char read_buffer[BUFFER_SIZE];
+	int read_size = read(socket_, read_buffer, BUFFER_SIZE);
+	request_.parse(read_buffer, read_size);
 	// std::cout << ".." << std::endl;
 	if (request_.getParsing_status() == DONE || request_.getParsing_status() == ERROR) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !

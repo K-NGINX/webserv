@@ -38,13 +38,7 @@ class Request {
 	Request();
 	Request &operator=(const Request &obj);
 
-	void parse(int fd);
-	void parseStartLine(std::vector<char> &line);
-	void parseHeader(std::vector<char> &line);
-	void parseBody(std::vector<char> &line);
-	void parseChunkedBody(std::vector<char> &size, std::vector<char> &line);
-	void checkEmptyRemainBuffer();
-	void refineContentType(std::string &value);
+	void parse(char *read_buffer, int read_size);
 	void print();
 	// gettersetter
 	std::string getConnection() const;
@@ -54,10 +48,14 @@ class Request {
 	std::string getHost() const;
 	const std::vector<char> &getBody() const;
 	int getBodySize();
-	void func(std::vector<char> &line, v_c_iter &line_start_it, v_c_iter &next_sep_it);
-	void parseBinaryBody(std::vector<char> &line);
 
    private:
+	void parseStartLine(std::vector<char> &line);
+	void parseHeader(std::vector<char> &line);
+	void parseBody(std::vector<char> &line);
+	void parseChunkedBody(std::vector<char> &line, v_c_iter &line_start_it, v_c_iter &next_sep_it);
+	void parseBinaryBody(std::vector<char> &line);
+	void refineContentType(std::string &value);
 	v_c_iter getNextSepIter(v_c_iter line_start_it);
 	std::string connection_;
 	RequestStatus parsing_status_;
@@ -65,10 +63,9 @@ class Request {
 	std::string uri_;
 	std::string host_;
 	std::vector<char> buffer_;
-	std::map<std::string, std::string> m_header_;	 ////////////////////
+	size_t content_length_;
 	std::vector<char> body_;
 	size_t body_size_;
-	// bool is_chunked_;///////////////
 	BodyType bodyType_;
 	std::string boundary_;
 };

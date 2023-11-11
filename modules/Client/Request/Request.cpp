@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request() : parsing_status_(INIT), body_size_(0), bodyType_(DEFAULT) {}
+Request::Request() : parsing_status_(INIT), content_length_(0), body_size_(0), bodyType_(DEFAULT) {}
 
 std::string Request::getConnection() const { return connection_; }
 RequestStatus Request::getParsing_status() const { return parsing_status_; }
@@ -16,7 +16,7 @@ Request &Request::operator=(const Request &obj) {
 	method_ = obj.method_;
 	uri_ = obj.uri_;
 	host_ = obj.host_;
-	m_header_ = obj.m_header_;
+	content_length_ = obj.content_length_;
 	body_ = obj.body_;
 	body_size_ = obj.body_size_;
 	bodyType_ = obj.bodyType_;
@@ -28,8 +28,7 @@ void Request::print() {
 	std::cout << GRAY << "\n[ REQUEST ]" << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
 	std::cout << "Host: " << host_ << std::endl;
-	if (m_header_.find("Content-Length") != m_header_.end())
-		std::cout << "Content-Length: " << m_header_["Content-Length"] << std::endl;
+	std::cout << "Content-Length: " << content_length_ << std::endl;
 	std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
 		std::cout << "-> DONE" << RESET << std::endl;
@@ -47,7 +46,6 @@ void Request::parseStartLine(std::vector<char> &line) {
 	std::string s_line(line.begin(), line.end()), tmp;
 	std::cout << "|" << s_line << "|" << std::endl;
 	std::stringstream ss(s_line);
-	// std::cout << s_line << std::endl; /////////
 	std::vector<std::string> split;
 	while (ss >> tmp)
 		split.push_back(tmp);
@@ -72,10 +70,10 @@ void Request::refineContentType(std::string &value) {
 	if (semi_colon == std::string::npos)
 		return;
 	size_t equal_oper = value.find('=');
-	boundary_ = value.substr(equal_oper);
+	boundary_ = value.substr(equal_oper + 1);
 	bodyType_ = BINARY;
 	value.erase(semi_colon);
-	std::cout << YELLOW << "boundary : " << boundary_ << "\nnew value : " << value << RESET << std::endl; /////////////
+	std::cout << YELLOW << "boundary : " << boundary_ << "\nnew value : " << value << RESET << std::endl;	 /////////////
 }
 
 void Request::parseHeader(std::vector<char> &line) {
@@ -104,9 +102,12 @@ void Request::parseHeader(std::vector<char> &line) {
 		return;
 	}
 	// body 파일 제한
-	if (key == "Content-Length" && value != "0" && (method_ == "GET" || method_ == "DELETE")) {
-		parsing_status_ = ERROR;
-		return;
+	if (key == "Content-Length") {
+		if (value != "0" && (method_ == "GET" || method_ == "DELETE")) {
+			parsing_status_ = ERROR;
+			return;
+		}
+		content_length_ = static_cast<size_t>(Utils::stoi(value));
 	}
 	if (key == "Content-Type") {
 		refineContentType(value);
@@ -121,58 +122,16 @@ void Request::parseHeader(std::vector<char> &line) {
 		host_ = value;
 	if (key == "Connection")
 		connection_ = value;
-	m_header_[key] = value;
 }
 
-// Content-Type: multipart/form-data; boundary=-----XXX
-
-// -----XXX
-// 1111
-
-// -----XXX
-// file_name: "kitty.png"
-
-// -----XXX
-// 22
-
-// -----XXX--
-
 void Request::parseBody(std::vector<char> &line) {
-	size_t content_length = static_cast<size_t>(Utils::stoi(m_header_["Content-Length"]));
-
 	size_t idx = 0;
-	while (idx < line.size() && body_size_ < content_length) {
+	while (idx < line.size() && body_size_ < content_length_) {
 		body_.push_back(line[idx]);
 		body_size_++;
 		idx++;
 	}
-	if (body_size_ == content_length)
-		parsing_status_ = DONE;
-}
-
-/**
- * @brief 모든 request를 읽었을때 호출되며 request 형식에 부합하는지 마지막으로 검증하는 함수
- *
- */
-void Request::checkEmptyRemainBuffer() {
-	if (buffer_.size() != 0) {	  // chunked인데 end가 아니거나
-		parsing_status_ = ERROR;
-		return;
-	}
-}
-
-void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line) {
-	size_t line_size = Utils::stoi(std::string(size.begin(), size.end()));
-	if (line_size != line.size()) {
-		parsing_status_ = ERROR;
-		return;
-	}
-	line.push_back('\r');
-	line.push_back('\n');
-	body_size_ += line_size;
-	for (size_t i = 0; i < line.size(); i++)
-		body_.push_back(line[i]);
-	if (line_size == 0)
+	if (body_size_ == content_length_)
 		parsing_status_ = DONE;
 }
 
@@ -189,8 +148,8 @@ v_c_iter Request::getNextSepIter(v_c_iter line_start_it) {
 	return next_sep_it;
 }
 
-void Request::func(std::vector<char>& line, v_c_iter& line_start_it, v_c_iter& next_sep_it) {
-	if (next_sep_it == buffer_.end()) { // chunked인데 짝이 안맞음
+void Request::parseChunkedBody(std::vector<char> &line, v_c_iter &line_start_it, v_c_iter &next_sep_it) {
+	if (next_sep_it == buffer_.end()) {	   // chunked인데 짝이 안맞음
 		parsing_status_ = ERROR;
 		return;
 	}
@@ -199,7 +158,19 @@ void Request::func(std::vector<char>& line, v_c_iter& line_start_it, v_c_iter& n
 	line_start_it = next_sep_it;
 	if (next_sep_it != buffer_.end())
 		line_start_it += 2;
-	parseChunkedBody(line, chunked_line);
+
+	size_t line_size = Utils::stoi(std::string(line.begin(), line.end()));
+	if (line_size != chunked_line.size()) {
+		parsing_status_ = ERROR;
+		return;
+	}
+	chunked_line.push_back('\r');
+	chunked_line.push_back('\n');
+	body_size_ += line_size;
+	for (size_t i = 0; i < chunked_line.size(); i++)
+		body_.push_back(chunked_line[i]);
+	if (line_size == 0)
+		parsing_status_ = DONE;
 }
 
 void Request::parseBinaryBody(std::vector<char> &line) {
@@ -210,7 +181,7 @@ void Request::parseBinaryBody(std::vector<char> &line) {
 	int end_idx = Utils::findSubVector(line, boundary_end);
 	if (end_idx == -1)
 		end_idx = line.size() - 1;
-	else // body parsing 끝
+	else	// body parsing 끝
 		parsing_status_ = DONE;
 
 	for (int i = 0; i <= end_idx; i++) {
@@ -219,31 +190,18 @@ void Request::parseBinaryBody(std::vector<char> &line) {
 	}
 }
 
-void Request::parse(int fd) {
-	// (void)fd;
-	// char buffer[BUFFER_SIZE] = "POST /index.html HTTP/1.1\r\nHost:www.example.com\r\nContent-Length:24\r\n\r\nbody\r\nbody\r\nbody\r\nbody\r\n";
-	//   char buffer[BUFFER_SIZE] = "GET /index.html HTTP/1.1\r\nHost:dfdfd\r\ndfd";
-	char read_buffer[BUFFER_SIZE];
-	int read_size = read(fd, read_buffer, BUFFER_SIZE);
-	// for (int i = 0; i < read_size; i++)
-	// 	std::cout << buffer[i];
+void Request::parse(char *read_buffer, int read_size) {
 	if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
 		return;
 	if (parsing_status_ == INIT)
 		parsing_status_ = START_LINE;
-	if (read_size == 0 && parsing_status_ != DONE)	  // EOF
-		checkEmptyRemainBuffer();
-	if (read_size == -1)
+	if (read_size <= 0 && parsing_status_ != DONE)	  // EOF 이거나 read error
 		parsing_status_ = ERROR;
 	if (parsing_status_ == ERROR || parsing_status_ == DONE)
 		return;
 	// remainbuf에 이어붙힌다.
 	for (int i = 0; i < read_size; i++)
 		buffer_.push_back(read_buffer[i]);
-	if (buffer_.size() == 0) {	  ////////////////////
-		parsing_status_ = ERROR;
-		return;
-	}
 
 	v_c_iter line_start_it = buffer_.begin();
 
@@ -268,9 +226,8 @@ void Request::parse(int fd) {
 						line.push_back('\n');
 					}
 					parseBody(line);
-				}
-				else if (bodyType_ == CHUNKED)
-					func(line, line_start_it, next_sep_it);
+				} else if (bodyType_ == CHUNKED)
+					parseChunkedBody(line, line_start_it, next_sep_it);
 				else if (bodyType_ == BINARY)
 					parseBinaryBody(line);
 				break;
@@ -280,15 +237,3 @@ void Request::parse(int fd) {
 	}
 	buffer_.clear();
 }
-// int main() {
-//   Request req;
-//   req.parse(0);
-
-//   req.CheckEmptyRemainBuffer();
-//   req.print();
-// }
-
-
-// TODO: header에서 나가는 경우 get, delete 일때 buffer 맞춰서 썰어주기
-// multipartformdata일때 boundary-- 일때 끝나는 로직 만들어주기
-
