@@ -24,6 +24,7 @@ class Utils {
 	static std::string whitespace;
 	static std::map<std::string, std::string> m_mime;
 
+	static int findSubVector(std::vector<char>& v, std::vector<char>& obj);
 	template <typename T>
 	std::string ntos(T n) {
 	std::stringstream ss;
