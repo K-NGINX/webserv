@@ -45,6 +45,7 @@ static bool isValidMethod(std::string &str) {
 
 void Request::parseStartLine(std::vector<char> &line) {
 	std::string s_line(line.begin(), line.end()), tmp;
+	std::cout << "|" << s_line << "|" << std::endl;
 	std::stringstream ss(s_line);
 	// std::cout << s_line << std::endl; /////////
 	std::vector<std::string> split;
@@ -175,13 +176,15 @@ void Request::parseChunkedBody(std::vector<char> &size, std::vector<char> &line)
 		parsing_status_ = DONE;
 }
 
-v_c_iter Request::getNextSepIter(v_c_iter &line_start_it) {
+v_c_iter Request::getNextSepIter(v_c_iter line_start_it) {
 	v_c_iter next_sep_it = buffer_.begin();
 
 	while (next_sep_it != buffer_.end()) {
 		next_sep_it = std::find(line_start_it, buffer_.end(), '\r');
 		if (*(next_sep_it + 1) == '\n')
 			break;
+		else
+			line_start_it = next_sep_it + 1;
 	}
 	return next_sep_it;
 }
@@ -205,14 +208,15 @@ void Request::parseBinaryBody(std::vector<char> &line) {
 	boundary_end.push_back('-');
 
 	int end_idx = Utils::findSubVector(line, boundary_end);
-	for (int i = 0; i <= end_idx; i++) {
-		body_.push_back(line[i]);
-		body_size_++;
-	}
 	if (end_idx == -1)
 		end_idx = line.size() - 1;
 	else // body parsing 끝
 		parsing_status_ = DONE;
+
+	for (int i = 0; i <= end_idx; i++) {
+		body_.push_back(line[i]);
+		body_size_++;
+	}
 }
 
 void Request::parse(int fd) {
@@ -245,7 +249,7 @@ void Request::parse(int fd) {
 
 	while (line_start_it < buffer_.end()) {
 		v_c_iter next_sep_it = getNextSepIter(line_start_it);
-		std::vector<char> line(line_start_it, next_sep_it - 1);
+		std::vector<char> line(line_start_it, next_sep_it);
 		line_start_it = next_sep_it;
 		if (next_sep_it != buffer_.end())
 			line_start_it += 2;

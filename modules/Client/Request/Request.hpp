@@ -58,7 +58,7 @@ class Request {
 	void parseBinaryBody(std::vector<char> &line);
 
    private:
-	v_c_iter getNextSepIter(v_c_iter &line_start_it);
+	v_c_iter getNextSepIter(v_c_iter line_start_it);
 	std::string connection_;
 	RequestStatus parsing_status_;
 	std::string method_;

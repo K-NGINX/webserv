@@ -12,5 +12,5 @@ void RequestHandler::handleCgi(Client &client) {
     std::cout << GREEN << "===" << std::endl;
     for (size_t i = 0; i < body.size(); i++)
         std::cout << body[i];
-    std::cout << RESET << std::endl;
+    std::cout << "\n===" << RESET << std::endl;
 }
