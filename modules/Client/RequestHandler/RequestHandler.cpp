@@ -5,6 +5,7 @@ RequestHandler::RequestHandler() {}
 RequestHandler::~RequestHandler() {}
 
 void RequestHandler::handleError(Client &client, const std::string &error_code) {
+	std::cerr << YELLOW << "handleError" << RESET << std::endl;
 	client.response_.setStatusCode(error_code);
 	// 에러 페이지 설정
 	std::string error_page = DEFAULT_ERROR_PAGE;	// 기본 에러 페이지
@@ -21,7 +22,7 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 		return ;
 	}
 	std::cout << YELLOW << error_page << RESET << std::endl;
-	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	// fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); /////////////////////
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }

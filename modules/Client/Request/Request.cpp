@@ -9,6 +9,7 @@ std::string Request::getUri() const { return uri_; }
 std::string Request::getHost() const { return host_; }
 const std::vector<char> &Request::getBody() const { return body_; }
 int Request::getBodySize() { return body_size_; }
+const std::string Request::getContentLength() const { return std::to_string(content_length_); }
 
 Request &Request::operator=(const Request &obj) {
 	parsing_status_ = obj.parsing_status_;
@@ -44,7 +45,6 @@ static bool isValidMethod(std::string &str) {
 
 void Request::parseStartLine(std::vector<char> &line) {
 	std::string s_line(line.begin(), line.end()), tmp;
-	std::cout << "|" << s_line << "|" << std::endl;
 	std::stringstream ss(s_line);
 	std::vector<std::string> split;
 	while (ss >> tmp)
@@ -73,7 +73,6 @@ void Request::refineContentType(std::string &value) {
 	boundary_ = value.substr(equal_oper + 1);
 	bodyType_ = BINARY;
 	value.erase(semi_colon);
-	std::cout << YELLOW << "boundary : " << boundary_ << "\nnew value : " << value << RESET << std::endl;	 /////////////
 }
 
 void Request::parseHeader(std::vector<char> &line) {
@@ -140,7 +139,7 @@ v_c_iter Request::getNextSepIter(v_c_iter line_start_it) {
 
 	while (next_sep_it != buffer_.end()) {
 		next_sep_it = std::find(line_start_it, buffer_.end(), '\r');
-		if (*(next_sep_it + 1) == '\n')
+		if (next_sep_it != buffer_.end() && *(next_sep_it + 1) == '\n')
 			break;
 		else
 			line_start_it = next_sep_it + 1;

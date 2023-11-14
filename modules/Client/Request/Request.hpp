@@ -10,7 +10,7 @@
 
 #include "../../Utils/Utils.hpp"
 
-#define BUFFER_SIZE 100000
+// #define BUFFER_SIZE 100000
 #define VERSION "HTTP/1.1"
 // #define PLAIN_TEXT "text/plain"
 // #define HTML_TEXT "text/html"
@@ -48,6 +48,7 @@ class Request {
 	std::string getHost() const;
 	const std::vector<char> &getBody() const;
 	int getBodySize();
+	const std::string getContentLength() const;
 
    private:
 	void parseStartLine(std::vector<char> &line);

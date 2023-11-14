@@ -9,6 +9,8 @@
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
 
+#define BUFFER_SIZE 1024
+
 enum ClientStatus {
 	RECV_REQUEST,
 	READ_CGI,
@@ -32,7 +34,7 @@ class Client {
 	void handleCgiWriteEvent(int fd);
 	void handleFileReadEvent(int fd);
 	void handleFileWriteEvent(int fd);
-	
+
 	Config config_;
 	ClientStatus status_;
 	int socket_;			// 클라이언트 소켓: 식별자로 사용됨, 소멸자에서 close
@@ -43,4 +45,5 @@ class Client {
 	const ServerBlock* server_;
 	const LocationBlock* location_;
 	ssize_t written_;
+	ssize_t cgi_write_size_;
 };
