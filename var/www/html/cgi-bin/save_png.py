@@ -2,22 +2,31 @@
 import os
 import cgi
 import cgitb
-import base64
-from pathlib import Path
+from PIL import Image
+from io import BytesIO
 
-cgitb.enable()
+cgitb.enable()  # for troubleshooting
 
-# 저장할 위치
-save_path = os.environ.get('SAVE_PATH')
+# 환경변수에서 필요한 정보를 얻어옵니다.
+request_method = os.environ['REQUEST_METHOD']
+content_type = os.environ['CONTENT_TYPE']
+content_length = os.environ['CONTENT_LENGTH']
+save_path = os.environ['SAVE_PATH']
 
-# 표준 입력에서 데이터 읽기
-form = cgi.FieldStorage(fp=sys.stdin, environ=os.environ, keep_blank_values=True)
+# multipart/form-data의 본문을 파이프로부터 읽어옵니다.
+form = cgi.FieldStorage()
+# 본문에서 파일 데이터를 불러옵니다.
+fileitem = form['file']
 
-# multipart/form-data에서 png 데이터와 파일 이름 추출
-fileitem = form['file'] # 'file'은 multipart/form-data의 필드명입니다.
-filename = fileitem.filename
-png_data = fileitem.file.read()
+if fileitem.filename:
+    # BytesIO를 이용해 바이너리 데이터를 PIL.Image로 읽어들입니다.
+    im = Image.open(BytesIO(fileitem.file.read()))
 
-# 파일로 저장
-with open(Path(save_path) / filename, 'wb') as f:
-    f.write(png_data)
+    # 이미지를 PNG 형식으로 저장합니다.
+    im.save(os.path.join(save_path, fileitem.filename))
+
+    # 파일 저장에 성공하였음을 알립니다.
+    print("Success: The file was saved as {}.".format(fileitem.filename))
+else:
+    # 파일 저장에 실패하였음을 알립니다.
+    print("Failed: No file was uploaded.")

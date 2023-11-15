@@ -62,24 +62,30 @@ void Client::handleSocketWriteEvent() {
 }
 
 void Client::handleCgiReadEvent(int fd) {
-	(void)fd;
 	std::cerr << "handleCgiReadEvent" << std::endl;
 	waitpid(pid_, NULL, 0);
 	std::cerr << "waitpid after" << std::endl;
+	char buffer[BUFFER_SIZE];
+	ssize_t read_size = read(fd, buffer, BUFFER_SIZE);
+	for (ssize_t i = 0; i < read_size; i++)
+		std::cout << buffer[i];
+	std::cout << std::endl;
 	// waitpid
 	// 다 읽었다면 반환값 response 헤더 파싱
 	// 읽기 실패 -> 500
 	// 양방향 파이프 resource_fd 닫기
-	status_ = SEND_RESPONSE;
+	if (read_size <= 0) {
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
+		close(fd);
+		status_ = SEND_RESPONSE;
+	}
 }
 
 void Client::handleCgiWriteEvent(int fd) {
-	std::cerr << "handleCgiWriteEvent" << std::endl;
 	const std::vector<char>& body = request_.getBody();
 	ssize_t write_size = body.size() - cgi_write_size_ > BUFFER_SIZE ? BUFFER_SIZE : body.size() - cgi_write_size_;
 	write_size = write(fd, &body[cgi_write_size_], write_size);
 	if (write_size == -1) {	   // 쓰기 실패
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
 		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(fd);
 		close(fd);
 		RequestHandler::handleError(*this, "500");
@@ -87,6 +93,7 @@ void Client::handleCgiWriteEvent(int fd) {
 	}
 	cgi_write_size_ += write_size;			 // 읽은 만큼 더해주기
 	if (cgi_write_size_ == static_cast<ssize_t>(body.size())) {	 // 다 썼음
+		std::cout << YELLOW << "Done !!!" << RESET << std::endl;
 		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(fd);
 		close(fd);
 		status_ = READ_CGI;

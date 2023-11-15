@@ -10,18 +10,20 @@ std::string Request::getHost() const { return host_; }
 const std::vector<char> &Request::getBody() const { return body_; }
 int Request::getBodySize() { return body_size_; }
 const std::string Request::getContentLength() const { return std::to_string(content_length_); }
+const std::string Request::getBoundary() const { return boundary_; }
 
 Request &Request::operator=(const Request &obj) {
+	connection_ = obj.connection_;
 	parsing_status_ = obj.parsing_status_;
-	buffer_ = obj.buffer_;
 	method_ = obj.method_;
 	uri_ = obj.uri_;
 	host_ = obj.host_;
+	buffer_ = obj.buffer_;
 	content_length_ = obj.content_length_;
 	body_ = obj.body_;
 	body_size_ = obj.body_size_;
 	bodyType_ = obj.bodyType_;
-	connection_ = obj.connection_;
+	boundary_ = obj.boundary_;
 	return *this;
 }
 
@@ -225,10 +227,15 @@ void Request::parse(char *read_buffer, int read_size) {
 						line.push_back('\n');
 					}
 					parseBody(line);
-				} else if (bodyType_ == CHUNKED)
+				} else if (bodyType_ == CHUNKED) {
 					parseChunkedBody(line, line_start_it, next_sep_it);
-				else if (bodyType_ == BINARY)
+				} else if (bodyType_ == BINARY) {
+					if (next_sep_it != buffer_.end()) {
+						line.push_back('\r');
+						line.push_back('\n');
+					}
 					parseBinaryBody(line);
+				}
 				break;
 			default:
 				return;

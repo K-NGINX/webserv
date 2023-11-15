@@ -23,7 +23,7 @@ static char **setEnv(Client& client) {
     std::string root = ConfigManager::getInstance().getProgramPath() + client.location_->common_directives_.getRoot();
 	std::vector<std::string> v_env;
 	v_env.push_back("REQUEST_METHOD=POST");
-	v_env.push_back("CONTENT_TYPE=multipart/form-data");
+	v_env.push_back("CONTENT_TYPE=multipart/form-data; boundary=" + client.request_.getBoundary());
 	v_env.push_back("CONTENT_LENGTH=" + client.request_.getContentLength());
 	v_env.push_back("SAVE_PATH=" + root + client.location_->getUploadPath());
 
@@ -76,6 +76,7 @@ void RequestHandler::handleCgi(Client &client) {
 		delete[] envp;
 		exit(1);
 	} else {	// 부모 프로세스
+		signal(SIGPIPE, SIG_IGN);
 		close(p2c_fd[0]);
 		close(c2p_fd[1]);
 		// 양방향 파이프에 대한 읽기, 쓰기 이벤트 등록 및 클라이언트 상태 변경

@@ -48,6 +48,7 @@ class Request {
 	const std::vector<char> &getBody() const;
 	int getBodySize();
 	const std::string getContentLength() const;
+	const std::string getBoundary() const;
 
    private:
 	void parseStartLine(std::vector<char> &line);
