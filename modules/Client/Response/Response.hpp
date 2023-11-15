@@ -19,6 +19,7 @@ class Response {
 	void setContentType(const std::string& resource);
 	// gettersetter
 	void setBody(const std::vector<char>& obj);
+	void pushBackBody(char *buffer, int read_size);
 	void setStatusCode(const std::string& obj);
 
    private:

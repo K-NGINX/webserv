@@ -96,16 +96,12 @@ void Client::handleFileReadEvent(int fd) {
 	int read_size = 0;
 	char buffer[BUFFER_SIZE];
 	std::vector<char> response_body;
-	while (true) {
-		read_size = read(fd, buffer, BUFFER_SIZE);
-		if (read_size == -1)
-			return RequestHandler::handleError(*this, "500");
-		else if (read_size == 0)
-			break;
-		for (int i = 0; i < read_size; i++)
-			response_body.push_back(buffer[i]);
-	}
-	response_.setBody(response_body);
+
+	read_size = read(fd, buffer, BUFFER_SIZE);
+	if (read_size == -1)
+		return RequestHandler::handleError(*this, "500");
+
+	response_.pushBackBody(buffer, read_size);
 	// for (size_t i = 0; i < response_.body_.size(); i++) /////////////////
 	// 	std::cout << response_.body_[i];
 	// std::cout << std::endl;

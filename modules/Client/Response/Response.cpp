@@ -11,6 +11,12 @@ Response &Response::operator=(const Response &obj) {
 }
 
 void Response::setBody(const std::vector<char> &obj) { body_ = obj; }
+
+void Response::pushBackBody(char *buffer, int read_size) {
+	for (int i = 0; i < read_size; i++)
+		body_.push_back(buffer[i]);
+}
+
 void Response::setStatusCode(const std::string &obj) { status_code_ = obj; }
 
 void Response::print() {
