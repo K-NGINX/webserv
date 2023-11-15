@@ -139,7 +139,7 @@ v_c_iter Request::getNextSepIter(v_c_iter line_start_it) {
 
 	while (next_sep_it != buffer_.end()) {
 		next_sep_it = std::find(line_start_it, buffer_.end(), '\r');
-		if (next_sep_it != buffer_.end() || *(next_sep_it + 1) == '\n')
+		if (next_sep_it == buffer_.end() || *(next_sep_it + 1) == '\n')
 			break;
 		else
 			line_start_it = next_sep_it + 1;
