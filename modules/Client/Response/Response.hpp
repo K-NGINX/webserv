@@ -17,9 +17,10 @@ class Response {
 
 	void makeResponse(std::vector<char>& msg, bool is_keep_alive);
 	void setContentType(const std::string& resource);
-	//gettersetter
+	// gettersetter
 	void setBody(const std::vector<char>& obj);
 	void setStatusCode(const std::string& obj);
+
    private:
 	std::string status_code_;
 	std::string content_type_;
