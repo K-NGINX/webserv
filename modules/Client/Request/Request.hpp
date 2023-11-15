@@ -10,7 +10,6 @@
 
 #include "../../Utils/Utils.hpp"
 
-// #define BUFFER_SIZE 100000
 #define VERSION "HTTP/1.1"
 // #define PLAIN_TEXT "text/plain"
 // #define HTML_TEXT "text/html"

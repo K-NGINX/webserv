@@ -9,8 +9,6 @@
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
 
-#define BUFFER_SIZE 1024
-
 enum ClientStatus {
 	RECV_REQUEST,
 	READ_CGI,

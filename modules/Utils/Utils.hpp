@@ -3,6 +3,9 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <vector>
+
+#define BUFFER_SIZE 1024
 
 #define RESET "\033[0m"
 #define GRAY "\033[1;90m"
