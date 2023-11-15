@@ -21,8 +21,8 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 		client.setStatus(WILL_DISCONNECT);
 		return ;
 	}
-	std::cout << YELLOW << error_page << RESET << std::endl;
-	// fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); /////////////////////
+	std::cout << YELLOW << error_page << RESET << std::endl; ////////////////////
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); /////////////////////
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }
@@ -48,7 +48,7 @@ void RequestHandler::handleRequest(Client &client) {
 		handleError(client, "400");
 		return ;
 	}
-	if (request.getConnection() == "close")
+	if (request.getConnection() == "Closed")
 		client.is_keep_alive_ = false;
 	// 요청에 사용할 서버 블록과 위치 블록 찾기
 	client.server_ = ConfigManager::getInstance().getConfig().findMatchingServerBlock(request.getHost());

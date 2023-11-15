@@ -72,7 +72,7 @@ void RequestHandler::handleGet(Client& client) {
 	}
 	// 파일 형식에 따른 Content-Type 설정
 	client.response_.setContentType(resource);
-	// fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }

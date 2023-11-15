@@ -10,8 +10,10 @@ ClientManager &ClientManager::getInstance() {
 }
 
 void ClientManager::disconnectClient(Client *client) {
-	if (client->is_keep_alive_)
-		return client->clear();
+	if (client->is_keep_alive_) {
+		client->clear();
+		return;
+	}
 
 	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
 	// 배열에서 삭제
@@ -27,6 +29,7 @@ void ClientManager::disconnectClient(Client *client) {
 	ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(client->socket_);
 	delete client;
 }
+
 /**
  * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트 처리 하는 함수
  *
@@ -34,6 +37,10 @@ void ClientManager::disconnectClient(Client *client) {
  */
 void ClientManager::handleEvent(struct kevent &event) {
 	Client *client = reinterpret_cast<Client *>(event.udata);
+	if (client == NULL) {
+		std::cout << "Client is null !!!" << std::endl;
+		return;
+	}
 	if (event.filter == EVFILT_READ) {	  // read_event
 		switch (client->status_) {
 			case RECV_REQUEST:

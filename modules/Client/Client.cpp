@@ -24,6 +24,7 @@ void Client::clear() {
 	written_ = 0;
 	cgi_write_size_ = 0;
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(socket_, this);
+	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
 }
 
 void Client::setStatus(const ClientStatus& status) {
@@ -33,6 +34,7 @@ void Client::setStatus(const ClientStatus& status) {
 void Client::handleSocketReadEvent() {	  // request가 왔다
 	char read_buffer[BUFFER_SIZE];
 	int read_size = read(socket_, read_buffer, BUFFER_SIZE);
+
 	request_.parse(read_buffer, read_size);
 	if (request_.getParsing_status() == DONE || request_.getParsing_status() == ERROR) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
@@ -74,7 +76,8 @@ void Client::handleCgiReadEvent(int fd) {
 void Client::handleCgiWriteEvent(int fd) {
 	std::cerr << "handleCgiWriteEvent" << std::endl;
 	const std::vector<char>& body = request_.getBody();
-	ssize_t write_size = write(fd, &body[cgi_write_size_], body.size() - cgi_write_size_);
+	ssize_t write_size = body.size() - cgi_write_size_ > BUFFER_SIZE ? BUFFER_SIZE : body.size() - cgi_write_size_;
+	write_size = write(fd, &body[cgi_write_size_], write_size);
 	if (write_size == -1) {	   // 쓰기 실패
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
 		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(fd);

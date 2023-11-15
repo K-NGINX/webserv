@@ -1,60 +1,80 @@
 #include "RequestHandler.hpp"
 
-static void execve_cgi(Client &client) {
+static char* stringToCharPtr(std::string str) {
+	char* result = new char[str.size() + 1];
+	std::strcpy(result, str.c_str());
+	return result;
+}
+
+static char **setArgv(Client& client) {
+	std::string root = ConfigManager::getInstance().getProgramPath() + client.location_->common_directives_.getRoot();
+	std::vector<std::string> v_argv;
+	v_argv.push_back("/usr/bin/python3");
+	v_argv.push_back(root + client.location_->getCgiPath());
+
+	char **argv = new char*[v_argv.size() + 1];
+	for (size_t i = 0; i < v_argv.size(); i++)
+		argv[i] = stringToCharPtr(v_argv[i]);
+	argv[v_argv.size()] = NULL;
+	return argv;
+}
+
+static char **setEnv(Client& client) {
     std::string root = ConfigManager::getInstance().getProgramPath() + client.location_->common_directives_.getRoot();
-    // 실행 파일 경로 설정
-    char *argv[3];
-    argv[0] = const_cast<char*>("/usr/bin/python3");
-    std::string filename = root + client.location_->getCgiPath();
-    argv[1] = const_cast<char*>(filename.c_str());
-    argv[2] = NULL;
-    // 환경변수 설정
-    char *envp[5];
-    envp[0] = const_cast<char*>("REQUEST_METHOD=POST");
-    envp[1] = const_cast<char*>("CONTENT_TYPE=multipart/form-data");
-    std::string content_length = "CONTENT_LENGTH=" + client.request_.getContentLength();
-    envp[2] = const_cast<char*>(content_length.c_str());
-    std::string save_path = "SAVE_PATH=" + root + client.location_->getUploadPath();
-    envp[3] = const_cast<char*>(save_path.c_str());
-    envp[4] = NULL;
-    // 실행
-    execve(argv[0], argv, envp);
-    std::cerr << RED << "execve fail" << RESET << std::endl;
-    exit(1);
+	std::vector<std::string> v_env;
+	v_env.push_back("REQUEST_METHOD=POST");
+	v_env.push_back("CONTENT_TYPE=multipart/form-data");
+	v_env.push_back("CONTENT_LENGTH=" + client.request_.getContentLength());
+	v_env.push_back("SAVE_PATH=" + root + client.location_->getUploadPath());
+
+	char **env = new char*[v_env.size() + 1];
+	for (size_t i = 0; i < v_env.size(); i++)
+		env[i] = stringToCharPtr(v_env[i]);
+	env[v_env.size()] = NULL;
+	return env;
+}
+
+static void close_pipe_fd(std::vector<int>& pipe_fd) {
+	for (size_t i = 0; i < pipe_fd.size(); i++)
+		close(pipe_fd[i]);
 }
 
 void RequestHandler::handleCgi(Client &client) {
+	std::vector<int> pipe_fd;
 	// 양방향 파이프 설정
 	int p2c_fd[2];	  // 부모 -> 자식
 	if (pipe(p2c_fd) == -1) {
 		handleError(client, "500");
 		return;
 	}
+	pipe_fd.push_back(p2c_fd[0]);
+	pipe_fd.push_back(p2c_fd[1]);
 	int c2p_fd[2];	  // 자식 -> 부모
 	if (pipe(c2p_fd) == -1) {
-		close(p2c_fd[0]);
-		close(p2c_fd[1]);
+		close_pipe_fd(pipe_fd);
 		handleError(client, "500");
 		return;
 	}
+	pipe_fd.push_back(c2p_fd[0]);
+	pipe_fd.push_back(c2p_fd[1]);
 	// 프로세스 복제
 	client.pid_ = fork();
 	if (client.pid_ < 0) {	  // fork 실패
-		close(p2c_fd[0]);
-		close(p2c_fd[1]);
-		close(c2p_fd[0]);
-		close(c2p_fd[1]);
+		close_pipe_fd(pipe_fd);
 		handleError(client, "500");
 		return;
 	} else if (client.pid_ == 0) {		   // 자식 프로세스
 		dup2(p2c_fd[0], STDIN_FILENO);	   // 부모 -> 자식 읽기
 		dup2(c2p_fd[1], STDOUT_FILENO);	   // 자식 -> 부모 쓰기
-		close(p2c_fd[0]);
-		close(p2c_fd[1]);
-		close(c2p_fd[0]);
-		close(c2p_fd[1]);
+		close_pipe_fd(pipe_fd);
 		// cgi 프로그램 실행
-		execve_cgi(client);
+		char **argv = setArgv(client);
+		char **envp = setEnv(client);
+		execve(argv[0], argv, envp);
+		std::cerr << RED << "execve fail" << RESET << std::endl;
+		delete[] argv;
+		delete[] envp;
+		exit(1);
 	} else {	// 부모 프로세스
 		close(p2c_fd[0]);
 		close(c2p_fd[1]);
