@@ -63,6 +63,6 @@ void ClientManager::handleEvent(struct kevent &event) {
 				break;
 		}
 	}
-	// 클라이언트가 요청을 받고 응답을 보내는 일련의 과정을 마쳤다면, 연결 끊어주기
+	// 요청을 받고 응답을 보내는 일련의 과정을 마쳤다면, 클라이언트와 연결 끊어주기
 	if (client->status_ == WILL_DISCONNECT) disconnectClient(client);
 }
