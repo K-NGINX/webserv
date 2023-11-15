@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 1024
 
 #define RESET "\033[0m"
 #define GRAY "\033[1;90m"
@@ -28,12 +28,6 @@ class Utils {
 	static std::map<std::string, std::string> m_mime;
 
 	static int findSubVector(std::vector<char>& v, std::vector<char>& obj);
-	template <typename T>
-	std::string ntos(T n) {
-	std::stringstream ss;
-	ss << n;
-	return ss.str();
-	}
 
    private:
 	Utils();

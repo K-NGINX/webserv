@@ -3,6 +3,7 @@
 Response::Response() : status_code_("200") {}
 
 Response &Response::operator=(const Response &obj) {
+	send_buffer_ = obj.send_buffer_;
 	status_code_ = obj.status_code_;
 	content_type_ = obj.content_type_;
 	m_header_ = obj.m_header_;
@@ -10,6 +11,7 @@ Response &Response::operator=(const Response &obj) {
 	return *this;
 }
 
+const std::vector<char>& Response::getSendBuffer() const { return send_buffer_; }
 void Response::setBody(const std::vector<char>& obj) { body_ = obj; }
 void Response::setStatusCode(const std::string& obj) { status_code_ = obj; }
 
@@ -31,7 +33,7 @@ void Response::setContentType(const std::string &resource) {
 	content_type_ = Utils::getMIMEType(file_type);
 }
 
-void Response::makeResponse(std::vector<char> &msg, bool is_keep_alive) {
+void Response::makeResponse(bool is_keep_alive) {
 	std::vector<char> status_line = getStatusLine();
 	std::vector<char> rn;
 	rn.push_back('\r');
@@ -40,13 +42,13 @@ void Response::makeResponse(std::vector<char> &msg, bool is_keep_alive) {
 	makeHeaderLine(is_keep_alive);
 	std::map<std::string, std::string>::const_iterator it = this->m_header_.begin();
 
-	msg.insert(msg.end(), status_line.begin(), status_line.end());
+	send_buffer_.insert(send_buffer_.end(), status_line.begin(), status_line.end());
 
 	for (; it != m_header_.end(); ++it)
 		header += it->first + ": " + it->second + "\r\n";
-	msg.insert(msg.end(), header.begin(), header.end());
-	msg.insert(msg.end(), rn.begin(), rn.end());
-	msg.insert(msg.end(), body_.begin(), body_.end());
+	send_buffer_.insert(send_buffer_.end(), header.begin(), header.end());
+	send_buffer_.insert(send_buffer_.end(), rn.begin(), rn.end());
+	send_buffer_.insert(send_buffer_.end(), body_.begin(), body_.end());
 
 	print();
 }

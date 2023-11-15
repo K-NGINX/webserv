@@ -43,5 +43,5 @@ class Client {
 	const ServerBlock* server_;
 	const LocationBlock* location_;
 	ssize_t written_;
-	ssize_t cgi_write_size_;
+	ssize_t cgi_written_;
 };

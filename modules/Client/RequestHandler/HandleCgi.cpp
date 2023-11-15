@@ -23,6 +23,7 @@ static char **setEnv(Client& client) {
     std::string root = ConfigManager::getInstance().getProgramPath() + client.location_->common_directives_.getRoot();
 	std::vector<std::string> v_env;
 	v_env.push_back("REQUEST_METHOD=POST");
+	std::cerr << "boundary=" << client.request_.getBoundary() << std::endl;
 	v_env.push_back("CONTENT_TYPE=multipart/form-data; boundary=" + client.request_.getBoundary());
 	v_env.push_back("CONTENT_LENGTH=" + client.request_.getContentLength());
 	v_env.push_back("SAVE_PATH=" + root + client.location_->getUploadPath());
@@ -64,12 +65,14 @@ void RequestHandler::handleCgi(Client &client) {
 		handleError(client, "500");
 		return;
 	} else if (client.pid_ == 0) {		   // 자식 프로세스
+		close(c2p_fd[0]);
+		close(p2c_fd[1]);
 		dup2(p2c_fd[0], STDIN_FILENO);	   // 부모 -> 자식 읽기
 		dup2(c2p_fd[1], STDOUT_FILENO);	   // 자식 -> 부모 쓰기
-		close_pipe_fd(pipe_fd);
 		// cgi 프로그램 실행
 		char **argv = setArgv(client);
 		char **envp = setEnv(client);
+		chmod(argv[1], 0777);
 		execve(argv[0], argv, envp);
 		std::cerr << RED << "execve fail" << RESET << std::endl;
 		delete[] argv;
