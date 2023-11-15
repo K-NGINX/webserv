@@ -5,7 +5,7 @@
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket)
-	: status_(RECV_REQUEST), socket_(socket), is_keep_alive_(true), pid_(-1), server_(NULL), location_(NULL), written_(0) {}
+	: status_(RECV_REQUEST), socket_(socket), is_keep_alive_(true), pid_(-1), server_(NULL), location_(NULL), written_(0), cgi_write_size_(0) {}
 
 Client::~Client() { close(socket_); }
 
@@ -22,6 +22,7 @@ void Client::clear() {
 	server_ = NULL;
 	location_ = NULL;
 	written_ = 0;
+	cgi_write_size_ = 0;
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(socket_, this);
 }
 
@@ -30,22 +31,22 @@ void Client::setStatus(const ClientStatus& status) {
 }
 
 void Client::handleSocketReadEvent() {	  // request가 왔다
-	// std::cout << "." << std::endl;
 	char read_buffer[BUFFER_SIZE];
 	int read_size = read(socket_, read_buffer, BUFFER_SIZE);
 	request_.parse(read_buffer, read_size);
-	// std::cout << ".." << std::endl;
 	if (request_.getParsing_status() == DONE || request_.getParsing_status() == ERROR) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
 		RequestHandler::handleRequest(*this);
 	}
 }
 
-void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
-										   // start line 세팅
-										   // header 세팅
-										   // response 전문 생성
-										   // socket에 response 쓰기
+// response 보낼 수 있다
+// start line 세팅
+// header 세팅
+// response 전문 생성
+// socket에 response 쓰기
+void Client::handleSocketWriteEvent() {
+	std::cerr << "handleSocketWriteEvent" << std::endl;
 	std::vector<char> msg;
 	response_.makeResponse(msg, is_keep_alive_);
 	ssize_t cnt = msg.size() - written_;
@@ -59,8 +60,10 @@ void Client::handleSocketWriteEvent() {	   // response 보낼 수 있다
 }
 
 void Client::handleCgiReadEvent(int fd) {
-	std::cout << "handleCgiReadEvent" << std::endl;
 	(void)fd;
+	std::cerr << "handleCgiReadEvent" << std::endl;
+	waitpid(pid_, NULL, 0);
+	std::cerr << "waitpid after" << std::endl;
 	// waitpid
 	// 다 읽었다면 반환값 response 헤더 파싱
 	// 읽기 실패 -> 500
@@ -69,10 +72,22 @@ void Client::handleCgiReadEvent(int fd) {
 }
 
 void Client::handleCgiWriteEvent(int fd) {
-	std::cout << "handleCgiWriteEvent" << std::endl;
-	(void)fd;
-	// request body fd에 쓰기
-	status_ = READ_CGI;
+	std::cerr << "handleCgiWriteEvent" << std::endl;
+	const std::vector<char>& body = request_.getBody();
+	ssize_t write_size = write(fd, &body[cgi_write_size_], body.size() - cgi_write_size_);
+	if (write_size == -1) {	   // 쓰기 실패
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
+		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(fd);
+		close(fd);
+		RequestHandler::handleError(*this, "500");
+		return;
+	}
+	cgi_write_size_ += write_size;			 // 읽은 만큼 더해주기
+	if (cgi_write_size_ == static_cast<ssize_t>(body.size())) {	 // 다 썼음
+		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(fd);
+		close(fd);
+		status_ = READ_CGI;
+	}
 }
 
 void Client::handleFileReadEvent(int fd) {
