@@ -20,6 +20,7 @@ class Response {
 	//gettersetter
 	const std::vector<char>& getSendBuffer() const;
 	void setBody(const std::vector<char>& obj);
+	void pushBackBody(char *buffer, int read_size);
 	void setStatusCode(const std::string& obj);
 	void setContentType(const std::string& resource);
 

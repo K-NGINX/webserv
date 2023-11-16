@@ -12,8 +12,14 @@ Response &Response::operator=(const Response &obj) {
 }
 
 const std::vector<char>& Response::getSendBuffer() const { return send_buffer_; }
-void Response::setBody(const std::vector<char>& obj) { body_ = obj; }
-void Response::setStatusCode(const std::string& obj) { status_code_ = obj; }
+void Response::setBody(const std::vector<char> &obj) { body_ = obj; }
+
+void Response::pushBackBody(char *buffer, int read_size) {
+	for (int i = 0; i < read_size; i++)
+		body_.push_back(buffer[i]);
+}
+
+void Response::setStatusCode(const std::string &obj) { status_code_ = obj; }
 
 void Response::print() {
 	std::cout << GRAY << "\n[ RESPONSE ]" << std::endl;
