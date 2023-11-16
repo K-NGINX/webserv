@@ -2,17 +2,14 @@
 import os
 import cgi
 import cgitb
-import sys
 from PIL import Image
 from io import BytesIO
 
 cgitb.enable()  # for troubleshooting
 
 # 환경변수에서 필요한 정보를 얻어옵니다.
-request_method = os.environ['REQUEST_METHOD']
-content_type = os.environ['CONTENT_TYPE']
-content_length = os.environ['CONTENT_LENGTH']
 save_path = os.environ['SAVE_PATH']
+connection = os.environ['CONNECTION']
 
 # multipart/form-data의 본문을 파이프로부터 읽어옵니다.
 form = cgi.FieldStorage()
@@ -28,7 +25,13 @@ if fileitem.filename:
     im.save(os.path.join(save_path, fileitem.filename))
 
     # 파일 저장에 성공하였음을 알립니다.
-    print("Success: The file was saved as {}.".format(fileitem.filename))
+    print("HTTP/1.1 302 Moved", end="\r\n")
+    print("Connection:", connection, end="\r\n")
+    print("Location: /album.html", end="\r\n")
+    print(end="\r\n")
 else:
     # 파일 저장에 실패하였음을 알립니다.
-    print("Failed: No file was uploaded.")
+    print("HTTP/1.1 500 Internal Server Error", end="\r\n")
+    print("Connection:", connection, end="\r\n")
+    print("Location: /errors/default_error.html", end="\r\n")
+    print(end="\r\n")

@@ -26,6 +26,8 @@ static char **setEnv(Client &client) {
 	v_env.push_back("CONTENT_TYPE=multipart/form-data; boundary=" + client.request_.getBoundary());
 	v_env.push_back("CONTENT_LENGTH=" + client.request_.getContentLength());
 	v_env.push_back("SAVE_PATH=" + root + client.location_->getUploadPath());
+	std::string connection = client.is_keep_alive_ == true ? "keep-alive" : "Closed";
+	v_env.push_back("CONNECTION=" + connection);
 
 	char **env = new char *[v_env.size() + 1];
 	for (size_t i = 0; i < v_env.size(); i++)
@@ -86,8 +88,6 @@ void RequestHandler::handleCgi(Client &client) {
 		client.cgi_pipe_[1] = p2c_fd[1];
 		ServerManager::getInstance().kqueue_.startMonitoringReadEvent(client.cgi_pipe_[0], &client);
 		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.cgi_pipe_[1], &client);
-		std::cout << BLUE << "Cgi Read Event Fd : " << client.cgi_pipe_[0] << RESET << std::endl;
-		std::cout << BLUE << "Cgi Write Event Fd : " << client.cgi_pipe_[1] << RESET << std::endl;
 		client.status_ = WRITE_CGI;
 	}
 }

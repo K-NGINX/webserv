@@ -16,16 +16,18 @@ class Response {
 	void print();
 
 	void makeResponse(bool is_keep_alive);
-	void setContentType(const std::string& resource);
+	void pushBackSendBuffer(char *buffer, ssize_t size);
 	//gettersetter
 	const std::vector<char>& getSendBuffer() const;
 	void setBody(const std::vector<char>& obj);
 	void setStatusCode(const std::string& obj);
+	void setContentType(const std::string& resource);
 
    private:
 	std::vector<char> send_buffer_;
 	std::string status_code_;
 	std::string content_type_;
+	std::string location_;
 	std::map<std::string, std::string> m_header_;
 	std::vector<char> body_;
 	

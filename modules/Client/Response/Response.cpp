@@ -53,6 +53,11 @@ void Response::makeResponse(bool is_keep_alive) {
 	print();
 }
 
+void Response::pushBackSendBuffer(char *buffer, ssize_t size) {
+	for (ssize_t i = 0; i < size; i++)
+		send_buffer_.push_back(buffer[i]);
+}
+
 std::vector<char> Response::getStatusLine() const {
 	static std::map<std::string, std::string> m_status;
 	// 한번만 실행됨 !
@@ -60,7 +65,7 @@ std::vector<char> Response::getStatusLine() const {
 		m_status["200"] = "OK";
 		m_status["201"] = "Created";
 		m_status["204"] = "No Content";
-		m_status["301"] = "Moved Permanetly";
+		m_status["302"] = "Moved";
 		m_status["400"] = "Bad Request";
 		m_status["404"] = "Not Found";
 		m_status["405"] = "Method Not Allowed";
@@ -76,7 +81,8 @@ void Response::makeHeaderLine(bool is_keep_alive) {
 	m_header_["Date"] = getResponseDate(NULL);
 	if (body_.size() != 0)
 		m_header_["Content-Length"] = ntos(body_.size());
-	m_header_["Content-Type"] = content_type_;
+	if (content_type_ != "")
+		m_header_["Content-Type"] = content_type_;
 	m_header_["Connection"] = is_keep_alive == true ? "keep-alive" : "Closed";
 }
 
