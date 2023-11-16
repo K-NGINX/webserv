@@ -2,6 +2,7 @@
 import os
 import cgi
 import cgitb
+import sys
 from PIL import Image
 from io import BytesIO
 
@@ -12,11 +13,10 @@ request_method = os.environ['REQUEST_METHOD']
 content_type = os.environ['CONTENT_TYPE']
 content_length = os.environ['CONTENT_LENGTH']
 save_path = os.environ['SAVE_PATH']
-print(os.environ)
 
 # multipart/form-data의 본문을 파이프로부터 읽어옵니다.
 form = cgi.FieldStorage()
-print(form)
+
 # 본문에서 파일 데이터를 불러옵니다.
 fileitem = form['file']
 
