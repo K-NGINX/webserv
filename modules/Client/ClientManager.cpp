@@ -10,11 +10,14 @@ ClientManager &ClientManager::getInstance() {
 }
 
 void ClientManager::disconnectClient(Client *client) {
-	if (client->is_keep_alive_)
-		return client->clear();
-
+	ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(client->socket_);
+	// Connection: keep_alive
+	if (client->is_keep_alive_) {
+		client->clear();
+		return;
+	}
+	// Connection: Closed
 	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
-	// 배열에서 삭제
 	std::vector<Client *>::iterator client_it = v_client_.begin();
 	while (client_it != v_client_.end()) {
 		if ((*client_it)->socket_ == client->socket_) {
@@ -23,10 +26,9 @@ void ClientManager::disconnectClient(Client *client) {
 		}
 		client_it++;
 	}
-	// 이벤트 해제 후 객체 삭제
-	ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(client->socket_);
 	delete client;
 }
+
 /**
  * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트 처리 하는 함수
  *
@@ -34,13 +36,15 @@ void ClientManager::disconnectClient(Client *client) {
  */
 void ClientManager::handleEvent(struct kevent &event) {
 	Client *client = reinterpret_cast<Client *>(event.udata);
+	if (client == NULL)	   // event.ident가 stopMonitoringEvent(fd)를 통해 이벤트 감지가 중단된 fd일 때
+		return;
 	if (event.filter == EVFILT_READ) {	  // read_event
 		switch (client->status_) {
 			case RECV_REQUEST:
 				client->handleSocketReadEvent();
 				break;
 			case READ_CGI:
-				client->handleCgiReadEvent(event.ident);
+				client->handleCgiReadEvent();
 				break;
 			case READ_FILE:
 				client->handleFileReadEvent(event.ident);
@@ -54,7 +58,7 @@ void ClientManager::handleEvent(struct kevent &event) {
 				client->handleSocketWriteEvent();
 				break;
 			case WRITE_CGI:
-				client->handleCgiWriteEvent(event.ident);
+				client->handleCgiWriteEvent();
 				break;
 			case WRITE_FILE:
 				client->handleFileWriteEvent(event.ident);

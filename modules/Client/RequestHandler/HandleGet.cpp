@@ -41,6 +41,8 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
 	autoindex_html += "</table></ul></body></html>";
 	// 응답 body에 써주기
 	client.response_.setBody(std::vector<char>(autoindex_html.begin(), autoindex_html.end()));
+	client.response_.makeResponse(client.is_keep_alive_);
+	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.socket_, &client); /////////////////////
 	client.status_ = SEND_RESPONSE;
 }
 
@@ -70,9 +72,9 @@ void RequestHandler::handleGet(Client& client) {
 		handleError(client, "404");
 		return ;
 	}
-	// 파일 형식에 따른 Content-Type 설정
+	// 파일 형식에 따른 Content-Type 설정 후 응답 보내기
 	client.response_.setContentType(resource);
-	// fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
 	client.status_ = READ_FILE;
 }

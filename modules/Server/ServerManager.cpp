@@ -99,7 +99,7 @@ void ServerManager::connectNewClient(int server_socket) {
 	fcntl(client_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	Client *new_client = new Client(client_socket);
 	kqueue_.startMonitoringReadEvent(client_socket, new_client);
-	kqueue_.startMonitoringWriteEvent(client_socket, new_client);
+	// kqueue_.startMonitoringWriteEvent(client_socket, new_client); //////////////////////
 	ClientManager::getInstance().v_client_.push_back(new_client);
 	std::cout << MAGENTA << "\nNEW CLIENT(" << client_socket << ") CONNECTED" << RESET << std::endl;
 }

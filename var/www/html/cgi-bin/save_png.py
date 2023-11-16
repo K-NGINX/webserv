@@ -2,22 +2,36 @@
 import os
 import cgi
 import cgitb
-import base64
-from pathlib import Path
+from PIL import Image
+from io import BytesIO
 
-cgitb.enable()
+cgitb.enable()  # for troubleshooting
 
-# 저장할 위치
-save_path = os.environ.get('SAVE_PATH')
+# 환경변수에서 필요한 정보를 얻어옵니다.
+save_path = os.environ['SAVE_PATH']
+connection = os.environ['CONNECTION']
 
-# 표준 입력에서 데이터 읽기
-form = cgi.FieldStorage(fp=sys.stdin, environ=os.environ, keep_blank_values=True)
+# multipart/form-data의 본문을 파이프로부터 읽어옵니다.
+form = cgi.FieldStorage()
 
-# multipart/form-data에서 png 데이터와 파일 이름 추출
-fileitem = form['file'] # 'file'은 multipart/form-data의 필드명입니다.
-filename = fileitem.filename
-png_data = fileitem.file.read()
+# 본문에서 파일 데이터를 불러옵니다.
+fileitem = form['file']
 
-# 파일로 저장
-with open(Path(save_path) / filename, 'wb') as f:
-    f.write(png_data)
+if fileitem.filename:
+    # BytesIO를 이용해 바이너리 데이터를 PIL.Image로 읽어들입니다.
+    im = Image.open(BytesIO(fileitem.file.read()))
+
+    # 이미지를 PNG 형식으로 저장합니다.
+    im.save(os.path.join(save_path, fileitem.filename))
+
+    # 파일 저장에 성공하였음을 알립니다.
+    print("HTTP/1.1 302 Moved", end="\r\n")
+    print("Connection:", connection, end="\r\n")
+    print("Location: /album.html", end="\r\n")
+    print(end="\r\n")
+else:
+    # 파일 저장에 실패하였음을 알립니다.
+    print("HTTP/1.1 500 Internal Server Error", end="\r\n")
+    print("Connection:", connection, end="\r\n")
+    print("Location: /errors/default_error.html", end="\r\n")
+    print(end="\r\n")
