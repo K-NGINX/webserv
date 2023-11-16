@@ -107,23 +107,21 @@ void Client::handleCgiWriteEvent() {
 }
 
 void Client::handleFileReadEvent(int fd) {
-	// 파일 크기만큼 response 본문에 저장
-	// 읽기 실패 -> 500
-	int read_size = 0;
 	char buffer[BUFFER_SIZE];
-	std::vector<char> response_body;
-
-	read_size = read(fd, buffer, BUFFER_SIZE);
-	if (read_size == -1)
-		return RequestHandler::handleError(*this, "500");
-
-	response_.pushBackBody(buffer, read_size);
-	// for (size_t i = 0; i < response_.body_.size(); i++) /////////////////
-	// 	std::cout << response_.body_[i];
-	// std::cout << std::endl;
-	response_.makeResponse(is_keep_alive_);
-	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
-	status_ = SEND_RESPONSE;
+	ssize_t read_size;
+	while ((read_size = read(fd, buffer, BUFFER_SIZE)) > 0)
+		response_.pushBackBody(buffer, read_size);	  // 응답 본문에 파일 내용을 써줌
+	if (read_size == -1) {	  // 파일 fd로부터 읽기 실패
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
+		close(fd);
+		RequestHandler::handleError(*this, "500");
+	} else if (read_size == 0) {						  // 파일 다 읽음
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
+		close(fd);
+		response_.makeResponse(is_keep_alive_);
+		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
+		status_ = SEND_RESPONSE;
+	}
 }
 
 void Client::handleFileWriteEvent(int fd) {

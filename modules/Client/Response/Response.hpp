@@ -28,7 +28,6 @@ class Response {
 	std::vector<char> send_buffer_;
 	std::string status_code_;
 	std::string content_type_;
-	std::string location_;
 	std::map<std::string, std::string> m_header_;
 	std::vector<char> body_;
 	
@@ -37,7 +36,7 @@ class Response {
 	std::string getResponseDate(std::time_t* t);
 };
 
-template <typename T>
+template <typename T> //////////////////
 	std::string ntos(T n) {
 	std::stringstream ss;
 	ss << n;
