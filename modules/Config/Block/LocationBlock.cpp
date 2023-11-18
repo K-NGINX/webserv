@@ -62,7 +62,7 @@ bool LocationBlock::isAllowMethod(const std::string& method) const {
 }
 
 bool LocationBlock::checkBodySize(int body_size) const {
-	if (common_directives_.getClientMaxBodySize() > 0)
+	if (common_directives_.getClientMaxBodySize() > 0) // 클라이언트 본문 크기를 제한하는 경우
 		return body_size <= common_directives_.getClientMaxBodySize();
 	return true;
 }
