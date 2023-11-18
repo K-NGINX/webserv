@@ -15,7 +15,9 @@ class Kqueue {
 	Kqueue();
 	~Kqueue();
 
+	/* getter */
 	int getEvents();
+
 	void startMonitoringReadEvent(int ident, void *udata);
 	void startMonitoringWriteEvent(int ident, void *udata);
 	void stopMonitoringReadEvent(int ident);

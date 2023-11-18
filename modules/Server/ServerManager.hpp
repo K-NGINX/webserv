@@ -5,19 +5,19 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/event.h>
-#include <sys/socket.h>	   // server.cpp
+#include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../Config/Block/ServerBlock.hpp"
 #include "../Utils/Utils.hpp"
 #include "Kqueue/Kqueue.hpp"
 
 class ClientManager;
 
-class ServerManager
-{
-public:
+class ServerManager {
+   public:
 	static ServerManager &getInstance();
 
 	void init();
@@ -30,6 +30,7 @@ public:
 	~ServerManager();
 
 	void closeAllServerSocket();
+	void initServerSocket(const ServerBlock& server_block);
 	void handleEvent(struct kevent &event);
 	bool isServerSocket(int fd);
 	void connectNewClient(int server_fd);

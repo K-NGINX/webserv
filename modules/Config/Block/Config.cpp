@@ -3,7 +3,6 @@
 #include "../ConfigManager.hpp"
 
 ABlock* Config::getLastSubBlock() { return &(v_server_block_.back()); }
-
 const std::vector<ServerBlock>& Config::getServerBlockVec() const { return v_server_block_; }
 
 /**
@@ -49,7 +48,7 @@ const ServerBlock* Config::findMatchingServerBlock(std::string host) const {
  * @param line "server "일 것으로 기대됨
  */
 void Config::addSubBlock(std::string& line) {
-	Utils::trimWhiteSpace(line);	// 서버 블록 이름(server) 추출
+	Utils::trimWhiteSpace(line); // 서버 블록 이름(server) 추출
 	if (line != "server")
 		throw std::runtime_error("server blocks must start with the following format: \"server {\"");
 	v_server_block_.push_back(ServerBlock());

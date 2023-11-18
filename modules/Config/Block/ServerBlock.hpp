@@ -10,10 +10,7 @@ class ServerBlock : public ABlock {
    public:
 	ServerBlock();
 
-	virtual void addSubBlock(std::string& line);
-	virtual void refineDirectives();
-	virtual void print();
-
+	/* getter */
 	virtual ABlock* getLastSubBlock();
 	const std::vector<LocationBlock>& getLocationBlockVec() const;
 	const std::string& getIp() const;
@@ -21,8 +18,11 @@ class ServerBlock : public ABlock {
 	const std::string& getServerName() const;
 	const LocationBlock* findMatchingLocationBlock(std::string uri) const;
 
+	virtual void addSubBlock(std::string& line);
+	virtual void refineDirectives();
+	virtual void print();
+
    private:
-	size_t getMatchLength(const std::string& uri, const std::string& match_directive) const;
 	void refineServerDirectives();
 	void setHost(const std::string& value);
 

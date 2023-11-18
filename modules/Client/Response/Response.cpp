@@ -11,18 +11,23 @@ Response &Response::operator=(const Response &obj) {
 	return *this;
 }
 
-const std::vector<char>& Response::getSendBuffer() const { return send_buffer_; }
+const std::vector<char> &Response::getSendBuffer() const { return send_buffer_; }
+
 void Response::setBody(const std::vector<char> &obj) { body_ = obj; }
+void Response::setStatusCode(const std::string &obj) { status_code_ = obj; }
 
 void Response::pushBackBody(char *buffer, int read_size) {
 	for (int i = 0; i < read_size; i++)
 		body_.push_back(buffer[i]);
 }
 
-void Response::setStatusCode(const std::string &obj) { status_code_ = obj; }
+void Response::setContentType(const std::string &resource) {
+	std::string file_type = resource.substr(resource.find('.') + 1);
+	content_type_ = Utils::getMIMEType(file_type);
+}
 
 void Response::print() {
-	std::cout << GRAY << "\n[ RESPONSE ]" << std::endl;
+	std::cout << MAGENTA << std::endl;
 	std::map<std::string, std::string>::iterator header_it = m_header_.begin();
 	std::vector<char> status_line = getStatusLine();
 	std::cout << std::string(status_line.begin(), status_line.end());
@@ -33,27 +38,25 @@ void Response::print() {
 	std::cout << RESET << std::endl;
 }
 
-void Response::setContentType(const std::string &resource) {
-	std::string file_type = resource.substr(resource.find('.') + 1);
-	// Request에서 파일 타입 제한을 이미 했기 때문에 여기로 흘러온 이상 무조건 있다고 판단
-	content_type_ = Utils::getMIMEType(file_type);
-}
-
 void Response::makeResponse(bool is_keep_alive) {
+	// 시작 줄
 	std::vector<char> status_line = getStatusLine();
-	std::vector<char> rn;
-	rn.push_back('\r');
-	rn.push_back('\n');
+	send_buffer_.insert(send_buffer_.end(), status_line.begin(), status_line.end());
+
+	// 헤더
 	std::string header;
 	makeHeaderLine(is_keep_alive);
 	std::map<std::string, std::string>::const_iterator it = this->m_header_.begin();
-
-	send_buffer_.insert(send_buffer_.end(), status_line.begin(), status_line.end());
-
 	for (; it != m_header_.end(); ++it)
 		header += it->first + ": " + it->second + "\r\n";
 	send_buffer_.insert(send_buffer_.end(), header.begin(), header.end());
+
+	std::vector<char> rn;
+	rn.push_back('\r');
+	rn.push_back('\n');
 	send_buffer_.insert(send_buffer_.end(), rn.begin(), rn.end());
+
+	// 바디
 	send_buffer_.insert(send_buffer_.end(), body_.begin(), body_.end());
 
 	print();
@@ -62,11 +65,17 @@ void Response::makeResponse(bool is_keep_alive) {
 void Response::pushBackSendBuffer(char *buffer, ssize_t size) {
 	for (ssize_t i = 0; i < size; i++)
 		send_buffer_.push_back(buffer[i]);
+
+	if (size > 0) {
+		std::cout << MAGENTA << std::endl;
+		for (ssize_t i = 0; i < size; i++)
+			std::cout << buffer[i];
+		std::cout << RESET << std::endl;
+	}
 }
 
 std::vector<char> Response::getStatusLine() const {
 	static std::map<std::string, std::string> m_status;
-	// 한번만 실행됨 !
 	if (m_status.empty()) {
 		m_status["200"] = "OK";
 		m_status["201"] = "Created";

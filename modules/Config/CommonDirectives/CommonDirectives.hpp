@@ -15,8 +15,8 @@ class CommonDirectives {
 	CommonDirectives& operator=(const CommonDirectives& other);
 
 	/* getter */
-	const bool& isAutoindex() const;
-	const int& getClientMaxBodySize() const;
+	bool isAutoindex() const;
+	int getClientMaxBodySize() const;
 	const std::vector<std::string>& getErrorCodeVec() const;
 	const std::string& getErrorPage() const;
 	const std::vector<std::string>& getIndexVec() const;

@@ -2,9 +2,6 @@
 
 CommonDirectives::CommonDirectives() : is_autoindex_(false),
 									   client_max_body_size_(0),
-									   error_page_(""),
-									   return_code_(""),
-									   return_path_(""),
 									   root_("/") {}
 
 CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
@@ -38,20 +35,13 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
 		setRoot(directive_it->second);
 }
 
-const bool& CommonDirectives::isAutoindex() const { return is_autoindex_; }
-
-const int& CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
-
+bool CommonDirectives::isAutoindex() const { return is_autoindex_; }
+int CommonDirectives::getClientMaxBodySize() const { return client_max_body_size_; }
 const std::vector<std::string>& CommonDirectives::getErrorCodeVec() const { return v_error_code_; }
-
 const std::string& CommonDirectives::getErrorPage() const { return error_page_; }
-
 const std::vector<std::string>& CommonDirectives::getIndexVec() const { return v_index_; }
-
 const std::string& CommonDirectives::getReturnCode() const { return return_code_; }
-
 const std::string& CommonDirectives::getReturnPath() const { return return_path_; }
-
 const std::string& CommonDirectives::getRoot() const { return root_; }
 
 void CommonDirectives::setAutoindex(std::string& value) {
@@ -111,7 +101,7 @@ void CommonDirectives::setReturn(std::string& value) {
 	return_path_ = value.substr(pos_sepatator + 1);
 
 	return_code_ = value.substr(0, pos_sepatator);
-	if (return_code_ != "301")
+	if (return_code_ != "302")
 		throw std::runtime_error("return must be in following format: \"return_code return_path\"");
 	Utils::trimWhiteSpace(return_code_);
 }

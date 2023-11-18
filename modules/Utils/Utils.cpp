@@ -13,7 +13,6 @@ std::map<std::string, std::string> initializeMIMEMap() {
 std::map<std::string, std::string> Utils::m_mime = initializeMIMEMap();
 
 Utils::Utils() {}
-
 Utils::~Utils() {}
 
 void Utils::trimComment(std::string& str) {

@@ -1,20 +1,14 @@
 #include "ServerBlock.hpp"
 
-ServerBlock::ServerBlock() : ip_("0.0.0.0"),
-							 port_("80"),
-							 server_name_("") {}
+ServerBlock::ServerBlock() : ip_("0.0.0.0"), port_("80") {}
 
 ABlock* ServerBlock::getLastSubBlock() { return &(v_location_block_.back()); }
-
 const std::vector<LocationBlock>& ServerBlock::getLocationBlockVec() const { return v_location_block_; }
-
 const std::string& ServerBlock::getIp() const { return ip_; }
-
 const std::string& ServerBlock::getPort() const { return port_; }
-
 const std::string& ServerBlock::getServerName() const { return server_name_; }
 
-size_t ServerBlock::getMatchLength(const std::string& uri, const std::string& match_directive) const {
+static size_t getMatchLength(const std::string& uri, const std::string& match_directive) {
 	size_t length = 0;
 	for (size_t i = 0; i < uri.size(); i++) {
 		if (uri[i] == match_directive[i])
@@ -33,7 +27,7 @@ size_t ServerBlock::getMatchLength(const std::string& uri, const std::string& ma
  * @details [ 규칙 ]
  *      1. 위치 블록의 match_directive중 uri와 가장 길게 일치하는 위치 블록 리턴
  *      2. 길이가 같다면 먼저 나오는 위치 블록 리턴
- *      2. 만약 일치하는 블록이 하나도 없다면 404 에러
+ *      2. 만약 일치하는 블록이 하나도 없다면 NULL 리턴
  */
 const LocationBlock* ServerBlock::findMatchingLocationBlock(std::string uri) const {
 	size_t size = v_location_block_.size(), idx = size, match_length = 0;
@@ -45,7 +39,7 @@ const LocationBlock* ServerBlock::findMatchingLocationBlock(std::string uri) con
 			idx = i;
 		}
 	}
-	if (idx == size)
+	if (idx == size) // 일치하는 블록이 없다
 		return NULL;
 	else
 		return &(v_location_block_[idx]);
@@ -88,18 +82,12 @@ void ServerBlock::setHost(const std::string& value) {
  *
  */
 void ServerBlock::refineServerDirectives() {
-	std::map<std::string, std::string>::iterator directive_it = m_directives_.begin();
-	while (directive_it != m_directives_.end()) {
-		std::string directive = directive_it->first;
-		std::string value = directive_it->second;
+	std::map<std::string, std::string>::iterator directive_it;
 
-		if (directive == "listen")
-			setHost(value);
-		else if (directive == "server_name")
-			server_name_ = value;
-
-		directive_it++;
-	}
+	if ((directive_it = m_directives_.find("listen")) != m_directives_.end())
+		setHost(directive_it->second);
+	if ((directive_it = m_directives_.find("server_name")) != m_directives_.end())
+		server_name_ = directive_it->second;
 }
 
 void ServerBlock::refineDirectives() {
@@ -107,7 +95,7 @@ void ServerBlock::refineDirectives() {
 	common_directives_.refine(m_directives_);
 	std::vector<LocationBlock>::iterator location_it = v_location_block_.begin();
 	while (location_it != v_location_block_.end()) {
-		location_it->common_directives_ = common_directives_;
+		location_it->common_directives_ = common_directives_; // 하위 블록인 위치 블록에 공통 지시어 공유
 		location_it->refineDirectives();
 		location_it++;
 	}

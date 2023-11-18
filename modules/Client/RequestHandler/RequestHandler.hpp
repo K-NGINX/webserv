@@ -14,7 +14,6 @@ class RequestHandler {
 	static void handleError(Client& client, const std::string& error_code);
 	static void handleCgi(Client& client);
 	static void handleGet(Client& client);
-	static void handlePost(Client& client);
 	static void handleDelete(Client& client);
 
    private:

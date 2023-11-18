@@ -1,7 +1,6 @@
 #include "ClientManager.hpp"
 
 ClientManager::ClientManager() {}
-
 ClientManager::~ClientManager() {}
 
 ClientManager &ClientManager::getInstance() {
@@ -17,7 +16,7 @@ void ClientManager::disconnectClient(Client *client) {
 		return;
 	}
 	// Connection: Closed
-	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
+	std::cout << RED << "\n❗️ CLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
 	std::vector<Client *>::iterator client_it = v_client_.begin();
 	while (client_it != v_client_.end()) {
 		if ((*client_it)->socket_ == client->socket_) {
@@ -30,15 +29,16 @@ void ClientManager::disconnectClient(Client *client) {
 }
 
 /**
- * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트 처리 하는 함수
+ * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 발생한 이벤트를 처리 하는 함수
  *
  * @param event 해당 이벤트
  */
 void ClientManager::handleEvent(struct kevent &event) {
 	Client *client = reinterpret_cast<Client *>(event.udata);
-	if (client == NULL)	   // event.ident가 stopMonitoringEvent(fd)를 통해 이벤트 감지가 중단된 fd일 때
+	if (client == NULL) // 이벤트 감지가 중단된 fd일 때
 		return;
-	if (event.filter == EVFILT_READ) {	  // read_event
+
+	if (event.filter == EVFILT_READ) {
 		switch (client->status_) {
 			case RECV_REQUEST:
 				client->handleSocketReadEvent();
@@ -47,12 +47,12 @@ void ClientManager::handleEvent(struct kevent &event) {
 				client->handleCgiReadEvent();
 				break;
 			case READ_FILE:
-				client->handleFileReadEvent(event.ident);
+				client->handleFileReadEvent();
 				break;
 			default:
 				break;
 		}
-	} else if (event.filter == EVFILT_WRITE) {	  // write_event
+	} else if (event.filter == EVFILT_WRITE) {
 		switch (client->status_) {
 			case SEND_RESPONSE:
 				client->handleSocketWriteEvent();
@@ -60,13 +60,11 @@ void ClientManager::handleEvent(struct kevent &event) {
 			case WRITE_CGI:
 				client->handleCgiWriteEvent();
 				break;
-			case WRITE_FILE:
-				client->handleFileWriteEvent(event.ident);
-				break;
 			default:
 				break;
 		}
 	}
+
 	// 요청을 받고 응답을 보내는 일련의 과정을 마쳤다면, 클라이언트와 연결 끊어주기
 	if (client->status_ == WILL_DISCONNECT) disconnectClient(client);
 }
