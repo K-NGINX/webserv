@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
+#include "../../Utils/Utils.hpp"
+#include "ABlock.hpp"
 #include "LocationBlock.hpp"
 
 /**

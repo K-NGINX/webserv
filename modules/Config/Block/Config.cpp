@@ -1,7 +1,5 @@
 #include "Config.hpp"
 
-#include "../ConfigManager.hpp"
-
 ABlock* Config::getLastSubBlock() { return &(v_server_block_.back()); }
 const std::vector<ServerBlock>& Config::getServerBlockVec() const { return v_server_block_; }
 

@@ -1,5 +1,3 @@
-#include <dirent.h>
-
 #include "RequestHandler.hpp"
 
 static bool isFileType(std::string& resource) {
