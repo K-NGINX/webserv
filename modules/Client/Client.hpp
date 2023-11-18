@@ -1,11 +1,12 @@
 #pragma once
 
-#include <cstdlib>
+#include <fcntl.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <map>
 
-#include "../Config/ConfigManager.hpp"
+#include "../Config/Block/Config.hpp"
 #include "../Server/ServerManager.hpp"
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"

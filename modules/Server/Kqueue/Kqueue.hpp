@@ -1,11 +1,7 @@
 #pragma once
 
 #include <sys/event.h>
-#include <sys/time.h>
-#include <sys/types.h>
 
-#include <cstdlib>
-#include <iostream>
 #include <vector>
 
 #define EVENT_SIZE 8

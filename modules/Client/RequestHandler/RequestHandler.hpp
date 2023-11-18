@@ -1,9 +1,17 @@
 #pragma once
 
-#include <iostream>
-#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
+#include <cstring>
+#include <iostream>
+#include <vector>
+
+#include "../../Config/ConfigManager.hpp"
+#include "../../Server/ServerManager.hpp"
 #include "../Client.hpp"
 
 #define DEFAULT_ERROR_PAGE "/var/www/html/errors/default_error.html"

@@ -1,5 +1,11 @@
 #pragma once
 
+#include <string>
+#include <stdexcept>
+#include <vector>
+
+#include "../../Utils/Utils.hpp"
+#include "ABlock.hpp"
 #include "ServerBlock.hpp"
 
 /**

@@ -1,5 +1,11 @@
 #pragma once
 
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include "../../Utils/Utils.hpp"
 #include "ABlock.hpp"
 
 class LocationBlock : public ABlock {
