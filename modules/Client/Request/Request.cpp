@@ -2,15 +2,15 @@
 
 Request::Request() : parsing_status_(INIT), content_length_(0), body_size_(0), bodyType_(DEFAULT) {}
 
-std::string Request::getConnection() const { return connection_; }
-RequestStatus Request::getParsing_status() const { return parsing_status_; }
-std::string Request::getMethod() const { return method_; }
-std::string Request::getUri() const { return uri_; }
-std::string Request::getHost() const { return host_; }
+const std::string &Request::getConnection() const { return connection_; }
+const RequestStatus &Request::getParsingStatus() const { return parsing_status_; }
+const std::string &Request::getMethod() const { return method_; }
+const std::string &Request::getUri() const { return uri_; }
+const std::string &Request::getHost() const { return host_; }
 const std::vector<char> &Request::getBody() const { return body_; }
 int Request::getBodySize() { return body_size_; }
 const std::string Request::getContentLength() const { return std::to_string(content_length_); }
-const std::string Request::getBoundary() const { return boundary_; }
+const std::string &Request::getBoundary() const { return boundary_; }
 
 Request &Request::operator=(const Request &obj) {
 	connection_ = obj.connection_;
@@ -28,18 +28,20 @@ Request &Request::operator=(const Request &obj) {
 }
 
 void Request::print() {
-	std::cout << GRAY << "\n[ REQUEST ]" << std::endl;
+	std::cout << CYAN << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
 	std::cout << "Host: " << host_ << std::endl;
-	std::cout << "Content-Length: " << content_length_ << std::endl;
-	std::cout << "BodySize: " << body_size_ << std::endl;
+	if (content_length_)
+		std::cout << "Content-Length: " << content_length_ << std::endl;
+	if (body_size_)
+		std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
-		std::cout << "-> DONE" << RESET << std::endl;
+		std::cout << "---> DONE" << RESET << std::endl;
 	else if (parsing_status_ == ERROR)
-		std::cout << "-> ERROR" << RESET << std::endl;
+		std::cout << "---> ERROR" << RESET << std::endl;
 }
 
-static bool isValidMethod(std::string &str) {
+static bool isValidMethod(const std::string &str) {
 	if (str == "GET" || str == "POST" || str == "DELETE")
 		return true;
 	return false;
@@ -63,9 +65,8 @@ void Request::parseStartLine(std::vector<char> &line) {
 }
 
 /**
- * @brief content-type value 뒤에 ----boundary_ 잘라주는 함수
+ * @brief Content-Type이 multipart/form-data일 때 boundary를 저장하는 함수
  *
- * @param value content-type 뒤에 붙는 ---boundary_ 달려있는 value
  */
 void Request::refineContentType(std::string &value) {
 	size_t semi_colon = value.find(';');
@@ -79,9 +80,9 @@ void Request::refineContentType(std::string &value) {
 
 void Request::parseHeader(std::vector<char> &line) {
 	if (line.size() == 0) {
-		if (method_ == "POST")
+		if (method_ == "POST") {
 			parsing_status_ = BODY;
-		else {
+		} else {
 			buffer_.clear();
 			parsing_status_ = DONE;
 		}
@@ -94,7 +95,6 @@ void Request::parseHeader(std::vector<char> &line) {
 		parsing_status_ = ERROR;
 		return;
 	}
-	// key value로 나눠서 넣어준다.
 	std::string key(line.begin(), it);
 	std::string value(it + 1, line.end());
 	Utils::trimWhiteSpace(value);
@@ -150,7 +150,7 @@ v_c_iter Request::getNextSepIter(v_c_iter line_start_it) {
 }
 
 void Request::parseChunkedBody(std::vector<char> &line, v_c_iter &line_start_it, v_c_iter &next_sep_it) {
-	if (next_sep_it == buffer_.end()) {	   // chunked인데 짝이 안맞음
+	if (next_sep_it == buffer_.end()) { // chunked인데 짝이 안 맞음
 		parsing_status_ = ERROR;
 		return;
 	}
@@ -182,7 +182,7 @@ void Request::parseBinaryBody(std::vector<char> &line) {
 	int end_idx = Utils::findSubVector(line, boundary_end);
 	if (end_idx == -1)
 		end_idx = line.size() - 1;
-	else	// body parsing 끝
+	else // body parsing 끝
 		parsing_status_ = DONE;
 
 	for (int i = 0; i <= end_idx; i++) {
@@ -192,20 +192,18 @@ void Request::parseBinaryBody(std::vector<char> &line) {
 }
 
 void Request::parse(char *read_buffer, int read_size) {
-	if (parsing_status_ == INIT && read_size <= 0)	  // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
+	if (parsing_status_ == INIT && read_size <= 0) // 클라이언트와 연결되어 있지만, 요청을 받은 상태는 아님
 		return;
 	if (parsing_status_ == INIT)
 		parsing_status_ = START_LINE;
-	if (read_size <= 0 && parsing_status_ != DONE)	  // EOF 이거나 read error
+	if (read_size <= 0 && parsing_status_ != DONE) // EOF 이거나 read error
 		parsing_status_ = ERROR;
 	if (parsing_status_ == ERROR || parsing_status_ == DONE)
 		return;
-	// remainbuf에 이어붙힌다.
 	for (int i = 0; i < read_size; i++)
 		buffer_.push_back(read_buffer[i]);
 
 	v_c_iter line_start_it = buffer_.begin();
-
 	while (line_start_it < buffer_.end()) {
 		v_c_iter next_sep_it = getNextSepIter(line_start_it);
 		std::vector<char> line(line_start_it, next_sep_it);

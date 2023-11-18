@@ -7,6 +7,7 @@
 class ClientManager {
    public:
 	static ClientManager& getInstance();
+	
 	void handleEvent(struct kevent& event);
 
 	std::vector<Client*> v_client_;

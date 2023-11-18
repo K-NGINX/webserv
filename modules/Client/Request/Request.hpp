@@ -10,11 +10,6 @@
 
 #include "../../Utils/Utils.hpp"
 
-#define VERSION "HTTP/1.1"
-// #define PLAIN_TEXT "text/plain"
-// #define HTML_TEXT "text/html"
-// #define JSON_TEXT "application/json"
-
 enum RequestStatus {
 	INIT,
 	START_LINE,
@@ -35,29 +30,32 @@ typedef std::vector<char>::iterator v_c_iter;
 class Request {
    public:
 	Request();
-	Request &operator=(const Request &obj);
+	Request& operator=(const Request& obj);
 
-	void parse(char *read_buffer, int read_size);
-	void print();
-	// gettersetter
-	std::string getConnection() const;
-	RequestStatus getParsing_status() const;
-	std::string getMethod() const;
-	std::string getUri() const;
-	std::string getHost() const;
-	const std::vector<char> &getBody() const;
+	/* getter setter */
+	const std::string& getConnection() const;
+	const RequestStatus& getParsingStatus() const;
+	const std::string& getMethod() const;
+	const std::string& getUri() const;
+	const std::string& getHost() const;
+	const std::vector<char>& getBody() const;
 	int getBodySize();
 	const std::string getContentLength() const;
-	const std::string getBoundary() const;
+	const std::string& getBoundary() const;
+
+	void parse(char* read_buffer, int read_size);
+	void print();
 
    private:
-	void parseStartLine(std::vector<char> &line);
-	void parseHeader(std::vector<char> &line);
-	void parseBody(std::vector<char> &line);
-	void parseChunkedBody(std::vector<char> &line, v_c_iter &line_start_it, v_c_iter &next_sep_it);
-	void parseBinaryBody(std::vector<char> &line);
-	void refineContentType(std::string &value);
 	v_c_iter getNextSepIter(v_c_iter line_start_it);
+
+	void parseStartLine(std::vector<char>& line);
+	void parseHeader(std::vector<char>& line);
+	void parseBody(std::vector<char>& line);
+	void parseChunkedBody(std::vector<char>& line, v_c_iter& line_start_it, v_c_iter& next_sep_it);
+	void parseBinaryBody(std::vector<char>& line);
+	void refineContentType(std::string& value);
+
 	std::string connection_;
 	RequestStatus parsing_status_;
 	std::string method_;

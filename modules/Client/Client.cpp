@@ -1,7 +1,5 @@
 #include "Client.hpp"
 
-#include <cstdlib>
-
 #include "RequestHandler/RequestHandler.hpp"
 
 Client::Client(int socket) : status_(RECV_REQUEST),
@@ -35,24 +33,31 @@ void Client::clear() {
 	written_ = 0;
 	cgi_written_ = 0;
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(socket_, this);
-	// ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this); ///////////////
 }
 
 void Client::setStatus(const ClientStatus& status) {
 	status_ = status;
 }
 
-void Client::handleSocketReadEvent() {	  // request가 왔다
+/**
+ * @brief 클라이언트로부터 온 Request를 소켓으로부터 읽어 파싱하는 함수
+ *
+ */
+void Client::handleSocketReadEvent() {
 	char read_buffer[BUFFER_SIZE];
 	int read_size = read(socket_, read_buffer, BUFFER_SIZE);
 
 	request_.parse(read_buffer, read_size);
-	if (request_.getParsing_status() == DONE || request_.getParsing_status() == ERROR) {
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);	  // 클라이언트 소켓에 대한 read 이벤트를 더이상 감시하지 않겠다 !
+	if (request_.getParsingStatus() == DONE || request_.getParsingStatus() == ERROR) {
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(socket_);
 		RequestHandler::handleRequest(*this);
 	}
 }
 
+/**
+ * @brief 클라이언트에게 보낼 Response를 소켓에 쓰는 함수
+ *
+ */
 void Client::handleSocketWriteEvent() {
 	const std::vector<char>& send_buffer = response_.getSendBuffer();
 	ssize_t write_size = send_buffer.size() - written_ > BUFFER_SIZE ? BUFFER_SIZE : send_buffer.size() - written_;
@@ -62,14 +67,18 @@ void Client::handleSocketWriteEvent() {
 		return;
 	}
 	written_ += write_size;
-	if (written_ == static_cast<ssize_t>(send_buffer.size()))	 // 다 보냈음
+	if (written_ == static_cast<ssize_t>(send_buffer.size()))
 		status_ = WILL_DISCONNECT;
 }
 
+/**
+ * @brief CGI 프로그램의 결과를 파이프로부터 읽어 파싱하는 함수
+ *
+ */
 void Client::handleCgiReadEvent() {
 	int exit_status;
 	waitpid(pid_, &exit_status, 0);
-	if (WIFSIGNALED(exit_status)) {	   // 시그널에 의해 종료되었다면
+	if (WIFSIGNALED(exit_status)) { // 시그널에 의한 종료
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
 		close(pipe_fd_[0]);
 		RequestHandler::handleError(*this, "500");
@@ -78,14 +87,14 @@ void Client::handleCgiReadEvent() {
 
 	char buffer[BUFFER_SIZE];
 	ssize_t read_size = read(pipe_fd_[0], buffer, BUFFER_SIZE);
-	if (read_size == -1) {	  // 읽기 실패
+	if (read_size == -1) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
 		close(pipe_fd_[0]);
 		RequestHandler::handleError(*this, "500");
 		return;
 	}
-	response_.pushBackSendBuffer(buffer, read_size);	// response send_buffer에 씀
-	if (read_size == 0) {								// 다 읽음
+	response_.pushBackSendBuffer(buffer, read_size);
+	if (read_size == 0) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
 		close(pipe_fd_[0]);
 		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
@@ -93,11 +102,15 @@ void Client::handleCgiReadEvent() {
 	}
 }
 
+/**
+ * @brief CGI 프로그램을 실행하기 위한 데이터를 파이프에 쓰는 함수
+ *
+ */
 void Client::handleCgiWriteEvent() {
 	const std::vector<char>& body = request_.getBody();
 	ssize_t write_size = body.size() - cgi_written_ > BUFFER_SIZE ? BUFFER_SIZE : body.size() - cgi_written_;
-	write_size = write(pipe_fd_[1], &body[cgi_written_], write_size);	 // 파이프에 데이터 쓰기
-	if (write_size == -1) {												 // 쓰기 실패
+	write_size = write(pipe_fd_[1], &body[cgi_written_], write_size);
+	if (write_size == -1) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
 		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(pipe_fd_[1]);
 		close(pipe_fd_[0]);
@@ -105,24 +118,28 @@ void Client::handleCgiWriteEvent() {
 		RequestHandler::handleError(*this, "500");
 		return;
 	}
-	cgi_written_ += write_size;									// 읽은 만큼 더해주기
-	if (cgi_written_ == static_cast<ssize_t>(body.size())) {	// 다 썼음
+	cgi_written_ += write_size;
+	if (cgi_written_ == static_cast<ssize_t>(body.size())) {
 		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(pipe_fd_[1]);
 		close(pipe_fd_[1]);
 		status_ = READ_CGI;
 	}
 }
 
+/**
+ * @brief 파일의 내용을 파일 디스크립터로부터 읽어 파싱하는 함수
+ *
+ */
 void Client::handleFileReadEvent() {
 	char buffer[BUFFER_SIZE];
 	ssize_t read_size;
 	while ((read_size = read(file_fd_, buffer, BUFFER_SIZE)) > 0)
-		response_.pushBackBody(buffer, read_size);	  // 응답 본문에 파일 내용을 써줌
-	if (read_size == -1) {							  // 파일 fd로부터 읽기 실패
+		response_.pushBackBody(buffer, read_size);
+	if (read_size == -1) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(file_fd_);
 		close(file_fd_);
 		RequestHandler::handleError(*this, "500");
-	} else if (read_size == 0) {	// 파일 다 읽음
+	} else if (read_size == 0) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(file_fd_);
 		close(file_fd_);
 		response_.makeResponse(is_keep_alive_);

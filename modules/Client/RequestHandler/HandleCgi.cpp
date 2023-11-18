@@ -44,14 +44,14 @@ static void close_pipe_fd(std::vector<int> &pipe_fd) {
 void RequestHandler::handleCgi(Client &client) {
 	std::vector<int> pipe_fd;
 	// 양방향 파이프 설정
-	int p2c_fd[2];	  // 부모 -> 자식
+	int p2c_fd[2]; // 부모 -> 자식
 	if (pipe(p2c_fd) == -1) {
 		handleError(client, "500");
 		return;
 	}
 	pipe_fd.push_back(p2c_fd[0]);
 	pipe_fd.push_back(p2c_fd[1]);
-	int c2p_fd[2];	  // 자식 -> 부모
+	int c2p_fd[2]; // 자식 -> 부모
 	if (pipe(c2p_fd) == -1) {
 		close_pipe_fd(pipe_fd);
 		handleError(client, "500");
@@ -61,15 +61,16 @@ void RequestHandler::handleCgi(Client &client) {
 	pipe_fd.push_back(c2p_fd[1]);
 	// 프로세스 복제
 	client.pid_ = fork();
-	if (client.pid_ < 0) {	  // fork 실패
+	if (client.pid_ < 0) { // fork 실패
 		close_pipe_fd(pipe_fd);
 		handleError(client, "500");
 		return;
-	} else if (client.pid_ == 0) {	  // 자식 프로세스
-		close(c2p_fd[0]);
-		close(p2c_fd[1]);
-		dup2(p2c_fd[0], STDIN_FILENO);	   // 부모 -> 자식 읽기
-		dup2(c2p_fd[1], STDOUT_FILENO);	   // 자식 -> 부모 쓰기
+	} else if (client.pid_ == 0) { // 자식 프로세스
+		// close(c2p_fd[0]);
+		// close(p2c_fd[1]);
+		dup2(p2c_fd[0], STDIN_FILENO);	// 부모 -> 자식 읽기
+		dup2(c2p_fd[1], STDOUT_FILENO); // 자식 -> 부모 쓰기
+		close_pipe_fd(pipe_fd);
 		// cgi 프로그램 실행
 		char **argv = setArgv(client);
 		char **envp = setEnv(client);
@@ -79,7 +80,7 @@ void RequestHandler::handleCgi(Client &client) {
 		delete[] argv;
 		delete[] envp;
 		exit(1);
-	} else {	// 부모 프로세스
+	} else { // 부모 프로세스
 		signal(SIGPIPE, SIG_IGN);
 		close(p2c_fd[0]);
 		close(c2p_fd[1]);

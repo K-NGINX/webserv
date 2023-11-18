@@ -6,6 +6,7 @@
 #include <vector>
 
 #define BUFFER_SIZE 1024
+#define VERSION "HTTP/1.1"
 
 #define RESET "\033[0m"
 #define GRAY "\033[1;90m"

@@ -1,7 +1,6 @@
 #include "ClientManager.hpp"
 
 ClientManager::ClientManager() {}
-
 ClientManager::~ClientManager() {}
 
 ClientManager &ClientManager::getInstance() {
@@ -17,7 +16,7 @@ void ClientManager::disconnectClient(Client *client) {
 		return;
 	}
 	// Connection: Closed
-	std::cout << MAGENTA << "\nCLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
+	std::cout << RED << "\n❗️ CLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
 	std::vector<Client *>::iterator client_it = v_client_.begin();
 	while (client_it != v_client_.end()) {
 		if ((*client_it)->socket_ == client->socket_) {
@@ -30,13 +29,13 @@ void ClientManager::disconnectClient(Client *client) {
 }
 
 /**
- * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 read, write 이벤트 처리 하는 함수
+ * @brief 클라이언트 소켓, CGI fd, 파일 fd에서 발생한 이벤트를 처리 하는 함수
  *
  * @param event 해당 이벤트
  */
 void ClientManager::handleEvent(struct kevent &event) {
 	Client *client = reinterpret_cast<Client *>(event.udata);
-	if (client == NULL)	   // event.ident가 stopMonitoringEvent(fd)를 통해 이벤트 감지가 중단된 fd일 때
+	if (client == NULL) // 이벤트 감지가 중단된 fd일 때
 		return;
 
 	if (event.filter == EVFILT_READ) {

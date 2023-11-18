@@ -42,7 +42,7 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
 	// 응답 body에 써주기
 	client.response_.setBody(std::vector<char>(autoindex_html.begin(), autoindex_html.end()));
 	client.response_.makeResponse(client.is_keep_alive_);
-	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.socket_, &client); /////////////////////
+	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.socket_, &client);
 	client.status_ = SEND_RESPONSE;
 }
 
@@ -53,7 +53,7 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
  * 		2. uri가 디렉토리 형식
  * 		- 기본 파일(index)이 있는지 찾음
  * 		- 기본 파일이 없고 autoindex 지시어가 "on"이면 목록 페이지 전송
- * 		- 아무것도 없으면 ... 404 리턴
+ * 		- 아무것도 해당되지 않으면 404 에러
  */
 void RequestHandler::handleGet(Client& client) {
 	const CommonDirectives& common_direcvties = client.location_->common_directives_;
@@ -61,6 +61,7 @@ void RequestHandler::handleGet(Client& client) {
 	std::string resource = root + client.request_.getUri();
 	if (resource.back() == '/')
 		resource.pop_back();
+
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
 	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex()) {
 		handleAutoindex(client, resource, client.request_.getUri());
@@ -74,7 +75,6 @@ void RequestHandler::handleGet(Client& client) {
 	}
 	// 파일 형식에 따른 Content-Type 설정 후 응답 보내기
 	client.response_.setContentType(resource);
-	fcntl(client.file_fd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
 	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(client.file_fd_, &client);
 	client.status_ = READ_FILE;
 }
