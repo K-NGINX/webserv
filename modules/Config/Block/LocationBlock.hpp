@@ -6,17 +6,17 @@ class LocationBlock : public ABlock {
    public:
 	LocationBlock(const std::string& match_directive);
 
-	virtual void addSubBlock(std::string& line);
-	virtual void refineDirectives();
-	virtual void print();
-
+	/* getter */
 	const std::string& getMatchDirective() const;
 	const std::vector<std::string>& getAllowMethodVec() const;
 	const std::string& getCgiPath() const;
 	const std::string& getUploadPath() const;
 
+	virtual void addSubBlock(std::string& line);
+	virtual void refineDirectives();
+	virtual void print();
 	bool isAllowMethod(const std::string& method) const;
-	bool checkBodySize(const int& body_size) const;
+	bool checkBodySize(int body_size) const;
 
    private:
 	void refineLocationDirectives();

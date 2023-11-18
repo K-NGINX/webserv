@@ -26,5 +26,5 @@ class ABlock {
 	CommonDirectives common_directives_;
 
    protected:
-	std::map<std::string, std::string> m_directives_;	 // 지시어 정제 후에는 사용되지 않음
+	std::map<std::string, std::string> m_directives_; // 지시어 정제 후에는 사용되지 않음
 };

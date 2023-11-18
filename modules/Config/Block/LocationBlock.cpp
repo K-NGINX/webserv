@@ -1,15 +1,10 @@
 #include "LocationBlock.hpp"
 
-LocationBlock::LocationBlock(const std::string& match_directive) : match_directive_(match_directive),
-																   cgi_path_(""),
-																   upload_path_("") {}
+LocationBlock::LocationBlock(const std::string& match_directive) : match_directive_(match_directive) {}
 
 const std::string& LocationBlock::getMatchDirective() const { return match_directive_; }
-
 const std::vector<std::string>& LocationBlock::getAllowMethodVec() const { return v_allow_method_; }
-
 const std::string& LocationBlock::getCgiPath() const { return cgi_path_; }
-
 const std::string& LocationBlock::getUploadPath() const { return upload_path_; }
 
 /**
@@ -47,33 +42,26 @@ void LocationBlock::setAllowMethodVec(std::string& value) {
  *
  */
 void LocationBlock::refineLocationDirectives() {
-	std::map<std::string, std::string>::iterator directive_it = m_directives_.begin();
-	while (directive_it != m_directives_.end()) {
-		std::string directive = directive_it->first;
-		std::string value = directive_it->second;
+	std::map<std::string, std::string>::iterator directive_it;
 
-		if (directive == "allow_method")
-			setAllowMethodVec(value);
-		else if (directive == "cgi_path")
-			cgi_path_ = value;
-		else if (directive == "upload_path")
-			upload_path_ = value;
-
-		directive_it++;
-	}
+	if ((directive_it = m_directives_.find("allow_method")) != m_directives_.end())
+		setAllowMethodVec(directive_it->second);
+	if ((directive_it = m_directives_.find("cgi_path")) != m_directives_.end())
+		cgi_path_ = directive_it->second;
+	if ((directive_it = m_directives_.find("upload_path")) != m_directives_.end())
+		upload_path_ = directive_it->second;
 }
 
 void LocationBlock::refineDirectives() {
 	refineLocationDirectives();
-	common_directives_.refine(m_directives_);
-	// print();
+	common_directives_.refine(m_directives_); // 상위 블록인 서버 블록과 다른 공통 지시어가 있다면 덮어씀
 }
 
 bool LocationBlock::isAllowMethod(const std::string& method) const {
 	return std::find(v_allow_method_.begin(), v_allow_method_.end(), method) != v_allow_method_.end();
 }
 
-bool LocationBlock::checkBodySize(const int& body_size) const {
+bool LocationBlock::checkBodySize(int body_size) const {
 	if (common_directives_.getClientMaxBodySize() > 0)
 		return body_size <= common_directives_.getClientMaxBodySize();
 	return true;

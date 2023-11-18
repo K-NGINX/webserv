@@ -14,7 +14,6 @@ ConfigManager& ConfigManager::getInstance() {
 }
 
 const Config& ConfigManager::getConfig() const { return config_; }
-
 const std::string& ConfigManager::getProgramPath() const { return program_path_; }
 
 void ConfigManager::parse(int argc, char** argv) {
@@ -30,25 +29,22 @@ void ConfigManager::parse(int argc, char** argv) {
 	// conf 파일 파싱
 	parseBlock(ifs, &config_);
 	config_.refineDirectives();
-	// 출력 ...
+	// 출력
 	std::cout << GREEN << "📢 CONFIG PARSING DONE" << RESET << std::endl;
 	config_.print();
 }
 
 void ConfigManager::checkLineType(std::string& line, char& line_type) {
-	bool is_block_end = line.back() == '}' ? true : false;
-	bool is_directives = line.back() == ';' ? true : false;
-	bool is_block_start = line.back() == '{' ? true : false;
-	line.pop_back();	// 타입 확인 후 맨 뒤 문자 제거
-
-	if (is_block_end && !is_directives && !is_block_start)
+	if (line.back() == '}')
 		line_type = '}';
-	else if (!is_block_end && is_directives && !is_block_start)
+	else if (line.back() == ';')
 		line_type = ';';
-	else if (!is_block_end && !is_directives && is_block_start)
+	else if (line.back() == '{')
 		line_type = '{';
 	else
-		line_type = '\0';
+		throw std::runtime_error("configuration file is wrong ...\nline : \"" + line + "\"");
+
+	line.pop_back(); // 타입 확인 후 맨 뒤 문자 제거
 }
 
 /**
@@ -62,8 +58,8 @@ void ConfigManager::parseBlock(std::ifstream& ifs, ABlock* block) {
 	char line_type;
 
 	while (std::getline(ifs, line)) {
-		Utils::trimComment(line);		// 주석 제거
-		Utils::trimWhiteSpace(line);	// 공백 제거
+		Utils::trimComment(line);	 // 주석 제거
+		Utils::trimWhiteSpace(line); // 공백 제거
 		if (line == "")
 			continue;
 		checkLineType(line, line_type);
@@ -77,8 +73,6 @@ void ConfigManager::parseBlock(std::ifstream& ifs, ABlock* block) {
 				block->addSubBlock(line);
 				parseBlock(ifs, block->getLastSubBlock());
 				break;
-			default:
-				throw std::runtime_error("configuration file is wrong ...\nline : \"" + line + "\"");
 		}
 	}
 }
