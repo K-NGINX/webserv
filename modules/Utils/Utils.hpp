@@ -18,20 +18,17 @@
 
 class Utils {
    public:
-	static void trimComment(std::string &str);
-	static void trimWhiteSpace(std::string &str);
+	static void trimComment(std::string& str);
+	static void trimWhiteSpace(std::string& str);
 	static int stoi(std::string str);
 	static std::string getMIMEType(const std::string& file_type);
 	static bool checkMIMEType(const std::string& mime_type);
-
+	static int findSubVector(std::vector<char>& v, std::vector<char>& obj);
+	
 	static std::string whitespace;
 	static std::map<std::string, std::string> m_mime;
-
-	static int findSubVector(std::vector<char>& v, std::vector<char>& obj);
 
    private:
 	Utils();
 	~Utils();
 };
-
-
