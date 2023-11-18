@@ -12,8 +12,8 @@ Client::Client(int socket) : status_(RECV_REQUEST),
 							 location_(NULL),
 							 written_(0),
 							 cgi_written_(0) {
-	cgi_pipe_[0] = -1;
-	cgi_pipe_[1] = -1;
+	pipe_fd_[0] = -1;
+	pipe_fd_[1] = -1;
 }
 
 Client::~Client() { close(socket_); }
@@ -26,8 +26,8 @@ void Client::clear() {
 	status_ = RECV_REQUEST;
 	is_keep_alive_ = true;
 	pid_ = -1;
-	cgi_pipe_[0] = -1;
-	cgi_pipe_[1] = -1;
+	pipe_fd_[0] = -1;
+	pipe_fd_[1] = -1;
 	request_ = Request();
 	response_ = Response();
 	server_ = NULL;
@@ -67,20 +67,27 @@ void Client::handleSocketWriteEvent() {
 }
 
 void Client::handleCgiReadEvent() {
-	waitpid(pid_, NULL, 0);
+	int exit_status;
+	waitpid(pid_, &exit_status, 0);
+	if (WIFSIGNALED(exit_status)) {	   // 시그널에 의해 종료되었다면
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
+		close(pipe_fd_[0]);
+		RequestHandler::handleError(*this, "500");
+		return;
+	}
 
 	char buffer[BUFFER_SIZE];
-	ssize_t read_size = read(cgi_pipe_[0], buffer, BUFFER_SIZE);
+	ssize_t read_size = read(pipe_fd_[0], buffer, BUFFER_SIZE);
 	if (read_size == -1) {	  // 읽기 실패
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(cgi_pipe_[0]);
-		close(cgi_pipe_[0]);
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
+		close(pipe_fd_[0]);
 		RequestHandler::handleError(*this, "500");
 		return;
 	}
 	response_.pushBackSendBuffer(buffer, read_size);	// response send_buffer에 씀
 	if (read_size == 0) {								// 다 읽음
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(cgi_pipe_[0]);
-		close(cgi_pipe_[0]);
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
+		close(pipe_fd_[0]);
 		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
 		status_ = SEND_RESPONSE;
 	}
@@ -89,44 +96,37 @@ void Client::handleCgiReadEvent() {
 void Client::handleCgiWriteEvent() {
 	const std::vector<char>& body = request_.getBody();
 	ssize_t write_size = body.size() - cgi_written_ > BUFFER_SIZE ? BUFFER_SIZE : body.size() - cgi_written_;
-	write_size = write(cgi_pipe_[1], &body[cgi_written_], write_size);	  // 파이프에 데이터 쓰기
-	if (write_size == -1) {												  // 쓰기 실패
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(cgi_pipe_[0]);
-		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(cgi_pipe_[1]);
-		close(cgi_pipe_[0]);
-		close(cgi_pipe_[1]);
+	write_size = write(pipe_fd_[1], &body[cgi_written_], write_size);	 // 파이프에 데이터 쓰기
+	if (write_size == -1) {												 // 쓰기 실패
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(pipe_fd_[0]);
+		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(pipe_fd_[1]);
+		close(pipe_fd_[0]);
+		close(pipe_fd_[1]);
 		RequestHandler::handleError(*this, "500");
 		return;
 	}
 	cgi_written_ += write_size;									// 읽은 만큼 더해주기
 	if (cgi_written_ == static_cast<ssize_t>(body.size())) {	// 다 썼음
-		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(cgi_pipe_[1]);
-		close(cgi_pipe_[1]);
+		ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(pipe_fd_[1]);
+		close(pipe_fd_[1]);
 		status_ = READ_CGI;
 	}
 }
 
-void Client::handleFileReadEvent(int fd) {
+void Client::handleFileReadEvent() {
 	char buffer[BUFFER_SIZE];
 	ssize_t read_size;
-	while ((read_size = read(fd, buffer, BUFFER_SIZE)) > 0)
+	while ((read_size = read(file_fd_, buffer, BUFFER_SIZE)) > 0)
 		response_.pushBackBody(buffer, read_size);	  // 응답 본문에 파일 내용을 써줌
-	if (read_size == -1) {	  // 파일 fd로부터 읽기 실패
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
-		close(fd);
+	if (read_size == -1) {							  // 파일 fd로부터 읽기 실패
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(file_fd_);
+		close(file_fd_);
 		RequestHandler::handleError(*this, "500");
-	} else if (read_size == 0) {						  // 파일 다 읽음
-		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(fd);
-		close(fd);
+	} else if (read_size == 0) {	// 파일 다 읽음
+		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(file_fd_);
+		close(file_fd_);
 		response_.makeResponse(is_keep_alive_);
 		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
 		status_ = SEND_RESPONSE;
 	}
-}
-
-void Client::handleFileWriteEvent(int fd) {
-	std::cout << "handleFileWriteEvent" << std::endl;
-	(void)fd;
-	// request body fd에 쓰기
-	status_ = SEND_RESPONSE;
 }

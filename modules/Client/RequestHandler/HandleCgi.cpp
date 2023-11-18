@@ -84,10 +84,10 @@ void RequestHandler::handleCgi(Client &client) {
 		close(p2c_fd[0]);
 		close(c2p_fd[1]);
 		// 양방향 파이프에 대한 읽기, 쓰기 이벤트 등록 및 클라이언트 상태 변경
-		client.cgi_pipe_[0] = c2p_fd[0];
-		client.cgi_pipe_[1] = p2c_fd[1];
-		ServerManager::getInstance().kqueue_.startMonitoringReadEvent(client.cgi_pipe_[0], &client);
-		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.cgi_pipe_[1], &client);
+		client.pipe_fd_[0] = c2p_fd[0];
+		client.pipe_fd_[1] = p2c_fd[1];
+		ServerManager::getInstance().kqueue_.startMonitoringReadEvent(client.pipe_fd_[0], &client);
+		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.pipe_fd_[1], &client);
 		client.status_ = WRITE_CGI;
 	}
 }

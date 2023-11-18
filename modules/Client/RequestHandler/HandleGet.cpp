@@ -67,14 +67,14 @@ void RequestHandler::handleGet(Client& client) {
 		return ;
 	}
 	// uri가 파일 형식이라면 uri 자체를, 디렉토리 형식이라면 기본 파일(index)을 사용
-	int fd = open(resource.c_str(), O_RDONLY);
-	if (fd == -1) {
+	client.file_fd_ = open(resource.c_str(), O_RDONLY);
+	if (client.file_fd_ == -1) {
 		handleError(client, "404");
 		return ;
 	}
 	// 파일 형식에 따른 Content-Type 설정 후 응답 보내기
 	client.response_.setContentType(resource);
-	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
-	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
+	fcntl(client.file_fd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC); //////////////
+	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(client.file_fd_, &client);
 	client.status_ = READ_FILE;
 }

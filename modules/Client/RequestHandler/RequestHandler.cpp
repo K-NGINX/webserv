@@ -14,17 +14,16 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 			error_page = common_directives.getRoot() + common_directives.getErrorPage();	// 사용자 정의 에러 페이지
 	}
 	error_page = ConfigManager::getInstance().getProgramPath() + error_page;
-	// 에러 페이지에 대한 fd 읽기 이벤트 등록
-	int fd = open(error_page.c_str(), O_RDONLY);
-	if (fd == -1) {	 // 실패했다면 클라이언트 연결 끊어주기
+	// 에러 페이지에 대한 fd 열기
+	client.file_fd_ = open(error_page.c_str(), O_RDONLY);
+	if (client.file_fd_ == -1) {	 // 실패했다면 클라이언트 연결 끊어주기
 		client.setStatus(WILL_DISCONNECT);
 		return ;
 	}
 	// 파일 형식에 따른 Content-Type 설정 후 응답 보내기
 	client.response_.setContentType(error_page);
-	std::cout << YELLOW << "error page : " << error_page << RESET << std::endl; ////////////////////
-	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC); /////////////////////
-	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(fd, &client);
+	fcntl(client.file_fd_, F_SETFL, O_NONBLOCK, FD_CLOEXEC); /////////////////////
+	ServerManager::getInstance().kqueue_.startMonitoringReadEvent(client.file_fd_, &client);
 	client.status_ = READ_FILE;
 }
 

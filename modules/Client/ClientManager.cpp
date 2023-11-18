@@ -38,7 +38,8 @@ void ClientManager::handleEvent(struct kevent &event) {
 	Client *client = reinterpret_cast<Client *>(event.udata);
 	if (client == NULL)	   // event.ident가 stopMonitoringEvent(fd)를 통해 이벤트 감지가 중단된 fd일 때
 		return;
-	if (event.filter == EVFILT_READ) {	  // read_event
+
+	if (event.filter == EVFILT_READ) {
 		switch (client->status_) {
 			case RECV_REQUEST:
 				client->handleSocketReadEvent();
@@ -47,12 +48,12 @@ void ClientManager::handleEvent(struct kevent &event) {
 				client->handleCgiReadEvent();
 				break;
 			case READ_FILE:
-				client->handleFileReadEvent(event.ident);
+				client->handleFileReadEvent();
 				break;
 			default:
 				break;
 		}
-	} else if (event.filter == EVFILT_WRITE) {	  // write_event
+	} else if (event.filter == EVFILT_WRITE) {
 		switch (client->status_) {
 			case SEND_RESPONSE:
 				client->handleSocketWriteEvent();
@@ -60,13 +61,11 @@ void ClientManager::handleEvent(struct kevent &event) {
 			case WRITE_CGI:
 				client->handleCgiWriteEvent();
 				break;
-			case WRITE_FILE:
-				client->handleFileWriteEvent(event.ident);
-				break;
 			default:
 				break;
 		}
 	}
+
 	// 요청을 받고 응답을 보내는 일련의 과정을 마쳤다면, 클라이언트와 연결 끊어주기
 	if (client->status_ == WILL_DISCONNECT) disconnectClient(client);
 }
