@@ -25,11 +25,6 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	client.status_ = READ_FILE;
 }
 
-void RequestHandler::handleDelete(Client &client) {
-	//  - 삭제 파일 있음 : 200
-	//  - 삭제 파일 없음 : (204)
-	(void)client;
-}
 
 /**
  * @details [ 요청 처리 순서 ]

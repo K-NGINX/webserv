@@ -54,12 +54,12 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
  * 		- 아무것도 해당되지 않으면 404 에러
  */
 void RequestHandler::handleGet(Client& client) {
+	// 파일에 대한 절대 경로 구하기
 	const CommonDirectives& common_direcvties = client.location_->common_directives_;
 	std::string root = ConfigManager::getInstance().getProgramPath() + common_direcvties.getRoot();
 	std::string resource = root + client.request_.getUri();
 	if (resource.back() == '/')
 		resource.pop_back();
-
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
 	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex()) {
 		handleAutoindex(client, resource, client.request_.getUri());
