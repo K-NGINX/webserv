@@ -30,7 +30,7 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
 			std::string entry_name = entry->d_name;
 			if (uri.back() != '/') uri.push_back('/');
 			std::string entry_path = uri + entry_name;
-			if (entry_name == "." || entry_name == "..") continue;
+			if (entry_name.front() == '.') continue;
 			// 각 파일에 대한 링크는 요청한 URL에 대한 상대 경로
 			autoindex_html += "<tr><td><a href='" + entry_path + "'>" + entry_name + "</a></td></tr>";
 		}

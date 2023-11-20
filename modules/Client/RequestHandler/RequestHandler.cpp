@@ -25,7 +25,6 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	client.status_ = READ_FILE;
 }
 
-
 /**
  * @details [ 요청 처리 순서 ]
  *      1. CGI
