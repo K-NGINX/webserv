@@ -20,7 +20,7 @@ static bool isIndex(Client& client, std::string& resource) {
 
 static void handleAutoindex(Client& client, const std::string& resource, std::string uri) {
 	// html 코드 생성
-	std::string autoindex_html = "<html><body><h1>" + uri.substr(1) + " List</h1><ul>";
+	std::string autoindex_html = "<html><head><meta charset=\"UTF-8\"></head><body><h1>" + uri.substr(1) + " List</h1><ul>";
 	autoindex_html += "<table>";
 	// 목록 채우기
 	struct dirent* entry;
