@@ -11,8 +11,6 @@ CommonDirectives& CommonDirectives::operator=(const CommonDirectives& other) {
 		v_error_code_ = other.v_error_code_;
 		error_page_ = other.error_page_;
 		v_index_ = other.v_index_;
-		return_code_ = other.return_code_;
-		return_path_ = other.return_path_;
 		root_ = other.root_;
 	}
 	return *this;
@@ -29,8 +27,6 @@ void CommonDirectives::refine(std::map<std::string, std::string>& m_directives) 
 		setErrorPage(directive_it->second);
 	if ((directive_it = m_directives.find("index")) != m_directives.end())
 		setIndex(directive_it->second);
-	if ((directive_it = m_directives.find("return")) != m_directives.end())
-		setReturn(directive_it->second);
 	if ((directive_it = m_directives.find("root")) != m_directives.end())
 		setRoot(directive_it->second);
 }
@@ -40,8 +36,6 @@ int CommonDirectives::getClientMaxBodySize() const { return client_max_body_size
 const std::vector<std::string>& CommonDirectives::getErrorCodeVec() const { return v_error_code_; }
 const std::string& CommonDirectives::getErrorPage() const { return error_page_; }
 const std::vector<std::string>& CommonDirectives::getIndexVec() const { return v_index_; }
-const std::string& CommonDirectives::getReturnCode() const { return return_code_; }
-const std::string& CommonDirectives::getReturnPath() const { return return_path_; }
 const std::string& CommonDirectives::getRoot() const { return root_; }
 
 void CommonDirectives::setAutoindex(std::string& value) {
@@ -108,17 +102,6 @@ void CommonDirectives::setIndex(std::string& value) {
 	}
 }
 
-void CommonDirectives::setReturn(std::string& value) {
-	Utils::trimWhiteSpace(value);
-	size_t pos_sepatator = value.find_last_of(Utils::whitespace);
-	return_path_ = value.substr(pos_sepatator + 1);
-
-	return_code_ = value.substr(0, pos_sepatator);
-	if (return_code_ != "302")
-		throw std::runtime_error("return must be in following format: \"return_code return_path\"");
-	Utils::trimWhiteSpace(return_code_);
-}
-
 void CommonDirectives::setRoot(std::string& value) {
 	Utils::trimWhiteSpace(value);
 	root_ = value;
@@ -149,8 +132,6 @@ void CommonDirectives::print(const std::string& indent) const {
 			std::cout << v_index_[i] << " ";
 		std::cout << std::endl;
 	}
-	if (return_code_ != "")
-		std::cout << indent << "*- return : " << return_code_ << " " << return_path_ << std::endl;
 	if (root_ != "")
 		std::cout << indent << "*- root : " << root_ << std::endl;
 }

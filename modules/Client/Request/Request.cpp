@@ -26,17 +26,16 @@ Request &Request::operator=(const Request &obj) {
 }
 
 void Request::print() {
-	std::cout << CYAN << std::endl;
+	std::cout << BLUE << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
 	std::cout << "Host: " << host_ << std::endl;
 	if (content_length_)
 		std::cout << "Content-Length: " << content_length_ << std::endl;
-	if (body_size_)
-		std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
-		std::cout << "---> DONE" << RESET << std::endl;
+		std::cout << YELLOW << "---> DONE" << std::endl;
 	else if (parsing_status_ == ERROR)
-		std::cout << "---> ERROR" << RESET << std::endl;
+		std::cout << RED << "---> ERROR" << std::endl;
+	std::cout << RESET << std::endl;
 }
 
 static bool isValidMethod(const std::string &str) {
