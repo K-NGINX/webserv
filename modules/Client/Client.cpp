@@ -4,7 +4,6 @@
 
 Client::Client(int socket) : status_(RECV_REQUEST),
 							 socket_(socket),
-							 is_keep_alive_(true),
 							 pid_(-1),
 							 server_(NULL),
 							 location_(NULL),
@@ -22,7 +21,6 @@ Client::~Client() { close(socket_); }
  */
 void Client::clear() {
 	status_ = RECV_REQUEST;
-	is_keep_alive_ = true;
 	pid_ = -1;
 	pipe_fd_[0] = -1;
 	pipe_fd_[1] = -1;
@@ -142,7 +140,7 @@ void Client::handleFileReadEvent() {
 	} else if (read_size == 0) {
 		ServerManager::getInstance().kqueue_.stopMonitoringReadEvent(file_fd_);
 		close(file_fd_);
-		response_.makeResponse(is_keep_alive_);
+		response_.makeResponse();
 		ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(socket_, this);
 		status_ = SEND_RESPONSE;
 	}

@@ -10,12 +10,6 @@ ClientManager &ClientManager::getInstance() {
 
 void ClientManager::disconnectClient(Client *client) {
 	ServerManager::getInstance().kqueue_.stopMonitoringWriteEvent(client->socket_);
-	// Connection: keep_alive
-	if (client->is_keep_alive_) {
-		client->clear();
-		return;
-	}
-	// Connection: Closed
 	std::cout << RED << "\n❗️ CLIENT(" << client->socket_ << ") DISCONNECTED" << RESET << std::endl;
 	std::vector<Client *>::iterator client_it = v_client_.begin();
 	while (client_it != v_client_.end()) {

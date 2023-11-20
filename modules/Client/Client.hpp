@@ -38,7 +38,6 @@ class Client {
 	Config config_;
 	ClientStatus status_;
 	int socket_;		 // 클라이언트 소켓: 식별자로 사용됨, 소멸자에서 close
-	bool is_keep_alive_; // 기본은 true, 클라이언트 요청에서 Connection: Closed를 받을 때 false
 	pid_t pid_;			 // CGI 실행을 위한 자식 프로세스 pid
 	int pipe_fd_[2];
 	int file_fd_;

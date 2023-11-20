@@ -38,14 +38,14 @@ void Response::print() {
 	std::cout << RESET << std::endl;
 }
 
-void Response::makeResponse(bool is_keep_alive) {
+void Response::makeResponse() {
 	// 시작 줄
 	std::vector<char> status_line = getStatusLine();
 	send_buffer_.insert(send_buffer_.end(), status_line.begin(), status_line.end());
 
 	// 헤더
 	std::string header;
-	makeHeaderLine(is_keep_alive);
+	makeHeaderLine();
 	std::map<std::string, std::string>::const_iterator it = this->m_header_.begin();
 	for (; it != m_header_.end(); ++it)
 		header += it->first + ": " + it->second + "\r\n";
@@ -70,7 +70,7 @@ void Response::pushBackSendBuffer(char *buffer, ssize_t size) {
 		std::cout << MAGENTA << std::endl;
 		for (ssize_t i = 0; i < size; i++)
 			std::cout << buffer[i];
-		std::cout << RESET << std::endl;
+		std::cout << RESET;
 	}
 }
 
@@ -80,7 +80,6 @@ std::vector<char> Response::getStatusLine() const {
 		m_status["200"] = "OK";
 		m_status["201"] = "Created";
 		m_status["204"] = "No Content";
-		m_status["302"] = "Moved";
 		m_status["400"] = "Bad Request";
 		m_status["404"] = "Not Found";
 		m_status["405"] = "Method Not Allowed";
@@ -92,13 +91,12 @@ std::vector<char> Response::getStatusLine() const {
 	return std::vector<char>(status_line.begin(), status_line.end());
 }
 
-void Response::makeHeaderLine(bool is_keep_alive) {
+void Response::makeHeaderLine() {
 	m_header_["Date"] = getResponseDate(NULL);
 	if (body_.size() != 0)
 		m_header_["Content-Length"] = ntos(body_.size());
 	if (content_type_ != "")
 		m_header_["Content-Type"] = content_type_;
-	m_header_["Connection"] = is_keep_alive == true ? "keep-alive" : "Closed";
 }
 
 std::string Response::getResponseDate(std::time_t *t) {

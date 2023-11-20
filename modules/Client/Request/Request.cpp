@@ -2,7 +2,6 @@
 
 Request::Request() : parsing_status_(INIT), content_length_(0), body_size_(0), bodyType_(DEFAULT) {}
 
-const std::string &Request::getConnection() const { return connection_; }
 const RequestStatus &Request::getParsingStatus() const { return parsing_status_; }
 const std::string &Request::getMethod() const { return method_; }
 const std::string &Request::getUri() const { return uri_; }
@@ -13,7 +12,6 @@ const std::string Request::getContentLength() const { return std::to_string(cont
 const std::string &Request::getBoundary() const { return boundary_; }
 
 Request &Request::operator=(const Request &obj) {
-	connection_ = obj.connection_;
 	parsing_status_ = obj.parsing_status_;
 	method_ = obj.method_;
 	uri_ = obj.uri_;
@@ -121,8 +119,6 @@ void Request::parseHeader(std::vector<char> &line) {
 		bodyType_ = CHUNKED;
 	if (key == "Host")
 		host_ = value;
-	if (key == "Connection")
-		connection_ = value;
 }
 
 void Request::parseBody(std::vector<char> &line) {

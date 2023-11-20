@@ -44,8 +44,6 @@ void RequestHandler::handleRequest(Client &client) {
 		handleError(client, "400");
 		return;
 	}
-	if (request.getConnection() == "Closed")
-		client.is_keep_alive_ = false;
 	// 요청에 사용할 서버 블록과 위치 블록 찾기
 	client.server_ = ConfigManager::getInstance().getConfig().findMatchingServerBlock(request.getHost());
 	client.location_ = client.server_->findMatchingLocationBlock(request.getUri());

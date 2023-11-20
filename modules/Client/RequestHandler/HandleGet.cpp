@@ -39,7 +39,7 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
 	autoindex_html += "</table></ul></body></html>";
 	// 응답 body에 써주기
 	client.response_.setBody(std::vector<char>(autoindex_html.begin(), autoindex_html.end()));
-	client.response_.makeResponse(client.is_keep_alive_);
+	client.response_.makeResponse();
 	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.socket_, &client);
 	client.status_ = SEND_RESPONSE;
 }

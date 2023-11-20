@@ -1,8 +1,6 @@
 #include "Kqueue.hpp"
 
-Kqueue::Kqueue() : fd_(-1) {
-	v_event_.resize(EVENT_SIZE);
-}
+Kqueue::Kqueue() : fd_(-1), v_event_(std::vector<struct kevent>(EVENT_SIZE)) {}
 
 Kqueue::~Kqueue() {}
 
