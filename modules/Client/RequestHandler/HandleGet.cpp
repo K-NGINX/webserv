@@ -20,7 +20,7 @@ static bool isIndex(Client& client, std::string& resource) {
 
 static void handleAutoindex(Client& client, const std::string& resource, std::string uri) {
 	// html 코드 생성
-	std::string autoindex_html = "<html><body><h1>" + uri.substr(1) + " List</h1><ul>";
+	std::string autoindex_html = "<html><head><meta charset=\"UTF-8\"></head><body><h1>" + uri.substr(1) + " List</h1><ul>";
 	autoindex_html += "<table>";
 	// 목록 채우기
 	struct dirent* entry;
@@ -30,7 +30,7 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
 			std::string entry_name = entry->d_name;
 			if (uri.back() != '/') uri.push_back('/');
 			std::string entry_path = uri + entry_name;
-			if (entry_name == "." || entry_name == "..") continue;
+			if (entry_name.front() == '.') continue;
 			// 각 파일에 대한 링크는 요청한 URL에 대한 상대 경로
 			autoindex_html += "<tr><td><a href='" + entry_path + "'>" + entry_name + "</a></td></tr>";
 		}
@@ -39,7 +39,7 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
 	autoindex_html += "</table></ul></body></html>";
 	// 응답 body에 써주기
 	client.response_.setBody(std::vector<char>(autoindex_html.begin(), autoindex_html.end()));
-	client.response_.makeResponse(client.is_keep_alive_);
+	client.response_.makeResponse();
 	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.socket_, &client);
 	client.status_ = SEND_RESPONSE;
 }
@@ -54,12 +54,12 @@ static void handleAutoindex(Client& client, const std::string& resource, std::st
  * 		- 아무것도 해당되지 않으면 404 에러
  */
 void RequestHandler::handleGet(Client& client) {
+	// 파일에 대한 절대 경로 구하기
 	const CommonDirectives& common_direcvties = client.location_->common_directives_;
 	std::string root = ConfigManager::getInstance().getProgramPath() + common_direcvties.getRoot();
 	std::string resource = root + client.request_.getUri();
 	if (resource.back() == '/')
 		resource.pop_back();
-
 	// uri가 디렉토리 형식이고 기본 파일이 없는데 autoindex가 "on"이면 -> autoindex 처리
 	if (isFileType(resource) == false && isIndex(client, resource) == false && common_direcvties.isAutoindex()) {
 		handleAutoindex(client, resource, client.request_.getUri());

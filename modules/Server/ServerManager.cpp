@@ -102,7 +102,6 @@ void ServerManager::connectNewClient(int server_socket) {
 	Client *new_client = new Client(client_socket);
 	kqueue_.startMonitoringReadEvent(client_socket, new_client);
 	ClientManager::getInstance().v_client_.push_back(new_client);
-	std::cout << BLUE << "\n✨ NEW CLIENT(" << client_socket << ") CONNECTED" << RESET << std::endl;
 }
 
 void ServerManager::handleEvent(struct kevent &event) {

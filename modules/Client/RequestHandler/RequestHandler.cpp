@@ -25,12 +25,6 @@ void RequestHandler::handleError(Client &client, const std::string &error_code) 
 	client.status_ = READ_FILE;
 }
 
-void RequestHandler::handleDelete(Client &client) {
-	//  - 삭제 파일 있음 : 200
-	//  - 삭제 파일 없음 : (204)
-	(void)client;
-}
-
 /**
  * @details [ 요청 처리 순서 ]
  *      1. CGI
@@ -44,8 +38,6 @@ void RequestHandler::handleRequest(Client &client) {
 		handleError(client, "400");
 		return;
 	}
-	if (request.getConnection() == "Closed")
-		client.is_keep_alive_ = false;
 	// 요청에 사용할 서버 블록과 위치 블록 찾기
 	client.server_ = ConfigManager::getInstance().getConfig().findMatchingServerBlock(request.getHost());
 	client.location_ = client.server_->findMatchingLocationBlock(request.getUri());

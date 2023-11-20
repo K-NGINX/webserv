@@ -31,7 +31,6 @@ class Request {
 	Request& operator=(const Request& obj);
 
 	/* getter setter */
-	const std::string& getConnection() const;
 	const RequestStatus& getParsingStatus() const;
 	const std::string& getMethod() const;
 	const std::string& getUri() const;
@@ -54,7 +53,6 @@ class Request {
 	void parseBinaryBody(std::vector<char>& line);
 	void refineContentType(std::string& value);
 
-	std::string connection_;
 	RequestStatus parsing_status_;
 	std::string method_;
 	std::string uri_;

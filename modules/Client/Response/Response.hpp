@@ -23,12 +23,12 @@ class Response {
 	void setContentType(const std::string& resource);
 
 	void print();
-	void makeResponse(bool is_keep_alive);
+	void makeResponse();
 
    private:
 	std::vector<char> getStatusLine() const;
 
-	void makeHeaderLine(bool is_keep_alive);
+	void makeHeaderLine();
 	std::string getResponseDate(std::time_t* t);
 
 	std::vector<char> send_buffer_;

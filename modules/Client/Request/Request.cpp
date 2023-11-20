@@ -2,7 +2,6 @@
 
 Request::Request() : parsing_status_(INIT), content_length_(0), body_size_(0), bodyType_(DEFAULT) {}
 
-const std::string &Request::getConnection() const { return connection_; }
 const RequestStatus &Request::getParsingStatus() const { return parsing_status_; }
 const std::string &Request::getMethod() const { return method_; }
 const std::string &Request::getUri() const { return uri_; }
@@ -13,7 +12,6 @@ const std::string Request::getContentLength() const { return std::to_string(cont
 const std::string &Request::getBoundary() const { return boundary_; }
 
 Request &Request::operator=(const Request &obj) {
-	connection_ = obj.connection_;
 	parsing_status_ = obj.parsing_status_;
 	method_ = obj.method_;
 	uri_ = obj.uri_;
@@ -28,17 +26,16 @@ Request &Request::operator=(const Request &obj) {
 }
 
 void Request::print() {
-	std::cout << CYAN << std::endl;
+	std::cout << BLUE << std::endl;
 	std::cout << method_ << " " << uri_ << " HTTP/1.1" << std::endl;
 	std::cout << "Host: " << host_ << std::endl;
 	if (content_length_)
 		std::cout << "Content-Length: " << content_length_ << std::endl;
-	if (body_size_)
-		std::cout << "BodySize: " << body_size_ << std::endl;
 	if (parsing_status_ == DONE)
-		std::cout << "---> DONE" << RESET << std::endl;
+		std::cout << YELLOW << "---> DONE" << std::endl;
 	else if (parsing_status_ == ERROR)
-		std::cout << "---> ERROR" << RESET << std::endl;
+		std::cout << RED << "---> ERROR" << std::endl;
+	std::cout << RESET << std::endl;
 }
 
 static bool isValidMethod(const std::string &str) {
@@ -121,8 +118,6 @@ void Request::parseHeader(std::vector<char> &line) {
 		bodyType_ = CHUNKED;
 	if (key == "Host")
 		host_ = value;
-	if (key == "Connection")
-		connection_ = value;
 }
 
 void Request::parseBody(std::vector<char> &line) {

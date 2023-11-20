@@ -8,6 +8,7 @@ SRCS		= modules/main.cpp											\
 			  modules/Webserv.cpp										\
 			  modules/Client/Request/Request.cpp						\
 			  modules/Client/RequestHandler/HandleCgi.cpp				\
+			  modules/Client/RequestHandler/HandleDelete.cpp				\
 			  modules/Client/RequestHandler/HandleGet.cpp				\
 			  modules/Client/RequestHandler/RequestHandler.cpp			\
 			  modules/Client/Response/Response.cpp						\
