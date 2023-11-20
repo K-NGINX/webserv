@@ -14,11 +14,13 @@ void RequestHandler::handleDelete(Client& client) {
 	if (access(resource.c_str(), F_OK) == 0) {
 		if (std::remove(resource.c_str())) { // 파일 삭제를 실패한 경우
 			handleError(client, "500");
-			return ;
+			return;
 		}
 	} else { // 삭제할 파일이 없는 경우
-		client.response_.setStatusCode("204");
+		handleError(client, "404");
+		return;
 	}
+	client.response_.setStatusCode("204");
 	client.response_.makeResponse();
 	ServerManager::getInstance().kqueue_.startMonitoringWriteEvent(client.socket_, &client);
 	client.status_ = SEND_RESPONSE;
