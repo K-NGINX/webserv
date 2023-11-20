@@ -1,6 +1,6 @@
 # compile options
 NAME		= webserv
-CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
+CXXFLAGS	= -Wall -Wextra -Werror -std=c++98 #-fsanitize=address
 RM			= rm -f
 
 # source files
@@ -8,7 +8,7 @@ SRCS		= modules/main.cpp											\
 			  modules/Webserv.cpp										\
 			  modules/Client/Request/Request.cpp						\
 			  modules/Client/RequestHandler/HandleCgi.cpp				\
-			  modules/Client/RequestHandler/HandleDelete.cpp				\
+			  modules/Client/RequestHandler/HandleDelete.cpp			\
 			  modules/Client/RequestHandler/HandleGet.cpp				\
 			  modules/Client/RequestHandler/RequestHandler.cpp			\
 			  modules/Client/Response/Response.cpp						\

@@ -15,7 +15,7 @@
 #include "../../Server/ServerManager.hpp"
 #include "../Client.hpp"
 
-#define DEFAULT_ERROR_PAGE "/var/www/html/errors/default_error.html"
+#define DEFAULT_ERROR_PAGE "/var/www/html/errors/5xx.html"
 
 class RequestHandler {
    public:
