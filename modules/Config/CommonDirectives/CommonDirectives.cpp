@@ -54,9 +54,22 @@ void CommonDirectives::setAutoindex(std::string& value) {
 
 void CommonDirectives::setClientMaxBodySize(std::string& value) {
 	Utils::trimWhiteSpace(value);
+	// 단위 저장 (K, M, G 중 하나일 것으로 기대됨)
+	char unit = value.back();
+	value.pop_back();
+	// 숫자인지 확인
 	std::istringstream iss(value);
 	if (!(iss >> client_max_body_size_) || iss.eof() == false)
 		throw std::runtime_error("client_max_body_size must be an integer");
+	// 단위만큼 저장
+	if (unit == 'K')
+		client_max_body_size_ *= 1024;
+	else if (unit == 'M')
+		client_max_body_size_ *= 1024 * 1024;
+	else if (unit == 'G')
+		client_max_body_size_ *= 1024 * 1024 * 1024;
+	else
+		throw std::runtime_error("invalid client_max_body_size");
 }
 
 void CommonDirectives::setErrorPage(std::string& value) {
