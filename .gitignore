@@ -4,3 +4,4 @@
 *.out
 *.png
 .gitmessage.txt
+.clang-format
