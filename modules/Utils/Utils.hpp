@@ -1,8 +1,9 @@
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
+#include <iostream>
 
 #define BUFFER_SIZE 1024
 #define VERSION "HTTP/1.1"
@@ -24,7 +25,8 @@ class Utils {
 	static std::string getMIMEType(const std::string& file_type);
 	static bool checkMIMEType(const std::string& mime_type);
 	static int findSubVector(std::vector<char>& v, std::vector<char>& obj);
-	
+	static ssize_t hexToDecimal(const std::string& hex_string);
+
 	static std::string whitespace;
 	static std::map<std::string, std::string> m_mime;
 

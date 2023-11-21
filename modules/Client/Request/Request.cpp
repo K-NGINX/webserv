@@ -50,7 +50,6 @@ void Request::parseStartLine(std::vector<char> &line) {
 	std::vector<std::string> split;
 	while (ss >> tmp)
 		split.push_back(tmp);
-
 	if (split.size() != 3 || isValidMethod(split[0]) == false || split[2] != VERSION) {
 		parsing_status_ = ERROR;
 		std::cout << RED << split[2] << RESET << std::endl;
@@ -150,13 +149,13 @@ void Request::parseChunkedBody(std::vector<char> &line, v_c_iter &line_start_it,
 		return;
 	}
 	next_sep_it = getNextSepIter(line_start_it);
-	std::vector<char> chunked_line(line_start_it, next_sep_it - 1);
+	std::vector<char> chunked_line(line_start_it, next_sep_it);
 	line_start_it = next_sep_it;
 	if (next_sep_it != buffer_.end())
 		line_start_it += 2;
 
-	size_t line_size = Utils::stoi(std::string(line.begin(), line.end()));
-	if (line_size != chunked_line.size()) {
+	ssize_t line_size = Utils::hexToDecimal(std::string(line.begin(), line.end()));
+	if (line_size == -1 || line_size != static_cast<ssize_t>(chunked_line.size())) {
 		parsing_status_ = ERROR;
 		return;
 	}
