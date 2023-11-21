@@ -5,6 +5,7 @@ std::string Utils::whitespace = " \r\n\t\v\f";
 std::map<std::string, std::string> initializeMIMEMap() {
 	std::map<std::string, std::string> m_mime;
 	m_mime["html"] = "text/html";
+	m_mime["txt"] = "text/plain";
 	m_mime["png"] = "image/png";
 	m_mime["ico"] = "image/x-icon";
 	m_mime["binary"] = "multipart/form-data";
@@ -71,8 +72,30 @@ int Utils::findSubVector(std::vector<char>& v, std::vector<char>& obj) {
 			}
 		}
 		if (found)
-			return static_cast<int>(i + obj.size() - 1);  // obj의 마지막 원소의 인덱스 반환;
+			return static_cast<int>(i + obj.size() - 1); // obj의 마지막 원소의 인덱스 반환;
 	}
 
-	return -1;	  // obj가 v에 없음
+	return -1; // obj가 v에 없음
+}
+
+ssize_t Utils::hexToDecimal(const std::string& hex_string) {
+	ssize_t result = 0;
+
+	for (size_t i = 0; i < hex_string.size(); i++) {
+		result *= 16; // 16진수이므로 16을 곱해줍니다.
+
+		if (hex_string[i] >= '0' && hex_string[i] <= '9') {
+			result += hex_string[i] - '0'; // '0' ~ '9'까지의 경우
+		} else if (hex_string[i] >= 'a' && hex_string[i] <= 'f') {
+			result += hex_string[i] - 'a' + 10; // 'a' ~ 'f'까지의 경우
+		} else if (hex_string[i] >= 'A' && hex_string[i] <= 'F') {
+			result += hex_string[i] - 'A' + 10; // 'A' ~ 'F'까지의 경우
+		} else {
+			// 잘못된 16진수 문자가 들어온 경우 처리
+			std::cerr << "Error: Invalid hex character - " << hex_string[i] << std::endl;
+			return -1; // 에러를 나타내는 값을 반환
+		}
+	}
+
+	return result;
 }
