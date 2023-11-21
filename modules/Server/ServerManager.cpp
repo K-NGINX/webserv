@@ -56,7 +56,7 @@ void ServerManager::initServerSocket(const ServerBlock &server_block) {
 	freeaddrinfo(host_info); // 메모리 해제
 
 	// 연결 요청 대기 상태로 바꿔줌
-	if (listen(server_socket, 5) == -1) {
+	if (listen(server_socket, 500) == -1) {
 		closeAllServerSocket();
 		throw std::runtime_error("Listen error");
 	}

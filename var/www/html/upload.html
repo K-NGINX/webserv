@@ -59,6 +59,16 @@
             position:relative;
             top:1px;
         }
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #666666;
+            text-decoration: none;
+        }
+        .home-button:visited {
+            color: #666666;
+        }
         .fileContainer {
             overflow: hidden;
             position: relative;
@@ -91,6 +101,7 @@
     </style>
 </head>
 <body>
+    <a href="/" class="home-button">Home</a>
     <h1>Upload PNG</h1>
     <div class="content">
         <form action="save" method="post" enctype="multipart/form-data">
