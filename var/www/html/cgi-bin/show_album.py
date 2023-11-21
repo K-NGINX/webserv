@@ -3,30 +3,69 @@ import os
 import cgi
 import sys
 
-photo_dir = os.environ['SAVE_PATH'] + "/photos/"
-web_photo_dir = "/photos/"
+relative_path = "/photos/"
+absolute_path = os.environ['SAVE_PATH'] + relative_path
+png_files = [f for f in os.listdir(absolute_path) if f.endswith(".png")]
 
-png_files = [f for f in os.listdir(photo_dir) if f.endswith(".png")]
-album_html = ""
+album_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Show Album</title>
+    <style>
+        body {
+            background-color: white;
+            font-family: Trebuchet MS;
+        }
+        h1 {
+            margin: 72px 0;
+			font-size: 48px;
+            color: #666666
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>Album</h1>
+"""
 
-album_html += "<html>\n"
-album_html += "<head>\n"
-album_html += "<title>Photo Gallery</title>\n"
-album_html += "</head>\n"
-album_html += "<body>\n"
+for file in png_files:
+    album_html += "<img src='{}' alt='Image' height='250'>".format(os.path.join(relative_path, file))
+    album_html += "<button class='delete-btn' data-filepath='{}'>Delete</button>".format(os.path.join(relative_path, file))
 
-for png_file in png_files:
-    album_html += "<img src='{}' width='200'><br>\n".format(web_photo_dir + png_file)
-    album_html += "<form method='POST' action='지우는CGI.py'>\n"
-    album_html += "<input type='hidden' name='filename' value='{}'>\n".format(png_file)
-    album_html += "<input type='submit' value='Delete'>\n"
-    album_html += "</form>\n"
-    album_html += "<br>\n"
-
-album_html += "</body>\n"
-album_html += "</html>"
+album_html += """
+    <script>
+        $(document).ready(function(){
+            $('.delete-btn').on('click', function(e){
+                e.preventDefault();
+                var filePath = $(this).data('filepath');
+                $.ajax({
+                    url: filePath,
+                    type: 'DELETE',
+                    success: function(result) {
+                        // 요청 성공
+                        Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Your file has been deleted.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                        }).then((result) => {
+                            // OK 버튼이 눌렸을 때
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        })
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+"""
 
 print("HTTP/1.1 200 OK", end="\r\n")
 print("Content-Type: text/html", end="\r\n")
-print()
+print(end="\r\n")
 print(album_html)

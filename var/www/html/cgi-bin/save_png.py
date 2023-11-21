@@ -21,7 +21,7 @@ try:
 
         # success
         print("HTTP/1.1 303 See Other", end="\r\n")
-        print("Location: /album.html", end="\r\n")
+        print("Location: /album", end="\r\n")
         print(end="\r\n")
     else:
         # failure
