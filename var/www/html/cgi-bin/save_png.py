@@ -26,10 +26,10 @@ try:
     else:
         # failure
         print("HTTP/1.1 500 Internal Server Error", end="\r\n")
-        print("Location: /errors/5xx.html", end="\r\n")
+        print("Location: /errors/error.html", end="\r\n")
         print(end="\r\n")
         
 except Exception as e:
     print("HTTP/1.1 500 Internal Server Error", end="\r\n")
-    print("Location: /errors/5xx.html", end="\r\n")
+    print("Location: /errors/error.html", end="\r\n")
     print(end="\r\n")
