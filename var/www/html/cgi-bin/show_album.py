@@ -20,13 +20,25 @@ album_html = """
         h1 {
             margin: 72px 0;
 			font-size: 48px;
+            text-align: center;
             color: #666666
+        }
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #666666;
+            text-decoration: none;
+        }
+        .home-button:visited {
+            color: #666666;
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+    <a href="/" class="home-button">Home</a>
     <h1>Album</h1>
 """
 
