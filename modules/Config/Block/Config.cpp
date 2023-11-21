@@ -15,18 +15,20 @@ const ServerBlock* Config::findMatchingServerBlock(std::string host) const {
 	// port 번호 구하기
 	size_t pos_colon = host.find(':');
 	std::string port = host.substr(pos_colon + 1);
-	host = host.substr(pos_colon);
+	host = host.substr(0, pos_colon);
 	// ip, server_name 구하기
 	std::string ip = "0.0.0.0", server_name = "";
-	if (host.find('.') != std::string::npos)
+	if (std::count(host.begin(), host.end(), '.') == 3)
 		ip = host;
 	else
 		server_name = host;
 	// ip와 port를 기준으로 일치하는 서버 블록 찾기
 	std::vector<int> v_match_idx;
 	for (size_t i = 0; i < v_server_block_.size(); i++) {
-		if (ip == v_server_block_[i].getIp() && port == v_server_block_[i].getPort())
-			v_match_idx.push_back(i);
+		if (port == v_server_block_[i].getPort()) {
+			if (v_server_block_[i].getIp() == "0.0.0.0" || v_server_block_[i].getIp() == ip)
+				v_match_idx.push_back(i);
+		}
 	}
 	// 일치하는 것이 없다면 첫 번째 서버 블록 리턴
 	if (v_match_idx.empty())
