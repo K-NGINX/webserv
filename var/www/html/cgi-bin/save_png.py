@@ -9,6 +9,9 @@ cgitb.enable()  # for troubleshooting
 
 save_path = os.environ['SAVE_PATH']
 
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+
 # read multipart/form-data body from pipe
 form = cgi.FieldStorage()
 
@@ -28,7 +31,7 @@ try:
         print("HTTP/1.1 500 Internal Server Error", end="\r\n")
         print("Location: /errors/error.html", end="\r\n")
         print(end="\r\n")
-        
+
 except Exception as e:
     print("HTTP/1.1 500 Internal Server Error", end="\r\n")
     print("Location: /errors/error.html", end="\r\n")

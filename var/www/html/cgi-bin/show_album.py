@@ -5,7 +5,12 @@ import sys
 
 relative_path = "/photos/"
 absolute_path = os.environ['SAVE_PATH'] + relative_path
+
+if not os.path.exists(absolute_path):
+    os.makedirs(absolute_path)
+
 png_files = [f for f in os.listdir(absolute_path) if f.lower().endswith((".png", ".PNG"))]
+
 
 album_html = """
 <!DOCTYPE html>
