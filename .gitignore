@@ -2,6 +2,6 @@
 .vscode
 *.o
 *.out
-*.png
+photos
 .gitmessage.txt
 .clang-format
