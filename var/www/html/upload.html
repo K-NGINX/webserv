@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Upload PNG</title>
+    <style>
+        body {
+            background-color: white;
+            text-align: center;
+            font-family: Trebuchet MS;
+        }
+        h1 {
+            margin: 72px 0;
+			font-size: 48px;
+            color: #666666
+        }
+        .button-group {
+        	display: inline-flex;
+            justify-content: center;
+            gap: 40px;
+        }
+        .button {
+            -moz-box-shadow:inset 0px 0px 0px -4px #ffffff;
+            -webkit-box-shadow:inset 0px 0px 0px -4px #ffffff;
+            box-shadow:inset 0px 0px 0px -4px #ffffff;
+            background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9));
+            background:-moz-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+            background:-webkit-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+            background:-o-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+            background:-ms-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+            background:linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+            filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#e9e9e9',GradientType=0);
+            background-color:#f9f9f9;
+            -webkit-border-radius:42px;
+            -moz-border-radius:42px;
+            border-radius:42px;
+            border:1px solid #dcdcdc;
+            display:inline-block;
+            cursor:pointer;
+            color:#666666;
+            font-family:Trebuchet MS;
+            font-size:14px;
+            font-weight:bold;
+            padding:10px 25px;
+            text-decoration:none;
+            text-shadow:0px 6px 36px #ffffff;
+        }
+        .button:hover {
+            background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e9e9e9), color-stop(1, #f9f9f9));
+            background:-moz-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+            background:-webkit-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+            background:-o-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+            background:-ms-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+            background:linear-gradient(to bottom, #e9e9e9 5%, #f9f9f9 100%);
+            filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e9e9e9', endColorstr='#f9f9f9',GradientType=0);
+            background-color:#e9e9e9;
+        }
+        .button:active {
+            position:relative;
+            top:1px;
+        }
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #666666;
+            text-decoration: none;
+        }
+        .home-button:visited {
+            color: #666666;
+        }
+        .fileContainer {
+            overflow: hidden;
+            position: relative;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .fileContainer [type=file] {
+            cursor: inherit;
+            display: block;
+            font-size: 999px;
+            filter: alpha(opacity=0);
+            min-height: 100%;
+            min-width: 100%;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: right;
+            top: 0;
+        }
+        .fileContainer [type=file]:hover,
+        .fileContainer [type=file]:active,
+        .fileContainer [type=file]:focus {
+            cursor: pointer;
+        }
+        #fileText {
+            display: inline-block;
+            padding: 10px 0;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="home-button">Home</a>
+    <h1>Upload PNG</h1>
+    <div class="content">
+        <form action="save" method="post" enctype="multipart/form-data">
+            <label for="file">Select a PNG file to upload:</label><br>
+            <label class="button fileContainer">
+                Choose File
+                <input type="file" id="file" name="file" accept="image/png" onchange="showFileName()">
+            </label>
+            <span id="fileText">No file chosen</span><br>
+            <button type="submit" class="button" style="margin-top: 50px;">Upload</button>
+        </form>
+    </div>
+    <script>
+        function showFileName() {
+            var fileInput = document.getElementById('file');
+            var fileText = document.getElementById('fileText');
+
+            if (fileInput.files.length > 0) {
+                fileText.textContent = fileInput.files[0].name;
+            } else {
+                fileText.textContent = 'No file chosen';
+            }
+        }
+    </script>
+</body>
+</html>

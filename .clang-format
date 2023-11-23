@@ -1,0 +1,15 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+TabWidth: 4
+ColumnLimit: 0
+SpacesBeforeTrailingComments: 1
+SpacesInCStyleCastParentheses: false
+BreakConstructorInitializersBeforeComma: false
+UseTab: Always
+IndentWidth: 4
+AlignAfterOpenBracket: AlwaysBreak
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 8
+PointerAlignment: Left
+...
